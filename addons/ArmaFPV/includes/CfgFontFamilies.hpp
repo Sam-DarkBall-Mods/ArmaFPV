@@ -1,0 +1,39 @@
+class CfgFontFamilies
+{
+    class VCROSDMono 
+    {
+        fonts[]=
+        {
+            "\ArmaFPV\font\VCROSDMono6",
+            "\ArmaFPV\font\VCROSDMono7",
+            "\ArmaFPV\font\VCROSDMono8",
+            "\ArmaFPV\font\VCROSDMono9",
+            "\ArmaFPV\font\VCROSDMono10",
+            "\ArmaFPV\font\VCROSDMono11",
+            "\ArmaFPV\font\VCROSDMono12",
+            "\ArmaFPV\font\VCROSDMono13",
+            "\ArmaFPV\font\VCROSDMono14",
+            "\ArmaFPV\font\VCROSDMono15",
+            "\ArmaFPV\font\VCROSDMono16",
+            "\ArmaFPV\font\VCROSDMono17",
+            "\ArmaFPV\font\VCROSDMono18",
+            "\ArmaFPV\font\VCROSDMono19",
+            "\ArmaFPV\font\VCROSDMono20",
+            "\ArmaFPV\font\VCROSDMono21",
+            "\ArmaFPV\font\VCROSDMono22",
+            "\ArmaFPV\font\VCROSDMono23",
+            "\ArmaFPV\font\VCROSDMono24",
+            "\ArmaFPV\font\VCROSDMono25",
+            "\ArmaFPV\font\VCROSDMono26",
+            "\ArmaFPV\font\VCROSDMono27",
+            "\ArmaFPV\font\VCROSDMono28",
+            "\ArmaFPV\font\VCROSDMono29",
+            "\ArmaFPV\font\VCROSDMono30",
+            "\ArmaFPV\font\VCROSDMono31",
+            "\ArmaFPV\font\VCROSDMono34",
+            "\ArmaFPV\font\VCROSDMono35",
+            "\ArmaFPV\font\VCROSDMono37",
+            "\ArmaFPV\font\VCROSDMono46"
+        };
+     };
+};
