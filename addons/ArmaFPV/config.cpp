@@ -20,7 +20,13 @@ class CfgPatches
 			"B_Crocus_AT",
 			"B_Crocus_AP",
 			"I_Crocus_AT",
-			"I_Crocus_AP"
+			"I_Crocus_AP",
+			"O_Crocus_AT_TI",
+			"O_Crocus_AP_TI",
+			"B_Crocus_AT_TI",
+			"B_Crocus_AP_TI",
+			"I_Crocus_AT_TI",
+			"I_Crocus_AP_TI"
 		};
 		weapons[]={};
 	};
