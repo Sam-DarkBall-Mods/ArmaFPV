@@ -1,3 +1,37 @@
+/*
+	ArmaFPV: PreInit and base settings.
+	Purpose: registers CBA settings and shared module constants.
+	Context: runs on all machines during preInit.
+*/
+
+if (isNil "DB_fpv_droneTypes") then {
+	DB_fpv_droneTypes = ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP"];
+};
+
+if (isNil "DB_fpv_terminalTypes") then {
+	DB_fpv_terminalTypes = ["B_UavTerminal", "O_UavTerminal", "I_UavTerminal"];
+};
+
+if (isNil "DB_fpv_signalLossThreshold") then {
+	DB_fpv_signalLossThreshold = 0.05;
+};
+
+if (isNil "DB_fpv_signalLossDuration") then {
+	DB_fpv_signalLossDuration = 5;
+};
+
+if (isNil "DB_fpv_signalUpdateInterval") then {
+	DB_fpv_signalUpdateInterval = 0.2;
+};
+
+if (isNil "DB_fpv_connectRange") then {
+	DB_fpv_connectRange = 4000;
+};
+
+if (isNil "DB_fpv_connectLoopInterval") then {
+	DB_fpv_connectLoopInterval = 0.1;
+};
+
 [ 
     "FPV_DefaultText",
     "EDITBOX",
@@ -6,8 +40,6 @@
     "CROCUS",
     0
 ] call cba_settings_fnc_init;
-
-// ["FPV Settings", "FPV_ManualDetonation", "Manual Detonation Key", ["player", [], -100, "[getConnectedUAV (missionNamespace getVariable [""bis_fnc_moduleRemoteControl_unit"", player])] call DB_fnc_fpv_onDestroy"], [35, [false, true, false]]] call cba_fnc_addKeybindToFleximenu;
 
 if ((hasInterface && isServer) || (serverCommandAvailable "#kick")) then {
     [
@@ -30,6 +62,3 @@ if ((hasInterface && isServer) || (serverCommandAvailable "#kick")) then {
         { publicVariable "FPV_MaxFlightDistance" }
     ] call cba_settings_fnc_init;
 };
-
-
-
