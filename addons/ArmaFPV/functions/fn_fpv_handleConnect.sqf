@@ -9,7 +9,7 @@
 if (!hasInterface) exitWith {};
 
 [] spawn {
-	private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP"]];
+private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP", "O_Crocus_AT_TI", "O_Crocus_AP_TI", "B_Crocus_AT_TI", "B_Crocus_AP_TI", "I_Crocus_AT_TI", "I_Crocus_AP_TI"]];
 	private _terminalTypes = missionNamespace getVariable ["DB_fpv_terminalTypes", ["B_UavTerminal", "O_UavTerminal", "I_UavTerminal"]];
 	private _connectRange = missionNamespace getVariable ["DB_fpv_connectRange", 4000];
 	private _loopInterval = missionNamespace getVariable ["DB_fpv_connectLoopInterval", 0.1];
@@ -77,7 +77,7 @@ if (!hasInterface) exitWith {};
 };
 
 [] spawn {
-	private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP"]];
+private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP", "O_Crocus_AT_TI", "O_Crocus_AP_TI", "B_Crocus_AT_TI", "B_Crocus_AP_TI", "I_Crocus_AT_TI", "I_Crocus_AP_TI"]];
 	private _signalLossThreshold = missionNamespace getVariable ["DB_fpv_signalLossThreshold", 0.05];
 	private _signalLossDuration = missionNamespace getVariable ["DB_fpv_signalLossDuration", 5];
 	private _loopInterval = missionNamespace getVariable ["DB_fpv_connectLoopInterval", 0.1];
