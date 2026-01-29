@@ -1,5 +1,15 @@
-#include "\a3\ui_f\hpp\defineDIKCodes.inc"
+/*
+	ArmaFPV: ClientInit.
+	Purpose: basic client initialization for UI/state variables.
+	Context: interface clients only.
+*/
 
 if (!hasInterface) exitWith {};
 
-call DB_fnc_fpv_overwriteKey;
+if (isNil "ArmaFPV_isControl") then {
+	ArmaFPV_isControl = false;
+};
+
+if (isNil "DB_FPV_Layer_ID") then {
+	DB_FPV_Layer_ID = -1;
+};
