@@ -148,7 +148,7 @@ if (_fxChrom >= 0) then {
 };
 
 if (_fxResolution >= 0) then {
-	_fxResolution ppEffectAdjust [1, 1, 0, 0];
+	_fxResolution ppEffectAdjust [1];
 	_fxResolution ppEffectCommit 0;
 };
 
@@ -163,7 +163,7 @@ if (_fxRadial >= 0) then {
 };
 
 if (_fxWet >= 0) then {
-	_fxWet ppEffectAdjust [0, 0, 0, 0];
+	_fxWet ppEffectAdjust [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 	_fxWet ppEffectCommit 0;
 };
 

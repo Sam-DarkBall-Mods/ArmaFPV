@@ -252,7 +252,7 @@ if (_fxChrom >= 0) then {
 };
 
 if (_fxResolution >= 0) then {
-	_fxResolution ppEffectAdjust [_resScale, _resScale, 0, 0];
+	_fxResolution ppEffectAdjust [_resScale];
 	_fxResolution ppEffectCommit _commitTime;
 };
 
@@ -267,7 +267,27 @@ if (_fxRadial >= 0) then {
 };
 
 if (_fxWet >= 0) then {
-	_fxWet ppEffectAdjust [_glitchWet, _glitchWet * 0.6, _now * 2, _glitchWet * 0.2];
+	private _wetParams = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	if (_glitchWet > 0) then {
+		_wetParams = [
+			_glitchWet,
+			_glitchWet * 0.6,
+			_glitchWet * 0.4,
+			_glitchWet * 0.8,
+			_glitchWet * 0.5,
+			_glitchWet * 0.5,
+			_now * 0.25,
+			_now * 0.33,
+			_glitchWet * 0.2,
+			_glitchWet * 0.2,
+			0,
+			0,
+			0,
+			0,
+			0
+		];
+	};
+	_fxWet ppEffectAdjust _wetParams;
 	_fxWet ppEffectCommit _commitTime;
 };
 
