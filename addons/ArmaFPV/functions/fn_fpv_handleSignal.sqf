@@ -8,13 +8,13 @@
 
 [] spawn {
 	private _weakSignalDuration = 0;
-	private _specialEffectTime = 0;
-	private _specialEffects = [];
 	private _loopInterval = missionNamespace getVariable ["DB_fpv_signalUpdateInterval", 0.2];
 	private _signalLossThreshold = missionNamespace getVariable ["DB_fpv_signalLossThreshold", 0.05];
 	private _signalLossDuration = missionNamespace getVariable ["DB_fpv_signalLossDuration", 5];
 
 	private _stop = false;
+
+	call DB_fnc_fpv_ppfx_start;
 
 	while { (missionNamespace getVariable ["ArmaFPV_isControl", false]) && !_stop } do {
 		private _player = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", player];
@@ -30,7 +30,7 @@
 
 		if (!_stop) then {
 			private _signal = [_player, _uav] call DB_fnc_fpv_getSignal;
-			private _altitude = (getPos _uav) select 2;
+			private _altitude = (getPosATL _uav) select 2;
 			private _controlPicture = uiNameSpace getVariable ["ArmaFPV_SignalPicture", controlNull];
 			private _controlText = uiNameSpace getVariable ["ArmaFPV_SignalText", controlNull];
 			private _picture = "";
@@ -43,41 +43,6 @@
 				};
 			} else {
 				_weakSignalDuration = 0;
-			};
-
-			if (_signal < 0.3 && _altitude < 20) then {
-				private _randomChance = random 1;
-
-				if (_randomChance > 0.9 && _specialEffectTime <= 0) then {
-					private _fxColor = ppEffectCreate ["ColorCorrections", 1500];
-					_fxColor ppEffectEnable true;
-					_fxColor ppEffectAdjust [1.08, 0.67, 0.06, [0, 0, 0.45, 0.06], [1, 1, 0.93, 1.61], [0.33, 0.33, 0.15, 0.2], [0, 0, 0, 0, 0, 0, 5]];
-					_fxColor ppEffectCommit 0;
-
-					private _fxDynamic = ppEffectCreate ["DynamicBlur", 500];
-					_fxDynamic ppEffectEnable true;
-					_fxDynamic ppEffectAdjust [0.4];
-					_fxDynamic ppEffectCommit 0;
-
-					private _fxFilm = ppEffectCreate ["FilmGrain", 2000];
-					_fxFilm ppEffectEnable true;
-					_fxFilm ppEffectAdjust [1, 0.47, 4.26, 0.5, 0.5, true];
-					_fxFilm ppEffectCommit 0;
-
-					_specialEffects = [_fxColor, _fxDynamic, _fxFilm];
-					missionNamespace setVariable ["DB_fpv_specialEffects", _specialEffects];
-					_specialEffectTime = 2;
-				};
-			};
-
-			if (_specialEffectTime > 0) then {
-				_specialEffectTime = _specialEffectTime - _loopInterval;
-
-				if (_specialEffectTime <= 0) then {
-					{ ppEffectDestroy _x; } forEach _specialEffects;
-					_specialEffects = [];
-					missionNamespace setVariable ["DB_fpv_specialEffects", _specialEffects];
-				};
 			};
 
 			switch (true) do {
@@ -97,37 +62,23 @@
 				_controlText ctrlSetText str(round(_signal * 100));
 			};
 
-			private _ppEffect = missionNamespace getVariable ["DB_fpv_ppEffect", []];
-			private _adjust = linearConversion [1, 0, _signal, 0.1, 1.0];
+			private _distance = _player distance _uav;
+			private _maxDistance = missionNamespace getVariable ["FPV_MaxFlightDistance", 1500];
+			private _inJammer = (missionNamespace getVariable ["DB_timeInJammerZone", 0]) > 0;
+			private _profile = missionNamespace getVariable ["DB_fpv_ppfx_profile", "ANALOG"];
 
-			if (_ppEffect isNotEqualTo []) then {
-				{ ppEffectDestroy _x; } forEach _ppEffect;
-			};
+			private _context = [
+				"altAGL", _altitude,
+				"distance", _distance,
+				"maxDistance", _maxDistance,
+				"inJammer", _inJammer
+			];
 
-			private _ppColor = ppEffectCreate ["ColorCorrections", 1500];
-			_ppColor ppEffectEnable true;
-			_ppColor ppEffectAdjust [[1.08, 1.2, _adjust] call BIS_fnc_lerp, [0.67, 1, _adjust] call BIS_fnc_lerp, 0.06, [0, 0, 0.45, 0.06], [1, 1, 0.93, 1.61], [0.33, 0.33, 0.15, 0.2], [0, 0, 0, 0, 0, 0, 5]];
-			_ppColor ppEffectCommit 0;
-
-			private _ppDynamic = ppEffectCreate ["DynamicBlur", 500];
-			_ppDynamic ppEffectEnable true;
-			_ppDynamic ppEffectAdjust [[0.2, 0.7, _adjust] call BIS_fnc_lerp];
-			_ppDynamic ppEffectCommit 0;
-
-			private _ppFilm = ppEffectCreate ["FilmGrain", 2000];
-			_ppFilm ppEffectEnable true;
-			_ppFilm ppEffectAdjust [[0.04, 1, _adjust] call BIS_fnc_lerp, 1, [4.09, 4.5, _adjust] call BIS_fnc_lerp, 0.5, 0.5, true];
-			_ppFilm ppEffectCommit 0;
-
-			missionNamespace setVariable ["DB_fpv_ppEffect", [_ppColor, _ppDynamic, _ppFilm]];
+			[_signal, _profile, _context] call DB_fnc_fpv_ppfx_setInput;
 
 			sleep _loopInterval;
 		};
 	};
 
-	if (_specialEffects isNotEqualTo []) then {
-		{ ppEffectDestroy _x; } forEach _specialEffects;
-	};
-
-	missionNamespace setVariable ["DB_fpv_specialEffects", []];
+	call DB_fnc_fpv_ppfx_stop;
 };

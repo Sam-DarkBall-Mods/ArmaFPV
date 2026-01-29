@@ -12,17 +12,7 @@ private _clearEffects = {
 		_layer cutText ["", "PLAIN"];
 	};
 
-	private _ppEffect = missionNamespace getVariable ["DB_fpv_ppEffect", []];
-	if (_ppEffect isNotEqualTo []) then {
-		{ ppEffectDestroy _x; } forEach _ppEffect;
-		missionNamespace setVariable ["DB_fpv_ppEffect", []];
-	};
-
-	private _specialEffects = missionNamespace getVariable ["DB_fpv_specialEffects", []];
-	if (_specialEffects isNotEqualTo []) then {
-		{ ppEffectDestroy _x; } forEach _specialEffects;
-		missionNamespace setVariable ["DB_fpv_specialEffects", []];
-	};
+	call DB_fnc_fpv_ppfx_stop;
 };
 
 call _clearEffects;

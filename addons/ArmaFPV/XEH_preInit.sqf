@@ -45,6 +45,10 @@ if (isNil "DB_fpv_connectLoopInterval") then {
 	DB_fpv_connectLoopInterval = 0.1;
 };
 
+if (isNil "DB_fpv_ppfx_profile") then {
+	DB_fpv_ppfx_profile = "ANALOG";
+};
+
 [ 
     "FPV_DefaultText",
     "EDITBOX",
@@ -54,24 +58,55 @@ if (isNil "DB_fpv_connectLoopInterval") then {
     0
 ] call cba_settings_fnc_init;
 
-if ((hasInterface && isServer) || (serverCommandAvailable "#kick")) then {
-    [
-        "FPV_isUavCaptive",
-        "CHECKBOX",
-        ["AI Cannot See FPV Drones", ""],
-        "FPV Settings",
-        true,
-        1,
-        { publicVariable "FPV_isUavCaptive" }
-    ] call cba_settings_fnc_init;
+private _fnc_registerAdminSettings = {
+	if (missionNamespace getVariable ["DB_fpv_adminSettingsRegistered", false]) exitWith {};
+	missionNamespace setVariable ["DB_fpv_adminSettingsRegistered", true];
 
-    [
-        "FPV_MaxFlightDistance", 
-        "SLIDER",   
-        ["Max Flight Distance", ""], 
-        "FPV Settings", 
-        [1500, 12000, 1500, 0],
-        1,
-        { publicVariable "FPV_MaxFlightDistance" }
-    ] call cba_settings_fnc_init;
+	[
+		"FPV_isUavCaptive",
+		"CHECKBOX",
+		["AI Cannot See FPV Drones", ""],
+		"FPV Settings",
+		true,
+		1,
+		{ publicVariable "FPV_isUavCaptive" }
+	] call cba_settings_fnc_init;
+
+	[
+		"FPV_MaxFlightDistance",
+		"SLIDER",
+		["Max Flight Distance", ""],
+		"FPV Settings",
+		[1500, 12000, 1500, 0],
+		1,
+		{ publicVariable "FPV_MaxFlightDistance" }
+	] call cba_settings_fnc_init;
+
+	[
+		"FPV_PpfxProfile",
+		"LIST",
+		["FPV Profile", "Analog/Digital PPFX profile"],
+		"FPV Settings",
+		[["ANALOG", "DIGITAL"], ["Analog", "Digital"], 0],
+		1,
+		{
+			DB_fpv_ppfx_profile = _this;
+			publicVariable "DB_fpv_ppfx_profile";
+		}
+	] call cba_settings_fnc_init;
+};
+
+missionNamespace setVariable ["DB_fpv_registerAdminSettings", _fnc_registerAdminSettings];
+
+if (hasInterface) then {
+	if (isServer || { serverCommandAvailable "#kick" }) then {
+		call _fnc_registerAdminSettings;
+	} else {
+		[] spawn {
+			waitUntil { !hasInterface || serverCommandAvailable "#kick" };
+			if (!hasInterface) exitWith {};
+			private _register = missionNamespace getVariable ["DB_fpv_registerAdminSettings", {}];
+			call _register;
+		};
+	};
 };

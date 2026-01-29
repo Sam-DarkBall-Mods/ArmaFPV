@@ -1,0 +1,174 @@
+/*
+	ArmaFPV: start FPV PPFX module.
+	Purpose: creates post-process effects once and registers an EachFrame update.
+	Context: client only.
+	Params: none.
+	Returns: nothing.
+*/
+
+if (!hasInterface) exitWith {};
+if (missionNamespace getVariable ["DB_fpv_ppfx_active", false]) exitWith {};
+
+if (isNil "DB_fpv_ppfx_profile") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_profile", "ANALOG"];
+};
+
+if (isNil "DB_fpv_ppfx_devEnabled") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_devEnabled", false];
+};
+
+if (isNil "DB_fpv_ppfx_devSignal") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_devSignal", 1];
+};
+
+if (isNil "DB_fpv_ppfx_devProfile") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_devProfile", "ANALOG"];
+};
+
+if (isNil "DB_fpv_ppfx_input") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_input", 1];
+};
+
+if (isNil "DB_fpv_ppfx_hysteresis") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_hysteresis", 0.05];
+};
+
+if (isNil "DB_fpv_ppfx_minStateTime") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_minStateTime", 0.4];
+};
+
+if (isNil "DB_fpv_ppfx_priorityBase") then {
+	missionNamespace setVariable ["DB_fpv_ppfx_priorityBase", 1650];
+};
+
+private _priorityBase = missionNamespace getVariable ["DB_fpv_ppfx_priorityBase", 1650];
+private _usedPriorities = missionNamespace getVariable ["DB_fpv_ppfx_usedPriorities", []];
+private _instancePriorities = [];
+
+private _createEffect = {
+	params ["_name", "_base", "_used"];
+	private _priority = _base;
+	private _limit = _base + 200;
+	private _handle = -1;
+
+	while { _priority < _limit && { _handle < 0 } } do {
+		if (!(_priority in _used)) then {
+			_handle = ppEffectCreate [_name, _priority];
+			if (_handle >= 0) then {
+				_handle ppEffectEnable true;
+				_used pushBack _priority;
+			} else {
+				_handle = -1;
+			};
+		};
+
+		if (_handle < 0) then {
+			_priority = _priority + 1;
+		};
+	};
+
+	if (_handle < 0) exitWith { [-1, _used, -1] };
+	[_handle, _used, _priority]
+};
+
+private _result = ["ColorCorrections", _priorityBase, _usedPriorities] call _createEffect;
+private _fxColor = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+_result = ["FilmGrain", _priorityBase, _usedPriorities] call _createEffect;
+private _fxGrain = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+_result = ["DynamicBlur", _priorityBase, _usedPriorities] call _createEffect;
+private _fxBlur = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+_result = ["ChromAberration", _priorityBase, _usedPriorities] call _createEffect;
+private _fxChrom = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+_result = ["Resolution", _priorityBase, _usedPriorities] call _createEffect;
+private _fxResolution = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+_result = ["ColorInversion", _priorityBase, _usedPriorities] call _createEffect;
+private _fxInvert = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+_result = ["RadialBlur", _priorityBase, _usedPriorities] call _createEffect;
+private _fxRadial = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+_result = ["WetDistortion", _priorityBase, _usedPriorities] call _createEffect;
+private _fxWet = _result # 0;
+_usedPriorities = _result # 1;
+if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
+
+missionNamespace setVariable ["DB_fpv_ppfx_usedPriorities", _usedPriorities];
+missionNamespace setVariable ["DB_fpv_ppfx_priorities", _instancePriorities];
+missionNamespace setVariable ["DB_fpv_ppfx_handles", [_fxColor, _fxGrain, _fxBlur, _fxChrom, _fxResolution, _fxInvert, _fxRadial, _fxWet]];
+missionNamespace setVariable ["DB_fpv_ppfx_fxColor", _fxColor];
+missionNamespace setVariable ["DB_fpv_ppfx_fxGrain", _fxGrain];
+missionNamespace setVariable ["DB_fpv_ppfx_fxBlur", _fxBlur];
+missionNamespace setVariable ["DB_fpv_ppfx_fxChrom", _fxChrom];
+missionNamespace setVariable ["DB_fpv_ppfx_fxResolution", _fxResolution];
+missionNamespace setVariable ["DB_fpv_ppfx_fxInvert", _fxInvert];
+missionNamespace setVariable ["DB_fpv_ppfx_fxRadial", _fxRadial];
+missionNamespace setVariable ["DB_fpv_ppfx_fxWet", _fxWet];
+missionNamespace setVariable ["DB_fpv_ppfx_active", true];
+missionNamespace setVariable ["DB_fpv_ppfx_state", "CLEAN"];
+missionNamespace setVariable ["DB_fpv_ppfx_stateSince", diag_tickTime];
+missionNamespace setVariable ["DB_fpv_ppfx_glitch", []];
+
+if (_fxColor >= 0) then {
+	_fxColor ppEffectAdjust [1, 1, 0, [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 4]];
+	_fxColor ppEffectCommit 0;
+};
+
+if (_fxGrain >= 0) then {
+	_fxGrain ppEffectAdjust [0, 1, 1, 0, 0, true];
+	_fxGrain ppEffectCommit 0;
+};
+
+if (_fxBlur >= 0) then {
+	_fxBlur ppEffectAdjust [0];
+	_fxBlur ppEffectCommit 0;
+};
+
+if (_fxChrom >= 0) then {
+	_fxChrom ppEffectAdjust [0, 0, true];
+	_fxChrom ppEffectCommit 0;
+};
+
+if (_fxResolution >= 0) then {
+	_fxResolution ppEffectAdjust [1, 1, 0, 0];
+	_fxResolution ppEffectCommit 0;
+};
+
+if (_fxInvert >= 0) then {
+	_fxInvert ppEffectAdjust [0, 0, 0];
+	_fxInvert ppEffectCommit 0;
+};
+
+if (_fxRadial >= 0) then {
+	_fxRadial ppEffectAdjust [0, 0, 0, 0];
+	_fxRadial ppEffectCommit 0;
+};
+
+if (_fxWet >= 0) then {
+	_fxWet ppEffectAdjust [0, 0, 0, 0];
+	_fxWet ppEffectCommit 0;
+};
+
+private _ehId = addMissionEventHandler ["EachFrame", {
+	call DB_fnc_fpv_ppfx_update;
+}];
+
+missionNamespace setVariable ["DB_fpv_ppfx_ehId", _ehId];
