@@ -69,7 +69,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_TopLeftText"", _this # 0];";
 
                 x = WX_POS + GRID_W(1);
-                y = WY_POS + GRID_H(5.6);
+                y = WY_POS + GRID_H(6.2);
                 w = GRID_W(10);
                 h = GRID_H(1.4);
             };
@@ -82,7 +82,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalPicture"", _this # 0];";
 
                 x = WX_POS + GRID_W(1);
-                y = WY_POS + GRID_H(7.3);
+                y = WY_POS + GRID_H(7.9);
                 w = GRID_W(2);
                 h = GRID_H(2);
             };
@@ -104,7 +104,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalText"", _this # 0];";
 
                 x = WX_POS + GRID_W(3.4);
-                y = WY_POS + GRID_H(7.3);
+                y = WY_POS + GRID_H(7.9);
                 w = GRID_W(6);
                 h = GRID_H(1.4);
             };
@@ -127,7 +127,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_compass.paa";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(30) / 2;
-                y = WY_POS + GRID_H(1.2);
+                y = WY_POS + GRID_H(1.8);
                 w = GRID_W(30);
                 h = GRID_H(2);
             };
@@ -138,7 +138,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassGroup"", _this # 0];";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(30) / 2;
-                y = WY_POS + GRID_H(0.2);
+                y = WY_POS + GRID_H(0.8);
                 w = GRID_W(30);
                 h = GRID_H(2);
 
@@ -251,7 +251,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_HeadingText"", _this # 0];";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(6) / 2;
-                y = WY_POS + GRID_H(3.2);
+                y = WY_POS + GRID_H(3.8);
                 w = GRID_W(6);
                 h = GRID_H(2);
             };
@@ -263,7 +263,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_pointer_down.paa";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(0.9) / 2;
-                y = WY_POS + GRID_H(2.3);
+                y = WY_POS + GRID_H(2.9);
                 w = GRID_W(0.9);
                 h = GRID_H(0.9);
             };
@@ -287,7 +287,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_vbar_left.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarLeft"", _this # 0];";
 
-                x = WX_POS + GRID_W(4);
+                x = WX_POS + GRID_W(5);
                 y = WY_POS + GRID_H(12);
                 w = GRID_W(1);
                 h = GRID_H(16);
@@ -300,7 +300,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_vbar_right.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarRight"", _this # 0];";
 
-                x = WX_POS + W_WIDTH - GRID_W(5);
+                x = WX_POS + W_WIDTH - GRID_W(6);
                 y = WY_POS + GRID_H(12);
                 w = GRID_W(1);
                 h = GRID_H(16);
@@ -313,7 +313,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_pointer_left.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerLeft"", _this # 0];";
 
-                x = WX_POS + GRID_W(5.2);
+                x = WX_POS + GRID_W(6.2);
                 y = WY_POS + GRID_H(19);
                 w = GRID_W(1.4);
                 h = GRID_H(1.4);
@@ -326,7 +326,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_pointer_right.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerRight"", _this # 0];";
 
-                x = WX_POS + W_WIDTH - GRID_W(6.6);
+                x = WX_POS + W_WIDTH - GRID_W(7.6);
                 y = WY_POS + GRID_H(19);
                 w = GRID_W(1.4);
                 h = GRID_H(1.4);
