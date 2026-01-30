@@ -90,10 +90,10 @@ class RscTitles
 
                 text = "\ArmaFPV\pictures\osd_controller.paa";
 
-                x = WX_POS + W_WIDTH - GRID_W(3);
-                y = WY_POS + GRID_H(0.8);
-                w = GRID_W(2);
-                h = GRID_H(2);
+                x = WX_POS + W_WIDTH - GRID_W(2.6);
+                y = WY_POS + GRID_H(0.9);
+                w = GRID_W(1.6);
+                h = GRID_H(1.6);
             };
             class CompassBar : ctrlStaticPicture
             {
@@ -107,46 +107,106 @@ class RscTitles
                 h = GRID_H(2);
             };
 
-            class HeadingLetterCenter : ctrlStructuredText
+            class CompassLettersGroup : ctrlControlsGroupNoScrollBars
             {
                 idc = -1;
+                onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassGroup"", _this # 0];";
 
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "center";
-                    shadow = 1;
-                };
-
-                shadow = 0;
-                size = GRID_H(1.4);
-                text = "N";
-
-                x = WX_POS + W_WIDTH / 2 - GRID_W(2);
+                x = WX_POS + W_WIDTH / 2 - GRID_W(30) / 2;
                 y = WY_POS + GRID_H(0.2);
-                w = GRID_W(4);
-                h = GRID_H(1.6);
-            };
+                w = GRID_W(30);
+                h = GRID_H(2);
 
-            class HeadingLetterRight : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
+                class controls
                 {
-                    font = "VCROSDMono";
-                    align = "center";
-                    shadow = 1;
+                    class CompassLetterN : ctrlStructuredText
+                    {
+                        idc = -1;
+
+                        class Attributes
+                        {
+                            font = "VCROSDMono";
+                            align = "center";
+                            shadow = 1;
+                        };
+
+                        shadow = 0;
+                        size = GRID_H(1.4);
+                        text = "N";
+                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassN"", _this # 0];";
+
+                        x = GRID_W(14);
+                        y = GRID_H(0);
+                        w = GRID_W(2);
+                        h = GRID_H(1.6);
+                    };
+
+                    class CompassLetterE : ctrlStructuredText
+                    {
+                        idc = -1;
+
+                        class Attributes
+                        {
+                            font = "VCROSDMono";
+                            align = "center";
+                            shadow = 1;
+                        };
+
+                        shadow = 0;
+                        size = GRID_H(1.4);
+                        text = "E";
+                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassE"", _this # 0];";
+
+                        x = GRID_W(14);
+                        y = GRID_H(0);
+                        w = GRID_W(2);
+                        h = GRID_H(1.6);
+                    };
+
+                    class CompassLetterS : ctrlStructuredText
+                    {
+                        idc = -1;
+
+                        class Attributes
+                        {
+                            font = "VCROSDMono";
+                            align = "center";
+                            shadow = 1;
+                        };
+
+                        shadow = 0;
+                        size = GRID_H(1.4);
+                        text = "S";
+                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassS"", _this # 0];";
+
+                        x = GRID_W(14);
+                        y = GRID_H(0);
+                        w = GRID_W(2);
+                        h = GRID_H(1.6);
+                    };
+
+                    class CompassLetterW : ctrlStructuredText
+                    {
+                        idc = -1;
+
+                        class Attributes
+                        {
+                            font = "VCROSDMono";
+                            align = "center";
+                            shadow = 1;
+                        };
+
+                        shadow = 0;
+                        size = GRID_H(1.4);
+                        text = "W";
+                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassW"", _this # 0];";
+
+                        x = GRID_W(14);
+                        y = GRID_H(0);
+                        w = GRID_W(2);
+                        h = GRID_H(1.6);
+                    };
                 };
-
-                shadow = 0;
-                size = GRID_H(1.4);
-                text = "E";
-
-                x = WX_POS + W_WIDTH - GRID_W(6);
-                y = WY_POS + GRID_H(0.2);
-                w = GRID_W(4);
-                h = GRID_H(1.6);
             };
 
             class HeadingText : ctrlStructuredText
@@ -177,10 +237,10 @@ class RscTitles
 
                 text = "\ArmaFPV\pictures\osd_pointer_down.paa";
 
-                x = WX_POS + W_WIDTH / 2 - GRID_W(1) / 2;
-                y = WY_POS + GRID_H(2.4);
-                w = GRID_W(1);
-                h = GRID_H(1);
+                x = WX_POS + W_WIDTH / 2 - GRID_W(0.9) / 2;
+                y = WY_POS + GRID_H(2.3);
+                w = GRID_W(0.9);
+                h = GRID_H(0.9);
             };
 
             class Center_target : ctrlStaticPicture
@@ -200,6 +260,7 @@ class RscTitles
                 idc = -1;
 
                 text = "\ArmaFPV\pictures\osd_vbar_left.paa";
+                onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarLeft"", _this # 0];";
 
                 x = WX_POS + GRID_W(4);
                 y = WY_POS + GRID_H(12);
@@ -212,6 +273,7 @@ class RscTitles
                 idc = -1;
 
                 text = "\ArmaFPV\pictures\osd_vbar_right.paa";
+                onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarRight"", _this # 0];";
 
                 x = WX_POS + W_WIDTH - GRID_W(5);
                 y = WY_POS + GRID_H(12);
@@ -224,6 +286,7 @@ class RscTitles
                 idc = -1;
 
                 text = "\ArmaFPV\pictures\osd_pointer_left.paa";
+                onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerLeft"", _this # 0];";
 
                 x = WX_POS + GRID_W(5.2);
                 y = WY_POS + GRID_H(19);
@@ -236,6 +299,7 @@ class RscTitles
                 idc = -1;
 
                 text = "\ArmaFPV\pictures\osd_pointer_right.paa";
+                onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerRight"", _this # 0];";
 
                 x = WX_POS + W_WIDTH - GRID_W(6.6);
                 y = WY_POS + GRID_H(19);
