@@ -13,7 +13,9 @@ private _ppfxInterval = GETMVAR(DB_fpv_ppfxUpdateInterval, FPV_PPFX_UPDATE_INTER
 private _state = [
 	diag_tickTime,
 	1,
-	diag_tickTime
+	diag_tickTime,
+	-1,
+	false
 ];
 
 call DB_fnc_fpv_ppfx_start;
@@ -39,6 +41,8 @@ private _pfhId = [{
 	private _lastUpdate = _state # 0;
 	private _signal = _state # 1;
 	private _lastPpfxUpdate = _state # 2;
+	private _lastJammerBroadcast = _state # 3;
+	private _lastJammerActive = _state # 4;
 	private _doUpdate = (_now - _lastUpdate) >= _loopInterval;
 	private _doPpfxUpdate = (_now - _lastPpfxUpdate) >= _ppfxInterval;
 
@@ -64,10 +68,15 @@ private _pfhId = [{
 	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
 
 	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
-	_uav setVariable ["DB_fpv_jammerClientActive", _inJammer, true];
-	_uav setVariable ["DB_fpv_jammerClientUpdate", diag_tickTime, true];
-	if (_inJammer) then {
-		_uav setVariable ["DB_fpv_lastJammerContact", diag_tickTime, true];
+	private _doJammerBroadcast = (_inJammer != _lastJammerActive) || { (_now - _lastJammerBroadcast) >= _loopInterval };
+	if (_doJammerBroadcast) then {
+		_uav setVariable ["DB_fpv_jammerClientActive", _inJammer, true];
+		_uav setVariable ["DB_fpv_jammerClientUpdate", _now, true];
+		if (_inJammer) then {
+			_uav setVariable ["DB_fpv_lastJammerContact", _now, true];
+		};
+		_state set [3, _now];
+		_state set [4, _inJammer];
 	};
 
 	if (_doUpdate || _doPpfxUpdate) then {
