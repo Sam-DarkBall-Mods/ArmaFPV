@@ -110,9 +110,10 @@ _noiseWeight = _noiseWeight * 1.1;
 _blurWeight = _blurWeight * 0.6;
 _aberrWeight = _aberrWeight * 0.9;
 
-_noiseWeight = (_noiseWeight * _envBoost) min 1;
-_blurWeight = (_blurWeight * _envBoost) min 1;
-_aberrWeight = (_aberrWeight * _envBoost) min 1;
+private _envScale = (_severity max 0) min 1;
+_noiseWeight = (_noiseWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
+_blurWeight = (_blurWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
+_aberrWeight = (_aberrWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
 
 private _glitch = missionNamespace getVariable ["DB_fpv_ppfx_glitch", []];
 private _glitchType = "";
