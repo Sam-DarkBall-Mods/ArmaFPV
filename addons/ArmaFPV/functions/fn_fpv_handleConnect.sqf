@@ -45,21 +45,23 @@ private _pfhId = [{
 
 SETMVAR(DB_fpv_connectPFH, _pfhId);
 
-[{
-	!isNull findDisplay 46
-}, {
-	if (GETMVAR(DB_fpv_keyEHAdded, false)) exitWith {};
-	SETMVAR(DB_fpv_keyEHAdded, true);
+[
+	{ !isNull findDisplay 46 },
+	{
+		if (GETMVAR(DB_fpv_keyEHAdded, false)) exitWith {};
+		SETMVAR(DB_fpv_keyEHAdded, true);
 
-	findDisplay 46 displayAddEventHandler ["KeyDown", {
-		private _handled = false;
+		findDisplay 46 displayAddEventHandler ["KeyDown", {
+			private _handled = false;
 
-		if (GETMVAR(ArmaFPV_isControl, false)) then {
-			if (inputAction "showMap" > 0) then {
-				_handled = true;
+			if (GETMVAR(ArmaFPV_isControl, false)) then {
+				if (inputAction "showMap" > 0) then {
+					_handled = true;
+				};
 			};
-		};
 
-		_handled;
-	}];
-}, []] call CBA_fnc_waitUntilAndExecute;
+			_handled;
+		}];
+	},
+	[]
+] call CBA_fnc_waitUntilAndExecute;
