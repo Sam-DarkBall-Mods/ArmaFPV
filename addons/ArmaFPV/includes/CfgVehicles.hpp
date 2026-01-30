@@ -117,10 +117,10 @@ class CfgVehicles
 		steerAheadPlan=0.69999999;
 		predictTurnPlan=2;
 		predictTurnSimul=1.5;
-		liftForceCoef=1.1;
+		liftForceCoef=1;
 		cyclicAsideForceCoef=2;
-		cyclicForwardForceCoef=1.5;
-		bodyFrictionCoef=0.25;
+		cyclicForwardForceCoef=1.2;
+		bodyFrictionCoef=0.30000001;
 		backRotorForceCoef=5;
 		fuelCapacity=8.5;
 		maxFordingDepth=0.30000001;
