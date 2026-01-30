@@ -45,8 +45,7 @@ private _fnc_findJammers = {
 
 private _fnc_distanceImpact = {
 	params ["_distance", "_maxDistance"];
-	private _ratio = (_distance / _maxDistance) min 1;
-	1 - (_ratio ^ 1.35)
+	1 - ((_distance / _maxDistance) min 1)
 };
 
 private _retranslatorsNearUAV = [_uav, 1500] call _fnc_findRetranslators;
@@ -62,25 +61,23 @@ private _maxDistance = if ((_retranslatorsNearUAV isNotEqualTo []) || (_retransl
 
 private _objectCount = [_player, _uav] call _fnc_countInterferingObjects;
 private _distance = _player distance _uav;
-private _altAGL = (getPosATL _uav) select 2;
-
 private _startASL = eyePos _player;
 private _endASL = getPosWorld _uav;
 private _terrainBlocked = terrainIntersectASL [_startASL, _endASL];
+private _altAGL = (getPosATL _uav) select 2;
 private _altFactor = (_altAGL / 40) min 1;
 
-private _terrainFactor = if (_terrainBlocked) then {
-	0.15 + (0.35 * _altFactor)
-} else {
-	0.6 + (0.4 * _altFactor)
-};
-
 private _distanceImpact = [_distance, _maxDistance] call _fnc_distanceImpact;
-private _obstacleFactor = 0.86 ^ (_objectCount min 8);
+private _obstacleFactor = (1 - ((_objectCount min 8) * 0.05)) max 0;
+private _terrainFactor = if (_terrainBlocked) then {
+	0.3 + (0.4 * _altFactor)
+} else {
+	1
+};
 private _signalStrength = _distanceImpact * _terrainFactor * _obstacleFactor;
 
 if ((_retranslatorsNearUAV isNotEqualTo []) || (_retranslatorsNearPlayer isNotEqualTo [])) then {
-	_signalStrength = _signalStrength * 1.35;
+	_signalStrength = _signalStrength * 1.2;
 };
 
 private _timeInJammerZone = missionNamespace getVariable ["DB_timeInJammerZone", 0];

@@ -195,15 +195,9 @@ private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _black
 private _offset = 0;
 
 private _colorA = [0, 0, 0, _blackout];
-private _desat = (_lowAltFactor * (0.25 + (_severity * 0.35))) min 0.6;
-private _colorB = [
-	1 + _colorShift - (_desat * 0.08) + (_analogBase * 0.02),
-	1 - (_desat * 0.08),
-	1 - _colorShift - (_desat * 0.08) - (_analogBase * 0.01),
-	_desat
-];
+private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - (_analogBase * 0.01), 1];
 
-private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35 + (_lowAltFactor * 0.12)) min 1;
+private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
 private _blur = (_blurWeight + _glitchBlur + _analogBase * 0.08) min 1;
 private _chrom = (_aberrWeight * 0.025 + _analogBase * 0.004) min 0.06;
 
