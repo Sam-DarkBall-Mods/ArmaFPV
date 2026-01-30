@@ -46,6 +46,7 @@ private _jammerFactor = [_context, "jammerFactor", 0] call _getCtx;
 private _obstacles = [_context, "obstacleCount", 0] call _getCtx;
 private _terrainMask = [_context, "terrainMask", 0] call _getCtx;
 private _lowAltFactor = (1 - ((_altAGL max 0) / 20) min 1) max 0;
+private _lowAltImpact = _lowAltFactor * _severity;
 
 private _hysteresis = missionNamespace getVariable ["DB_fpv_ppfx_hysteresis", 0.05];
 private _minStateTime = missionNamespace getVariable ["DB_fpv_ppfx_minStateTime", 0.4];
@@ -130,8 +131,8 @@ if (_glitchType != "" && { _now >= _glitchEnd }) then {
 
 if (_glitchType isEqualTo "") then {
 	private _chanceBase = 0.01 + (_severity ^ 2) * 0.35;
-	if (_altAGL < 20) then { _chanceBase = _chanceBase + 0.03; };
-	if (_lowAltFactor > 0) then { _chanceBase = _chanceBase + (_lowAltFactor * 0.06); };
+	if (_altAGL < 20) then { _chanceBase = _chanceBase + (0.03 * _severity); };
+	if (_lowAltImpact > 0) then { _chanceBase = _chanceBase + (_lowAltImpact * 0.08); };
 	if (_inJammer) then { _chanceBase = _chanceBase + 0.06; };
 	if (_obstacles > 0) then { _chanceBase = _chanceBase + 0.02; };
 	if (_severity > 0.6) then { _chanceBase = _chanceBase + 0.04; };
@@ -197,7 +198,7 @@ if (_severity > 0.35) then {
 	private _phase = (_now * _flickerHz);
 	private _wave = ((sin (_phase * 6.283) + 1) * 0.5);
 	_flickerBlackout = _wave * (0.25 + (_severity * 0.2));
-	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + 0.06; };
+	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + (0.06 * _severity); };
 };
 
 private _finalBlackout = (_blackout max _flickerBlackout) min 0.55;

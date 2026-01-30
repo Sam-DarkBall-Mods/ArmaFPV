@@ -52,7 +52,7 @@ private _retranslatorsNearUAV = [_uav, 1500] call _fnc_findRetranslators;
 private _retranslatorsNearPlayer = [_player, 1500] call _fnc_findRetranslators;
 private _jammersNearUAV = [_uav, 1000] call _fnc_findJammers;
 
-private _baseMaxDistance = missionNamespace getVariable ["FPV_MaxFlightDistance", 1500];
+private _baseMaxDistance = missionNamespace getVariable ["FPV_MaxFlightDistance", 4000];
 private _maxDistance = if ((_retranslatorsNearUAV isNotEqualTo []) || (_retranslatorsNearPlayer isNotEqualTo [])) then {
 	_baseMaxDistance + 2500
 } else {

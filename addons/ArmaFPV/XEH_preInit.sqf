@@ -73,7 +73,7 @@ private _fnc_registerAdminSettings = {
 		"SLIDER",
 		["Max Flight Distance", ""],
 		"FPV Settings",
-		[1500, 12000, 1500, 0],
+		[1500, 12000, 4000, 0],
 		1,
 		{ publicVariable "FPV_MaxFlightDistance" }
 	] call cba_settings_fnc_init;
