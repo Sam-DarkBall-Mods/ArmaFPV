@@ -95,7 +95,6 @@ class CfgVehicles
 		accuracy=1.5;
 		camouflage=0.2;
 		audible=0.1;
-		mass=3;
 		armor=0.5;
 		cost=20000;
 		altFullForce=1000;
@@ -112,16 +111,16 @@ class CfgVehicles
 		{
 		};
 		startDuration=3;
-		maxSpeed=170;
+		maxSpeed=180;
 		precision=15;
 		steerAheadSimul=0.5;
 		steerAheadPlan=0.69999999;
 		predictTurnPlan=2;
 		predictTurnSimul=1.5;
-		liftForceCoef=1;
+		liftForceCoef=1.1;
 		cyclicAsideForceCoef=2;
-		cyclicForwardForceCoef=1.2;
-		bodyFrictionCoef=0.30000001;
+		cyclicForwardForceCoef=1.5;
+		bodyFrictionCoef=0.25;
 		backRotorForceCoef=5;
 		fuelCapacity=8.5;
 		maxFordingDepth=0.30000001;
