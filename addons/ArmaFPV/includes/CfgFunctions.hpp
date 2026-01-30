@@ -11,6 +11,10 @@ class CfgFunctions
 			class fpv_handleBattery {};
 			class fpv_handleConnect { postInit = 1; };
 			class fpv_handleSignal {};
+			class fpv_ppfx_start {};
+			class fpv_ppfx_stop {};
+			class fpv_ppfx_update {};
+			class fpv_ppfx_setInput {};
 			class fpv_handleSettings {};
 			class fpv_handleTime {};
 			class fpv_onDestroy {};

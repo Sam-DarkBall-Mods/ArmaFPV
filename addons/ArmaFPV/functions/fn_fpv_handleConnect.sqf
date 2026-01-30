@@ -29,11 +29,7 @@ private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Cro
 
 				{ _player disableUAVConnectability [_x, true]; } forEach (_drones - _dronesNear);
 
-				{
-					if (!(_x getVariable ["DB_fpv_isUAVsignalLost", false])) then {
-						_player enableUAVConnectability [_x, true];
-					};
-				} forEach _dronesNear;
+				{ _player enableUAVConnectability [_x, true]; } forEach _dronesNear;
 			};
 
 			private _uav = getConnectedUAV _player;
@@ -41,7 +37,6 @@ private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Cro
 
 			if ((_uavType in _droneTypes) && { cameraView == "GUNNER" } && { (typeOf cameraOn) in _droneTypes }) then {
 				missionNamespace setVariable ["ArmaFPV_isControl", true];
-				_uav setVariable ["DB_fpv_isUAVsignalLost", false];
 
 				call DB_fnc_fpv_createDialog;
 
@@ -74,44 +69,4 @@ private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Cro
 
 		_handled;
 	}];
-};
-
-[] spawn {
-private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP", "O_Crocus_AT_TI", "O_Crocus_AP_TI", "B_Crocus_AT_TI", "B_Crocus_AP_TI", "I_Crocus_AT_TI", "I_Crocus_AP_TI"]];
-	private _signalLossThreshold = missionNamespace getVariable ["DB_fpv_signalLossThreshold", 0.05];
-	private _signalLossDuration = missionNamespace getVariable ["DB_fpv_signalLossDuration", 5];
-	private _loopInterval = missionNamespace getVariable ["DB_fpv_connectLoopInterval", 0.1];
-	private _signalDropTime = -1;
-
-	while { true } do {
-		private _player = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", player];
-		private _uav = getConnectedUAV _player;
-
-		if (!isNull _uav && { (typeOf _uav) in _droneTypes }) then {
-			if (_uav getVariable ["DB_fpv_isUAVsignalLost", false]) then {
-				_signalDropTime = -1;
-			} else {
-				private _uavSignal = [_player, _uav] call DB_fnc_fpv_getSignal;
-
-				if (_uavSignal < _signalLossThreshold) then {
-					if (_signalDropTime == -1) then {
-						_signalDropTime = time;
-					} else {
-						private _currentTime = time - _signalDropTime;
-
-						if (_currentTime >= _signalLossDuration) then {
-							[_player, _uav] call DB_fnc_fpv_onSignalLost;
-							_signalDropTime = -1;
-						};
-					};
-				} else {
-					_signalDropTime = -1;
-				};
-			};
-		} else {
-			_signalDropTime = -1;
-		};
-
-		sleep _loopInterval;
-	};
 };
