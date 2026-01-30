@@ -56,7 +56,8 @@ if (isNil "DB_fpv_connectLoopInterval") then {
     ["Default Text", "Enter the text"],
     "FPV Settings",
     "CROCUS",
-    0
+    0,
+    { call DB_fnc_fpv_handleSettings }
 ] call cba_settings_fnc_init;
 
 private _fnc_registerAdminSettings = {
@@ -70,7 +71,10 @@ private _fnc_registerAdminSettings = {
 		"FPV Settings",
 		true,
 		1,
-		{ publicVariable "FPV_isUavCaptive" }
+		{
+			publicVariable "FPV_isUavCaptive";
+			call DB_fnc_fpv_handleSettings;
+		}
 	] call cba_settings_fnc_init;
 
 	[
