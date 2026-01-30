@@ -808,7 +808,7 @@ class CfgVehicles
 		_generalMacro="O_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview=QARMAFPV_DATA(termo.jpg);
+		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
 		{
@@ -1147,7 +1147,7 @@ class CfgVehicles
 		_generalMacro="B_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview=QARMAFPV_DATA(termo.jpg);
+		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
 		{
@@ -1486,7 +1486,7 @@ class CfgVehicles
 		_generalMacro="I_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview=QARMAFPV_DATA(termo.jpg);
+		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
 		{
