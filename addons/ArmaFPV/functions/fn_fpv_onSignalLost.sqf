@@ -10,13 +10,17 @@
 
 params ["_player", "_uav"];
 
-if (isNull _player || { isNull _uav }) exitWith {};
+if (isNull _uav) exitWith {};
 if (_uav getVariable ["DB_fpv_isUAVsignalLost", false]) exitWith {};
 
 _uav engineOn false;
-_player connectTerminalToUAV objNull;
-_uav setVariable ["DB_fpv_isUAVsignalLost", true];
-_player disableUAVConnectability [_uav, true];
+
+if (!isNull _player) then {
+	_player connectTerminalToUAV objNull;
+	_player disableUAVConnectability [_uav, true];
+};
+
+_uav setVariable ["DB_fpv_isUAVsignalLost", true, true];
 
 {
 	if (!isNull _x) then {

@@ -99,6 +99,21 @@ private _pfhId = [{
 		[_signal, _context] call DB_fnc_fpv_ppfx_setInput;
 	};
 
+	private _jammerLowTime = _uav getVariable ["DB_fpv_jammerLowTime", 0];
+	private _isLost = _uav getVariable ["DB_fpv_isUAVsignalLost", false];
+
+	if (_inJammer && { _signal <= FPV_SIGNAL_LOSS_THRESHOLD } && { !_isLost }) then {
+		_jammerLowTime = _jammerLowTime + diag_deltaTime;
+		if (_jammerLowTime >= FPV_SIGNAL_LOSS_DURATION) then {
+			[_player, _uav] call DB_fnc_fpv_onSignalLost;
+			_jammerLowTime = 0;
+		};
+	} else {
+		_jammerLowTime = 0;
+	};
+
+	_uav setVariable ["DB_fpv_jammerLowTime", _jammerLowTime];
+
 	if (!isNull _headingText) then {
 		private _hTxt = if (_heading < 10) then {
 			format ["00%1", _heading]
