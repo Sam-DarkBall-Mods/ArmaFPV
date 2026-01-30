@@ -93,7 +93,7 @@ class CfgVehicles
 		washDownStrength="0.25f";
 		killFriendlyExpCoef=0.1;
 		accuracy=1.5;
-		camouflage=0.5;
+		camouflage=0.2;
 		audible=0.1;
 		armor=0.5;
 		cost=20000;
@@ -111,7 +111,7 @@ class CfgVehicles
 		{
 		};
 		startDuration=3;
-		maxSpeed=170;
+		maxSpeed=180;
 		precision=15;
 		steerAheadSimul=0.5;
 		steerAheadPlan=0.69999999;
@@ -124,7 +124,7 @@ class CfgVehicles
 		backRotorForceCoef=5;
 		fuelCapacity=8.5;
 		maxFordingDepth=0.30000001;
-		threat[]={0.1,0.1,0.1};
+		threat[]={0,0,0};
 		maxMainRotorDive=0;
 		minMainRotorDive=0;
 		neutralMainRotorDive=0;
@@ -132,9 +132,11 @@ class CfgVehicles
 		mainRotorSpeed=-7;
 		backRotorSpeed=7;
 		tailBladeVertical=0;
-		radarTargetSize=0.1;
-		visualTargetSize=0.1;
+		radarTarget=0;
+		radarTargetSize=0.02;
+		visualTargetSize=0.05;
 		irTarget=0;
+		irTargetSize=0.01;
 		lockDetectionSystem=0;
 		incomingMissileDetectionSystem=0;
 		weapons[]={};
