@@ -179,8 +179,8 @@
 		};
 
 		if (!isNull _topLeftText) then {
-			private _altDec = (round (_altitude * 10)) / 10;
-			_topLeftText ctrlSetText format ["%1m", _altDec];
+			private _altRounded = round _altitude;
+			_topLeftText ctrlSetText format ["%1m", _altRounded];
 		};
 	}, [_loopInterval, _state]];
 };
