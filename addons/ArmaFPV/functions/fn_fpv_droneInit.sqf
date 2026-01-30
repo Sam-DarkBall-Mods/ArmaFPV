@@ -13,6 +13,11 @@ params ["_uav"];
 
 if (isNull _uav) exitWith {};
 
+if (isNil "cba_common_waitUntilAndExecArray") exitWith {
+	_uav disableAI "ALL";
+	_uav setVariable ["DB_jammer_customUavBehavior", true, true];
+};
+
 [
 	{
 		params ["_uav"];

@@ -12,6 +12,8 @@ class CfgPatches
 			"A3_Drones_F",
 			"cba_main",
 			"cba_common",
+			"cba_xeh",
+			"cba_xeh_a3",
 			"cba_settings"
 		};
 		requiredVersion=0.1;
