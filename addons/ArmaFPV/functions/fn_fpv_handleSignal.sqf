@@ -83,7 +83,6 @@ private _pfhId = [{
 		};
 
 		private _maxDistance = GETMVAR(FPV_MaxFlightDistance, 4000);
-		private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
 		private _obstacles = GETMVAR(DB_fpv_signal_obstacles, 0);
 		private _terrainMask = GETMVAR(DB_fpv_signal_terrainMask, 0);
 
@@ -99,6 +98,7 @@ private _pfhId = [{
 		[_signal, _context] call DB_fnc_fpv_ppfx_setInput;
 	};
 
+	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
 	private _jammerLowTime = _uav getVariable ["DB_fpv_jammerLowTime", 0];
 	private _isLost = _uav getVariable ["DB_fpv_isUAVsignalLost", false];
 
