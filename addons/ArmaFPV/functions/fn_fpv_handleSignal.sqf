@@ -26,6 +26,11 @@
 			private _altitude = (getPosATL _uav) select 2;
 			private _controlPicture = uiNameSpace getVariable ["ArmaFPV_SignalPicture", controlNull];
 			private _controlText = uiNameSpace getVariable ["ArmaFPV_SignalText", controlNull];
+			private _headingText = uiNameSpace getVariable ["ArmaFPV_HeadingText", controlNull];
+			private _altText = uiNameSpace getVariable ["ArmaFPV_AltText", controlNull];
+			private _rightText = uiNameSpace getVariable ["ArmaFPV_RightText", controlNull];
+			private _distText = uiNameSpace getVariable ["ArmaFPV_DistText", controlNull];
+			private _topLeftText = uiNameSpace getVariable ["ArmaFPV_TopLeftText", controlNull];
 			private _picture = "";
 
 			switch (true) do {
@@ -44,6 +49,37 @@
 			if (!isNull _controlText) then {
 				_controlText ctrlSetText str(round(_signal * 100));
 			};
+
+			if (!isNull _headingText) then {
+				private _heading = (round (getDir _uav)) mod 360;
+				private _hTxt = if (_heading < 10) then {
+					format ["00%1", _heading]
+				} else {
+					if (_heading < 100) then { format ["0%1", _heading] } else { str _heading };
+				};
+				_headingText ctrlSetText _hTxt;
+			};
+
+			if (!isNull _altText) then {
+				private _alt = (round _altitude) max 0;
+				_altText ctrlSetText format ["%1", _alt];
+			};
+
+			if (!isNull _rightText) then {
+				private _distFt = round ((_player distance _uav) * 3.28084);
+				_rightText ctrlSetText format ["%1", _distFt];
+			};
+
+			if (!isNull _distText) then {
+				private _dist = round ((_player distance _uav) * 3.28084);
+				_distText ctrlSetText format ["%1ft", _dist];
+			};
+
+			if (!isNull _topLeftText) then {
+				private _altDec = (round (_altitude * 10)) / 10;
+				_topLeftText ctrlSetText format ["%1m", _altDec];
+			};
+
 
 			private _distance = _player distance _uav;
 			private _maxDistance = missionNamespace getVariable ["FPV_MaxFlightDistance", 4000];
