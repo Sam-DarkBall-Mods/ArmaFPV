@@ -27,7 +27,7 @@ private _pfhId = [{
 
 	private _uav = getConnectedUAV _player;
 	private _uavType = typeOf _uav;
-	private _isFpv = (_uavType in _droneTypes) && { cameraView == "GUNNER" } && { (typeOf cameraOn) in _droneTypes };
+	private _isFpv = (_uavType in _droneTypes) && { cameraView in ["GUNNER", "INTERNAL"] };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
 
 	if (_isFpv) then {
