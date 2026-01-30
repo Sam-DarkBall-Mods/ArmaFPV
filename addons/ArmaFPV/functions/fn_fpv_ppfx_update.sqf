@@ -202,7 +202,15 @@ if (_severity > 0.35) then {
 	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + (0.06 * _severity); };
 };
 
-private _finalBlackout = (_blackout max _flickerBlackout) min 0.55;
+private _microFlicker = 0;
+if (_lowAltFactor > 0.25) then {
+	private _microHz = 24 + (_lowAltFactor * 12);
+	private _microWave = ((sin (_now * _microHz * 6.283) + 1) * 0.5);
+	private _microAmp = 0.04 + ((1 - _q) * 0.06);
+	_microFlicker = _microWave * _microAmp;
+};
+
+private _finalBlackout = (_blackout max _flickerBlackout max _microFlicker) min 0.55;
 private _brightness = _baseBrightness * (1 - _finalBlackout);
 if (_severity > 0.7) then {
 	_brightness = _brightness max 0.16;
