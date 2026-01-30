@@ -91,7 +91,7 @@ class CfgVehicles
 		waterEffect="UAVWater";
 		washDownDiameter="10.0f";
 		washDownStrength="0.25f";
-		killFriendlyExpCoef=0.1;
+		killFriendlyExpCoef=0;
 		accuracy=1.5;
 		camouflage=0.2;
 		audible=0.1;
