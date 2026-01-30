@@ -65,8 +65,7 @@ class RscTitles
 
                 shadow = 0;
                 size = GRID_H(1.2);
-                text = "7.7m";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_TopLeftText"", _this # 0];";
+                text = "";
 
                 x = WX_POS + GRID_W(1);
                 y = WY_POS + GRID_H(6.2);
@@ -287,7 +286,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_vbar_left.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarLeft"", _this # 0];";
 
-                x = WX_POS + GRID_W(6);
+                x = WX_POS + GRID_W(7.5);
                 y = WY_POS + GRID_H(12);
                 w = GRID_W(1);
                 h = GRID_H(16);
@@ -300,7 +299,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_vbar_right.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarRight"", _this # 0];";
 
-                x = WX_POS + W_WIDTH - GRID_W(7);
+                x = WX_POS + W_WIDTH - GRID_W(8.5);
                 y = WY_POS + GRID_H(12);
                 w = GRID_W(1);
                 h = GRID_H(16);
@@ -313,7 +312,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_pointer_left.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerLeft"", _this # 0];";
 
-                x = WX_POS + GRID_W(7.2);
+                x = WX_POS + GRID_W(8.7);
                 y = WY_POS + GRID_H(19);
                 w = GRID_W(1.4);
                 h = GRID_H(1.4);
@@ -326,7 +325,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_pointer_right.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerRight"", _this # 0];";
 
-                x = WX_POS + W_WIDTH - GRID_W(8.6);
+                x = WX_POS + W_WIDTH - GRID_W(10.1);
                 y = WY_POS + GRID_H(19);
                 w = GRID_W(1.4);
                 h = GRID_H(1.4);

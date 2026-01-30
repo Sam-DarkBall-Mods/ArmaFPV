@@ -47,7 +47,6 @@
 		private _altText = uiNameSpace getVariable ["ArmaFPV_AltText", controlNull];
 		private _rightText = uiNameSpace getVariable ["ArmaFPV_RightText", controlNull];
 		private _distText = uiNameSpace getVariable ["ArmaFPV_DistText", controlNull];
-		private _topLeftText = uiNameSpace getVariable ["ArmaFPV_TopLeftText", controlNull];
 		private _heading = (round (getDir _uav)) mod 360;
 
 		if (_doUpdate) then {
@@ -178,9 +177,5 @@
 			_vPointerRight ctrlCommit 0;
 		};
 
-		if (!isNull _topLeftText) then {
-			private _altRounded = round _altitude;
-			_topLeftText ctrlSetText format ["%1m", _altRounded];
-		};
 	}, [_loopInterval, _state]];
 };
