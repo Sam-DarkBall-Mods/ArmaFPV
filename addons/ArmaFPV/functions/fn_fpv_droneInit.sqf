@@ -52,6 +52,13 @@ private _pfhId = [{
 
 	private _jammers = (getPosWorld _uav) nearEntities [["Sania", "Sania_with_tripod"], 1000];
 	private _isActive = (_jammers findIf { _x getVariable ["DB_jammer_isActive", false] }) >= 0;
+	private _clientActive = _uav getVariable ["DB_fpv_jammerClientActive", false];
+	private _clientUpdate = _uav getVariable ["DB_fpv_jammerClientUpdate", -1];
+	private _clientFresh = (_clientUpdate >= 0) && { (diag_tickTime - _clientUpdate) <= (FPV_SIGNAL_LOSS_DURATION + 1) };
+
+	if (!_isActive && _clientActive && _clientFresh) then {
+		_isActive = true;
+	};
 	private _jammerTime = _uav getVariable ["DB_fpv_jammerTime", 0];
 
 	if (_isActive) then {

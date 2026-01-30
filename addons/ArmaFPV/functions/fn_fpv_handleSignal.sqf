@@ -64,6 +64,8 @@ private _pfhId = [{
 	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
 
 	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
+	_uav setVariable ["DB_fpv_jammerClientActive", _inJammer, true];
+	_uav setVariable ["DB_fpv_jammerClientUpdate", diag_tickTime, true];
 
 	if (_doUpdate || _doPpfxUpdate) then {
 		_signal = [_player, _uav] call DB_fnc_fpv_getSignal;
