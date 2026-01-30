@@ -27,16 +27,9 @@ private _pfhId = [{
 
 	private _uav = getConnectedUAV _player;
 	private _uavType = typeOf _uav;
-	private _isFpv = (_uavType in _droneTypes) && { cameraView == "GUNNER" };
+	private _isFpv = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView != "EXTERNAL" };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
-
-	if (cameraView == "EXTERNAL") exitWith {
-		if (_wasControl) then {
-			SETMVAR(ArmaFPV_isControl, false);
-			call DB_fnc_fpv_destroyUI;
-		};
-	};
 
 	if (_isFpv) then {
 		if (!_wasControl || _uiMissing) then {
