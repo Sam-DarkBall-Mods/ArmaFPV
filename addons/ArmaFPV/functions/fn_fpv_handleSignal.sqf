@@ -105,8 +105,9 @@
 			};
 
 			if (!isNull _rightText) then {
-				private _distFt = round ((_player distance _uav) * 3.28084);
-				_rightText ctrlSetText format ["%1", _distFt];
+				private _speedFtH = (vectorMagnitude (velocity _uav)) * 3.28084 * 3600;
+				private _speedDisplay = round (_speedFtH / 100);
+				_rightText ctrlSetText format ["%1", _speedDisplay];
 			};
 
 			if (!isNull _distText) then {
@@ -136,10 +137,11 @@
 				private _ptrPos = ctrlPosition _vPointerRight;
 				private _ptrW = _ptrPos # 2;
 				private _ptrH = _ptrPos # 3;
-				private _distFt = (_player distance _uav) * 3.28084;
-				private _distClamp = (_distFt max 0) min 1200;
-				private _distNorm = _distClamp / 1200;
-				private _yPos = _barY + (_barH * (1 - _distNorm)) - (_ptrH / 2);
+				private _speedFtH = (vectorMagnitude (velocity _uav)) * 3.28084 * 3600;
+				private _speedDisplay = _speedFtH / 100;
+				private _speedClamp = (_speedDisplay max 0) min 3000;
+				private _speedNorm = _speedClamp / 3000;
+				private _yPos = _barY + (_barH * (1 - _speedNorm)) - (_ptrH / 2);
 
 				_vPointerRight ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
 				_vPointerRight ctrlCommit 0;

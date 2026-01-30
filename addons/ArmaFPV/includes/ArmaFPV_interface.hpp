@@ -25,6 +25,31 @@ class RscTitles
         movingEnable = false;
         enableSimulation = true;
 
+        class controlsBackground
+        {
+            class LeftHudMask : ctrlStaticBackground
+            {
+                idc = -1;
+                colorBackground[] = {0, 0, 0, 1};
+
+                x = safeZoneXAbs;
+                y = safeZoneY;
+                w = LINE_WIDTH;
+                h = safeZoneH;
+            };
+
+            class RightHudMask : ctrlStaticBackground
+            {
+                idc = -1;
+                colorBackground[] = {0, 0, 0, 1};
+
+                x = safeZoneXAbs + safeZoneWAbs - LINE_WIDTH;
+                y = safeZoneY;
+                w = LINE_WIDTH;
+                h = safeZoneH;
+            };
+        };
+
         class controls
         {
             class TopLeftText : ctrlStructuredText
@@ -44,7 +69,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_TopLeftText"", _this # 0];";
 
                 x = WX_POS + GRID_W(1);
-                y = WY_POS + GRID_H(4.5);
+                y = WY_POS + GRID_H(5.6);
                 w = GRID_W(10);
                 h = GRID_H(1.4);
             };
@@ -57,7 +82,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalPicture"", _this # 0];";
 
                 x = WX_POS + GRID_W(1);
-                y = WY_POS + GRID_H(6.2);
+                y = WY_POS + GRID_H(7.3);
                 w = GRID_W(2);
                 h = GRID_H(2);
             };
@@ -79,7 +104,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalText"", _this # 0];";
 
                 x = WX_POS + GRID_W(3.4);
-                y = WY_POS + GRID_H(6.2);
+                y = WY_POS + GRID_H(7.3);
                 w = GRID_W(6);
                 h = GRID_H(1.4);
             };
@@ -385,7 +410,7 @@ class RscTitles
 
                 shadow = 0;
                 size = GRID_H(1.1);
-                text = "ft";
+                text = "ft/h";
 
                 x = WX_POS + W_WIDTH - GRID_W(8);
                 y = WY_POS + GRID_H(20.2);

@@ -30,11 +30,11 @@ addMissionEventHandler ["EachFrame", {
 	private _controlText = uiNameSpace getVariable ["ArmaFPV_TimeText", controlNull];
 
 	if (!isNull _controlText) then {
-		private _hours = floor (_timeElapsed / 3600);
-		private _mins = floor ((_timeElapsed mod 3600) / 60);
-		private _hh = if (_hours < 10) then { format ["0%1", _hours] } else { str _hours };
+		private _mins = floor (_timeElapsed / 60);
+		private _secs = floor (_timeElapsed mod 60);
 		private _mm = if (_mins < 10) then { format ["0%1", _mins] } else { str _mins };
-		_controlText ctrlSetText format ["%1:%2", _hh, _mm];
+		private _ss = if (_secs < 10) then { format ["0%1", _secs] } else { str _secs };
+		_controlText ctrlSetText format ["%1:%2", _mm, _ss];
 	};
 
 	_uav setVariable ["DB_fpv_savedTime", _timeElapsed, true];
