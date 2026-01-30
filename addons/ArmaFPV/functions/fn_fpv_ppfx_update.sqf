@@ -93,7 +93,7 @@ private _smoothstepInv = {
 };
 
 private _severity = 1 - _q;
-private _noiseWeight = [_q, 0.9, 0.2] call _smoothstepInv;
+private _noiseWeight = [_q, 0.95, 0.35] call _smoothstepInv;
 private _blurWeight = _severity ^ 1.7;
 private _aberrWeight = _severity ^ 2.2;
 
@@ -177,8 +177,8 @@ switch (_glitchType) do {
 		_glitchNoise = 0.2;
 	};
 	case "BLACKOUT": {
-		_blackout = 0.85;
-		_glitchNoise = 0.55;
+		_blackout = 0.5;
+		_glitchNoise = 0.6;
 	};
 	default {};
 };
@@ -192,19 +192,18 @@ if (_severity > 0.8) then {
 	_baseBrightness = _baseBrightness max 0.28;
 };
 private _flickerBlackout = 0;
-if (_severity > 0.6 && { _lowAltFactor > 0.2 }) then {
-	private _flickerHz = 16 + (_severity * 10);
-	if (_lowAltFactor > 0.6) then { _flickerHz = _flickerHz + 6; };
-	private _flickerOn = ((floor (_now * _flickerHz)) % 2) == 0;
-	if (_flickerOn) then { _flickerBlackout = 0.65 + (_severity * 0.2); };
+if (_severity > 0.35) then {
+	private _flickerHz = 18 + (_severity * 14);
+	private _wave = (sin (_now * _flickerHz * 6.283)) max 0;
+	_flickerBlackout = _wave * (0.35 + (_severity * 0.25));
+	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + 0.08; };
 };
 
-if (_severity > 0.85) then {
-	_blackout = _blackout min 0.85;
-};
-
-private _finalBlackout = _blackout max _flickerBlackout;
+private _finalBlackout = (_blackout max _flickerBlackout) min 0.7;
 private _brightness = _baseBrightness * (1 - _finalBlackout);
+if (_severity > 0.7) then {
+	_brightness = _brightness max 0.12;
+};
 private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _finalBlackout) + (1 * _finalBlackout);
 private _offset = 0;
 
