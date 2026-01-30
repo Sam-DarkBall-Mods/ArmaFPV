@@ -111,7 +111,6 @@ _aberrWeight = _aberrWeight * 0.9;
 _noiseWeight = (_noiseWeight * _envBoost) min 1;
 _blurWeight = (_blurWeight * _envBoost) min 1;
 _aberrWeight = (_aberrWeight * _envBoost) min 1;
-_resWeight = (_resWeight * _envBoost) min 1;
 
 private _glitch = missionNamespace getVariable ["DB_fpv_ppfx_glitch", []];
 private _glitchType = "";
@@ -137,6 +136,9 @@ if (_glitchType isEqualTo "") then {
 
 	if ((random 1) < _chance) then {
 		private _types = ["LINE_TEAR", "COLOR_SHIFT", "BLACK_PULSE"];
+		if (_severity > 0.6) then {
+			_types pushBack "BLACKOUT";
+		};
 		_glitchType = selectRandom _types;
 		private _duration = 0.08 + (random 0.25) * (0.5 + _severity);
 		_glitchEnd = _now + _duration;
@@ -150,6 +152,7 @@ private _glitchRadial = 0;
 private _glitchWet = 0;
 private _colorShift = 0;
 private _pulse = 0;
+private _blackout = 0;
 private _invert = 0;
 
 switch (_glitchType) do {
@@ -165,6 +168,10 @@ switch (_glitchType) do {
 		_pulse = -0.35;
 		_glitchNoise = 0.2;
 	};
+	case "BLACKOUT": {
+		_blackout = 1;
+		_glitchNoise = 0.45;
+	};
 	default {};
 };
 
@@ -172,11 +179,11 @@ private _commitTime = if (_glitchType isEqualTo "") then { 0.03 } else { 0 };
 
 private _analogBase = 0.06;
 private _drift = (sin (_now * 2.1) * 0.03 + sin (_now * 0.7) * 0.015) * _severity;
-private _brightness = 1 + _drift + _pulse;
-private _contrast = 1 + (_severity * 0.4) + (_analogBase * 0.12);
+private _brightness = (1 + _drift + _pulse) * (1 - _blackout);
+private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _blackout) + (1 * _blackout);
 private _offset = 0;
 
-private _colorA = [0, 0, 0, 0];
+private _colorA = [0, 0, 0, _blackout];
 private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - (_analogBase * 0.01), 1];
 
 private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
