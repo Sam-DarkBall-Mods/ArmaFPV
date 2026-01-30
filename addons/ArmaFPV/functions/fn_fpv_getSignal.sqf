@@ -8,6 +8,8 @@
 	Returns: Number (0..1) - signal strength.
 */
 
+#include "\ArmaFPV\script_macros.hpp"
+
 params ["_player", "_uav"];
 
 private _fnc_countInterferingObjects = {
@@ -53,7 +55,7 @@ private _retranslatorsNearPlayer = [_player, 1500] call _fnc_findRetranslators;
 private _hasRetranslator = (_retranslatorsNearUAV isNotEqualTo []) || (_retranslatorsNearPlayer isNotEqualTo []);
 private _jammersNearUAV = [_uav, 1000] call _fnc_findJammers;
 
-private _baseMaxDistance = missionNamespace getVariable ["FPV_MaxFlightDistance", 4000];
+private _baseMaxDistance = GETMVAR(FPV_MaxFlightDistance, 4000);
 private _maxDistance = if (_hasRetranslator) then {
 	_baseMaxDistance + 2500
 } else {
@@ -85,7 +87,7 @@ if (_hasRetranslator) then {
 	_signalStrength = _signalStrength * 1.2;
 };
 
-private _timeInJammerZone = missionNamespace getVariable ["DB_timeInJammerZone", 0];
+private _timeInJammerZone = GETMVAR(DB_timeInJammerZone, 0);
 
 if (_jammersNearUAV isNotEqualTo []) then {
 	_timeInJammerZone = _timeInJammerZone + diag_deltaTime;
@@ -95,7 +97,7 @@ if (_jammersNearUAV isNotEqualTo []) then {
 	_timeInJammerZone = 0;
 };
 
-missionNamespace setVariable ["DB_timeInJammerZone", _timeInJammerZone];
+SETMVAR(DB_timeInJammerZone, _timeInJammerZone);
 
 if (_distance > _maxDistance) then {
 	_signalStrength = 0;
@@ -105,8 +107,8 @@ private _terrainMask = if (_terrainBlocked) then { 1 } else { (1 - _altFactor) m
 if (_hasRetranslator) then {
 	_terrainMask = _terrainMask * 0.4;
 };
-missionNamespace setVariable ["DB_fpv_signal_obstacles", _objectCount];
-missionNamespace setVariable ["DB_fpv_signal_terrainMask", _terrainMask];
+SETMVAR(DB_fpv_signal_obstacles, _objectCount);
+SETMVAR(DB_fpv_signal_terrainMask, _terrainMask);
 
 _signalStrength = _signalStrength max 0 min 1;
 _signalStrength;

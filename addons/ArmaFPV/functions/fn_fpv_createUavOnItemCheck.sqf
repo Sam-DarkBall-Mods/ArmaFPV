@@ -1,6 +1,8 @@
 params ["_unit", "_container", "_item"];
 
-private _validItems = missionNamespace getVariable ["DB_fpv_dronesArray_items", []];
+#include "\ArmaFPV\script_macros.hpp"
+
+private _validItems = GETMVAR(DB_fpv_dronesArray_items, []);
 if !(_item in _validItems) exitWith {};
 if (typeOf _container != "GroundWeaponHolder") exitWith {};
 

@@ -4,6 +4,8 @@
 	Context: runs on all machines during preInit.
 */
 
+#include "\ArmaFPV\script_macros.hpp"
+
 if (isNil "DB_fpv_droneTypes") then {
 	DB_fpv_droneTypes = [
 		"O_Crocus_AT",
@@ -35,19 +37,19 @@ if (isNil "DB_fpv_terminalTypes") then {
 };
 
 if (isNil "DB_fpv_signalLossThreshold") then {
-	DB_fpv_signalLossThreshold = 0.05;
+	DB_fpv_signalLossThreshold = FPV_SIGNAL_LOSS_THRESHOLD;
 };
 
 if (isNil "DB_fpv_signalLossDuration") then {
-	DB_fpv_signalLossDuration = 5;
+	DB_fpv_signalLossDuration = FPV_SIGNAL_LOSS_DURATION;
 };
 
 if (isNil "DB_fpv_signalUpdateInterval") then {
-	DB_fpv_signalUpdateInterval = 0.2;
+	DB_fpv_signalUpdateInterval = FPV_SIGNAL_UPDATE_INTERVAL;
 };
 
 if (isNil "DB_fpv_connectLoopInterval") then {
-	DB_fpv_connectLoopInterval = 0.1;
+	DB_fpv_connectLoopInterval = FPV_CONNECT_LOOP_INTERVAL;
 };
 
 [ 
@@ -61,8 +63,8 @@ if (isNil "DB_fpv_connectLoopInterval") then {
 ] call cba_settings_fnc_init;
 
 private _fnc_registerAdminSettings = {
-	if (missionNamespace getVariable ["DB_fpv_adminSettingsRegistered", false]) exitWith {};
-	missionNamespace setVariable ["DB_fpv_adminSettingsRegistered", true];
+	if (GETMVAR(DB_fpv_adminSettingsRegistered, false)) exitWith {};
+	SETMVAR(DB_fpv_adminSettingsRegistered, true);
 
 	[
 		"FPV_isUavCaptive",
@@ -89,17 +91,20 @@ private _fnc_registerAdminSettings = {
 
 };
 
-missionNamespace setVariable ["DB_fpv_registerAdminSettings", _fnc_registerAdminSettings];
+SETMVAR(DB_fpv_registerAdminSettings, _fnc_registerAdminSettings);
 
 if (hasInterface) then {
 	if (isServer || { serverCommandAvailable "#kick" }) then {
 		call _fnc_registerAdminSettings;
 	} else {
-		[] spawn {
-			waitUntil { !hasInterface || serverCommandAvailable "#kick" };
-			if (!hasInterface) exitWith {};
-			private _register = missionNamespace getVariable ["DB_fpv_registerAdminSettings", {}];
-			call _register;
-		};
+		[
+			{ !hasInterface || serverCommandAvailable "#kick" },
+			{
+				if (!hasInterface) exitWith {};
+				private _register = GETMVAR(DB_fpv_registerAdminSettings, {});
+				call _register;
+			},
+			[]
+		] call CBA_fnc_waitUntilAndExecute;
 	};
 };

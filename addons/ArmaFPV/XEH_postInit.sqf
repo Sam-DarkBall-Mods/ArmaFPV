@@ -1,6 +1,8 @@
 if (!hasInterface) exitWith {};
 
-private _player = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", player];
+#include "\ArmaFPV\script_macros.hpp"
+
+private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 if (!isNull _player) then {
 	private _id = _player addEventHandler ["Put", { _this call DB_fnc_fpv_createUavOnItemCheck }];
 	_player setVariable ["DB_armafpv_playerPutID", _id];

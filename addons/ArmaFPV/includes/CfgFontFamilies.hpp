@@ -1,39 +1,41 @@
+#include "ArmaFPV_config_macros.hpp"
+
 class CfgFontFamilies
 {
-    class VCROSDMono 
+    class VCROSDMono
     {
         fonts[]=
         {
-            "\ArmaFPV\font\VCROSDMono6",
-            "\ArmaFPV\font\VCROSDMono7",
-            "\ArmaFPV\font\VCROSDMono8",
-            "\ArmaFPV\font\VCROSDMono9",
-            "\ArmaFPV\font\VCROSDMono10",
-            "\ArmaFPV\font\VCROSDMono11",
-            "\ArmaFPV\font\VCROSDMono12",
-            "\ArmaFPV\font\VCROSDMono13",
-            "\ArmaFPV\font\VCROSDMono14",
-            "\ArmaFPV\font\VCROSDMono15",
-            "\ArmaFPV\font\VCROSDMono16",
-            "\ArmaFPV\font\VCROSDMono17",
-            "\ArmaFPV\font\VCROSDMono18",
-            "\ArmaFPV\font\VCROSDMono19",
-            "\ArmaFPV\font\VCROSDMono20",
-            "\ArmaFPV\font\VCROSDMono21",
-            "\ArmaFPV\font\VCROSDMono22",
-            "\ArmaFPV\font\VCROSDMono23",
-            "\ArmaFPV\font\VCROSDMono24",
-            "\ArmaFPV\font\VCROSDMono25",
-            "\ArmaFPV\font\VCROSDMono26",
-            "\ArmaFPV\font\VCROSDMono27",
-            "\ArmaFPV\font\VCROSDMono28",
-            "\ArmaFPV\font\VCROSDMono29",
-            "\ArmaFPV\font\VCROSDMono30",
-            "\ArmaFPV\font\VCROSDMono31",
-            "\ArmaFPV\font\VCROSDMono34",
-            "\ArmaFPV\font\VCROSDMono35",
-            "\ArmaFPV\font\VCROSDMono37",
-            "\ArmaFPV\font\VCROSDMono46"
+            QARMAFPV_FONT(VCROSDMono6),
+            QARMAFPV_FONT(VCROSDMono7),
+            QARMAFPV_FONT(VCROSDMono8),
+            QARMAFPV_FONT(VCROSDMono9),
+            QARMAFPV_FONT(VCROSDMono10),
+            QARMAFPV_FONT(VCROSDMono11),
+            QARMAFPV_FONT(VCROSDMono12),
+            QARMAFPV_FONT(VCROSDMono13),
+            QARMAFPV_FONT(VCROSDMono14),
+            QARMAFPV_FONT(VCROSDMono15),
+            QARMAFPV_FONT(VCROSDMono16),
+            QARMAFPV_FONT(VCROSDMono17),
+            QARMAFPV_FONT(VCROSDMono18),
+            QARMAFPV_FONT(VCROSDMono19),
+            QARMAFPV_FONT(VCROSDMono20),
+            QARMAFPV_FONT(VCROSDMono21),
+            QARMAFPV_FONT(VCROSDMono22),
+            QARMAFPV_FONT(VCROSDMono23),
+            QARMAFPV_FONT(VCROSDMono24),
+            QARMAFPV_FONT(VCROSDMono25),
+            QARMAFPV_FONT(VCROSDMono26),
+            QARMAFPV_FONT(VCROSDMono27),
+            QARMAFPV_FONT(VCROSDMono28),
+            QARMAFPV_FONT(VCROSDMono29),
+            QARMAFPV_FONT(VCROSDMono30),
+            QARMAFPV_FONT(VCROSDMono31),
+            QARMAFPV_FONT(VCROSDMono34),
+            QARMAFPV_FONT(VCROSDMono35),
+            QARMAFPV_FONT(VCROSDMono37),
+            QARMAFPV_FONT(VCROSDMono46)
         };
      };
 };

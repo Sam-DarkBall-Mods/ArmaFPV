@@ -6,9 +6,12 @@
 	Returns: nothing.
 */
 
+#include "\ArmaFPV\script_macros.hpp"
+
 private _layer = ("DB_FPV_Layer" call BIS_fnc_rscLayer);
 _layer cutRsc ["ArmaFPV_Dialog", "PLAIN"];
-missionNamespace setVariable ["DB_FPV_Layer_ID", _layer];
+
+SETMVAR(DB_FPV_Layer_ID, _layer);
 
 call DB_fnc_fpv_handleSettings;
 call DB_fnc_fpv_handleBattery;

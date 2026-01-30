@@ -6,7 +6,9 @@
 	Returns: nothing.
 */
 
-private _player = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", player];
+#include "\ArmaFPV\script_macros.hpp"
+
+private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 private _uav = getConnectedUAV _player;
 
 if (isNull _player) exitWith {};
@@ -19,15 +21,21 @@ if (isNil { _uav getVariable ["DB_fpv_savedTime", nil] }) then {
 private _savedTime = _uav getVariable ["DB_fpv_savedTime", 0];
 private _startTime = time - _savedTime;
 
-addMissionEventHandler ["EachFrame", {
-	_thisArgs params ["_startTime", "_uav"];
+private _prevPfh = GETMVAR(DB_fpv_timePFH, -1);
+if (_prevPfh >= 0) then {
+	[_prevPfh] call CBA_fnc_removePerFrameHandler;
+};
+
+private _pfhId = [{
+	_this params ["_args", "_handle"];
+	_args params ["_startTime", "_uav"];
 
 	if (isNull _uav) exitWith {
-		removeMissionEventHandler ["EachFrame", _thisEventHandler];
+		[_handle] call CBA_fnc_removePerFrameHandler;
 	};
 
 	private _timeElapsed = time - _startTime;
-	private _controlText = uiNameSpace getVariable ["ArmaFPV_TimeText", controlNull];
+	private _controlText = GETUVAR(ArmaFPV_TimeText, controlNull);
 
 	if (!isNull _controlText) then {
 		private _mins = floor (_timeElapsed / 60);
@@ -39,7 +47,9 @@ addMissionEventHandler ["EachFrame", {
 
 	_uav setVariable ["DB_fpv_savedTime", _timeElapsed, true];
 
-	if !(missionNamespace getVariable ["ArmaFPV_isControl", false]) exitWith {
-		removeMissionEventHandler ["EachFrame", _thisEventHandler];
+	if !(GETMVAR(ArmaFPV_isControl, false)) exitWith {
+		[_handle] call CBA_fnc_removePerFrameHandler;
 	};
-}, [_startTime, _uav]];
+}, 0, [_startTime, _uav]] call CBA_fnc_addPerFrameHandler;
+
+SETMVAR(DB_fpv_timePFH, _pfhId);
