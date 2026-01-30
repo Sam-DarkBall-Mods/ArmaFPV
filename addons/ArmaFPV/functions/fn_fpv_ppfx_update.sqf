@@ -191,11 +191,24 @@ private _baseBrightness = 1 + _drift + _pulse;
 if (_severity > 0.8) then {
 	_baseBrightness = _baseBrightness max 0.28;
 };
-private _brightness = _baseBrightness * (1 - _blackout);
-private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _blackout) + (1 * _blackout);
+private _flickerBlackout = 0;
+if (_severity > 0.6 && { _lowAltFactor > 0.2 }) then {
+	private _flickerHz = 16 + (_severity * 10);
+	if (_lowAltFactor > 0.6) then { _flickerHz = _flickerHz + 6; };
+	private _flickerOn = ((floor (_now * _flickerHz)) % 2) == 0;
+	if (_flickerOn) then { _flickerBlackout = 0.65 + (_severity * 0.2); };
+};
+
+if (_severity > 0.85) then {
+	_blackout = _blackout min 0.85;
+};
+
+private _finalBlackout = _blackout max _flickerBlackout;
+private _brightness = _baseBrightness * (1 - _finalBlackout);
+private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _finalBlackout) + (1 * _finalBlackout);
 private _offset = 0;
 
-private _colorA = [0, 0, 0, _blackout];
+private _colorA = [0, 0, 0, _finalBlackout];
 private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - (_analogBase * 0.01), 1];
 
 private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
