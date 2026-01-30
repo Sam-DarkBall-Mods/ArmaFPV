@@ -12,6 +12,7 @@
 params ["_uav"];
 
 if (isNull _uav) exitWith {};
+if (!isServer) exitWith {};
 
 if (isNil "cba_common_waitUntilAndExecArray") exitWith {
 	_uav disableAI "ALL";
@@ -30,55 +31,3 @@ if (isNil "cba_common_waitUntilAndExecArray") exitWith {
 	},
 	[_uav]
 ] call CBA_fnc_waitUntilAndExecute;
-
-if (!isServer) exitWith {};
-
-private _prevPfh = _uav getVariable ["DB_fpv_jammerPFH", -1];
-if (_prevPfh >= 0) then {
-	[_prevPfh] call CBA_fnc_removePerFrameHandler;
-};
-
-private _pfhId = [{
-	_this params ["_args", "_handle"];
-	_args params ["_uav"];
-
-	if (isNull _uav) exitWith {
-		[_handle] call CBA_fnc_removePerFrameHandler;
-	};
-
-	if (_uav getVariable ["DB_fpv_isUAVsignalLost", false]) exitWith {
-		[_handle] call CBA_fnc_removePerFrameHandler;
-	};
-
-	private _jammers = (getPosWorld _uav) nearEntities [["Sania", "Sania_with_tripod"], 1000];
-	private _isActive = (_jammers findIf { _x getVariable ["DB_jammer_isActive", false] }) >= 0;
-	private _clientActive = _uav getVariable ["DB_fpv_jammerClientActive", false];
-	private _clientUpdate = _uav getVariable ["DB_fpv_jammerClientUpdate", -1];
-	private _clientFresh = (_clientUpdate >= 0) && { (diag_tickTime - _clientUpdate) <= (FPV_SIGNAL_LOSS_DURATION + 1) };
-	private _lastContact = _uav getVariable ["DB_fpv_lastJammerContact", -1];
-	private _recentContact = (_lastContact >= 0) && { (diag_tickTime - _lastContact) <= (FPV_SIGNAL_LOSS_DURATION + 1) };
-
-	if (!_isActive && _clientActive && _clientFresh) then {
-		_isActive = true;
-	};
-
-	if (!_isActive && _recentContact) then {
-		_isActive = true;
-	};
-	private _jammerTime = _uav getVariable ["DB_fpv_jammerTime", 0];
-
-	if (_isActive) then {
-		_jammerTime = _jammerTime + diag_deltaTime;
-	} else {
-		_jammerTime = 0;
-	};
-
-	_uav setVariable ["DB_fpv_jammerTime", _jammerTime, true];
-
-	if (_isActive && { _jammerTime >= FPV_SIGNAL_LOSS_DURATION }) then {
-		[objNull, _uav] call DB_fnc_fpv_onSignalLost;
-		[_handle] call CBA_fnc_removePerFrameHandler;
-	};
-}, FPV_SIGNAL_UPDATE_INTERVAL, [_uav]] call CBA_fnc_addPerFrameHandler;
-
-_uav setVariable ["DB_fpv_jammerPFH", _pfhId];

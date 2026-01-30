@@ -27,11 +27,24 @@ private _pfhId = [{
 
 	private _uav = getConnectedUAV _player;
 	private _uavType = typeOf _uav;
+	private _lastUav = GETMVAR(DB_fpv_lastUav, objNull);
+
+	if (!isNull _lastUav && { _uav isNotEqualTo _lastUav }) then {
+		_lastUav setVariable ["DB_jammer_customUavBehavior", false, true];
+	};
+
+	if (isNull _uav) then {
+		SETMVAR(DB_fpv_lastUav, objNull);
+	} else {
+		SETMVAR(DB_fpv_lastUav, _uav);
+	};
+
 	private _isFpv = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView != "EXTERNAL" };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
 
 	if (_isFpv) then {
+		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
 		if (!_wasControl || _uiMissing) then {
 			SETMVAR(ArmaFPV_isControl, true);
 			call DB_fnc_fpv_createDialog;
