@@ -653,7 +653,7 @@ class CfgVehicles
 			class ArmaFPV
 			{
 				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) spawn DB_fnc_fpv_droneInit;";
+				init="(_this # 0) call DB_fnc_fpv_droneInit;";
 			};
 		};
 	};
@@ -798,7 +798,7 @@ class CfgVehicles
 			class ArmaFPV
 			{
 				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) spawn DB_fnc_fpv_droneInit;";
+				init="(_this # 0) call DB_fnc_fpv_droneInit;";
 			};
 		};
 	};
@@ -992,7 +992,7 @@ class CfgVehicles
 			class ArmaFPV
 			{
 				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) spawn DB_fnc_fpv_droneInit;";
+				init="(_this # 0) call DB_fnc_fpv_droneInit;";
 			};
 		};
 	};
@@ -1137,7 +1137,7 @@ class CfgVehicles
 			class ArmaFPV
 			{
 				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) spawn DB_fnc_fpv_droneInit;";
+				init="(_this # 0) call DB_fnc_fpv_droneInit;";
 			};
 		};
 	};
@@ -1331,7 +1331,7 @@ class CfgVehicles
 			class ArmaFPV
 			{
 				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) spawn DB_fnc_fpv_droneInit;";
+				init="(_this # 0) call DB_fnc_fpv_droneInit;";
 			};
 		};
 	};
@@ -1476,7 +1476,7 @@ class CfgVehicles
 			class ArmaFPV
 			{
 				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) spawn DB_fnc_fpv_droneInit;";
+				init="(_this # 0) call DB_fnc_fpv_droneInit;";
 			};
 		};
 	};
