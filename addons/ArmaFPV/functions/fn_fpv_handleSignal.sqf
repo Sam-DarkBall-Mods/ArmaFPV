@@ -9,9 +9,11 @@
 #include "\ArmaFPV\script_macros.hpp"
 
 private _loopInterval = GETMVAR(DB_fpv_signalUpdateInterval, FPV_SIGNAL_UPDATE_INTERVAL);
+private _ppfxInterval = GETMVAR(DB_fpv_ppfxUpdateInterval, FPV_PPFX_UPDATE_INTERVAL);
 private _state = [
 	diag_tickTime,
-	1
+	1,
+	diag_tickTime
 ];
 
 call DB_fnc_fpv_ppfx_start;
@@ -23,7 +25,7 @@ if (_prevPfh >= 0) then {
 
 private _pfhId = [{
 	_this params ["_args", "_handle"];
-	_args params ["_loopInterval", "_state"];
+	_args params ["_loopInterval", "_ppfxInterval", "_state"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	private _uav = getConnectedUAV _player;
@@ -36,7 +38,9 @@ private _pfhId = [{
 	private _now = diag_tickTime;
 	private _lastUpdate = _state # 0;
 	private _signal = _state # 1;
+	private _lastPpfxUpdate = _state # 2;
 	private _doUpdate = (_now - _lastUpdate) >= _loopInterval;
+	private _doPpfxUpdate = (_now - _lastPpfxUpdate) >= _ppfxInterval;
 
 	private _altitude = (getPosATL _uav) select 2;
 	private _controlPicture = GETUVAR(ArmaFPV_SignalPicture, controlNull);
@@ -59,27 +63,32 @@ private _pfhId = [{
 	private _speedMs = vectorMagnitude (velocity _uav);
 	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
 
-	if (_doUpdate) then {
+	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
+
+	if (_doUpdate || _doPpfxUpdate) then {
 		_signal = [_player, _uav] call DB_fnc_fpv_getSignal;
-		_state set [0, _now];
 		_state set [1, _signal];
+		if (_doUpdate) then { _state set [0, _now]; };
+		if (_doPpfxUpdate) then { _state set [2, _now]; };
 
-		private _picture = "";
-		switch (true) do {
-			case (_signal > 0.75): { _picture = "\ArmaFPV\pictures\100.paa"; };
-			case (_signal > 0.5): { _picture = "\ArmaFPV\pictures\75.paa"; };
-			case (_signal > 0.25): { _picture = "\ArmaFPV\pictures\50.paa"; };
-			case (_signal > 0): { _picture = "\ArmaFPV\pictures\25.paa"; };
-			case (_signal <= 0): { _picture = "\ArmaFPV\pictures\0.paa"; };
-			default { _picture = "\ArmaFPV\pictures\100.paa"; };
-		};
+		if (_doUpdate) then {
+			private _picture = "";
+			switch (true) do {
+				case (_signal > 0.75): { _picture = "\ArmaFPV\pictures\100.paa"; };
+				case (_signal > 0.5): { _picture = "\ArmaFPV\pictures\75.paa"; };
+				case (_signal > 0.25): { _picture = "\ArmaFPV\pictures\50.paa"; };
+				case (_signal > 0): { _picture = "\ArmaFPV\pictures\25.paa"; };
+				case (_signal <= 0): { _picture = "\ArmaFPV\pictures\0.paa"; };
+				default { _picture = "\ArmaFPV\pictures\100.paa"; };
+			};
 
-		if (!isNull _controlPicture) then {
-			_controlPicture ctrlSetText _picture;
-		};
+			if (!isNull _controlPicture) then {
+				_controlPicture ctrlSetText _picture;
+			};
 
-		if (!isNull _controlText) then {
-			_controlText ctrlSetText str(round(_signal * 100));
+			if (!isNull _controlText) then {
+				_controlText ctrlSetText str(round(_signal * 100));
+			};
 		};
 
 		private _maxDistance = GETMVAR(FPV_MaxFlightDistance, 4000);
@@ -98,7 +107,6 @@ private _pfhId = [{
 		[_signal, _context] call DB_fnc_fpv_ppfx_setInput;
 	};
 
-	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
 	private _jammerLowTime = _uav getVariable ["DB_fpv_jammerLowTime", 0];
 	private _isLost = _uav getVariable ["DB_fpv_isUAVsignalLost", false];
 
@@ -196,6 +204,6 @@ private _pfhId = [{
 		_vPointerRight ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
 		_vPointerRight ctrlCommit 0;
 	};
-}, 0, [_loopInterval, _state]] call CBA_fnc_addPerFrameHandler;
+}, 0, [_loopInterval, _ppfxInterval, _state]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_signalPFH, _pfhId);
