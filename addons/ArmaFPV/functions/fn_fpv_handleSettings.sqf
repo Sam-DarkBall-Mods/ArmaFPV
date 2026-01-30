@@ -34,6 +34,8 @@ if (hasInterface) then {
 private _droneTypes = GETMVAR(DB_fpv_droneTypes, FPV_DRONE_TYPES);
 if (_droneTypes isEqualTo []) exitWith {};
 
-{
-	_x setCaptive _isCaptive;
-} forEach (vehicles select { (typeOf _x) in _droneTypes });
+if (isServer) then {
+	{
+		_x setCaptive _isCaptive;
+	} forEach (vehicles select { (typeOf _x) in _droneTypes });
+};

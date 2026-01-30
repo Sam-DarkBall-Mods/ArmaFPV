@@ -20,21 +20,26 @@ if (isNil { _uav getVariable ["DB_fpv_savedTime", nil] }) then {
 
 private _savedTime = _uav getVariable ["DB_fpv_savedTime", 0];
 private _startTime = time - _savedTime;
+private _syncInterval = GETMVAR(FPV_TimeSyncInterval, FPV_TIME_SYNC_INTERVAL);
 
 private _prevPfh = GETMVAR(DB_fpv_timePFH, -1);
 if (_prevPfh >= 0) then {
 	[_prevPfh] call CBA_fnc_removePerFrameHandler;
 };
 
+private _state = [_startTime, _uav, -1, _syncInterval];
+
 private _pfhId = [{
 	_this params ["_args", "_handle"];
-	_args params ["_startTime", "_uav"];
+	_args params ["_state"];
+	_state params ["_startTime", "_uav", "_lastSync", "_syncInterval"];
 
 	if (isNull _uav) exitWith {
 		[_handle] call CBA_fnc_removePerFrameHandler;
 	};
 
 	private _timeElapsed = time - _startTime;
+	private _now = time;
 	private _controlText = GETUVAR(ArmaFPV_TimeText, controlNull);
 
 	if (!isNull _controlText) then {
@@ -45,11 +50,15 @@ private _pfhId = [{
 		_controlText ctrlSetText format ["%1:%2", _mm, _ss];
 	};
 
-	_uav setVariable ["DB_fpv_savedTime", _timeElapsed, true];
+	if ((_now - _lastSync) >= _syncInterval) then {
+		_uav setVariable ["DB_fpv_savedTime", _timeElapsed, true];
+		_state set [2, _now];
+	};
 
 	if !(GETMVAR(ArmaFPV_isControl, false)) exitWith {
+		_uav setVariable ["DB_fpv_savedTime", _timeElapsed, true];
 		[_handle] call CBA_fnc_removePerFrameHandler;
 	};
-}, 0, [_startTime, _uav]] call CBA_fnc_addPerFrameHandler;
+}, 0, [_state]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_timePFH, _pfhId);

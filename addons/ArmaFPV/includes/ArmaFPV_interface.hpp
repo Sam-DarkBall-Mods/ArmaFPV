@@ -461,7 +461,7 @@ class RscTitles
                 shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.3);
                 text = "11861ft";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_DistText"", _this # 0];";
+                onLoad = "uiNameSpace setVariable [""ArmaFPV_DefaultText"", _this # 0];";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(10) / 2;
                 y = WY_POS + W_HEIGHT - GRID_H(6);
