@@ -9,8 +9,8 @@
 #define SETUVAR(NAME,VALUE) (uiNamespace setVariable [#NAME, VALUE])
 
 #define FPV_FEET_PER_METER 3.28084
-#define FPV_SPEED_SCALE 100
-#define FPV_SPEED_MAX 3000
+#define FPV_SPEED_SCALE 1
+#define FPV_SPEED_MAX 60
 #define FPV_ALT_MAX 120
 
 #define FPV_SIGNAL_LOSS_THRESHOLD 0.05

@@ -107,7 +107,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalText"", _this # 0];";
 
                 x = WX_POS + GRID_W(3.4);
-                y = WY_POS + GRID_H(7.9);
+                y = WY_POS + GRID_H(8.3);
                 w = GRID_W(6);
                 h = GRID_H(1.4);
             };
@@ -438,7 +438,7 @@ class RscTitles
                 shadow = 2;
                 shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.1);
-                text = "ft/h";
+                text = "m/s";
 
                 x = WX_POS + W_WIDTH - GRID_W(8);
                 y = WY_POS + GRID_H(20.2);

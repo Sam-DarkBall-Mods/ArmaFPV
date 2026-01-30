@@ -56,9 +56,8 @@ private _pfhId = [{
 	private _distText = GETUVAR(ArmaFPV_DistText, controlNull);
 	private _heading = (round (getDir _uav)) mod 360;
 	private _distance = _player distance _uav;
-	private _distanceFt = _distance * FPV_FEET_PER_METER;
-	private _speedFtH = (vectorMagnitude (velocity _uav)) * FPV_FEET_PER_METER * 3600;
-	private _speedDisplay = round (_speedFtH / FPV_SPEED_SCALE);
+	private _speedMs = vectorMagnitude (velocity _uav);
+	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
 
 	if (_doUpdate) then {
 		_signal = [_player, _uav] call DB_fnc_fpv_getSignal;
@@ -149,7 +148,8 @@ private _pfhId = [{
 	};
 
 	if (!isNull _distText) then {
-		_distText ctrlSetText format ["%1ft", round _distanceFt];
+		private _defaultText = GETMVAR(FPV_DefaultText, "CROCUS");
+		_distText ctrlSetText _defaultText;
 	};
 
 	if (!isNull _vBarLeft && !isNull _vPointerLeft) then {
