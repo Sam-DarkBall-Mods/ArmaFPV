@@ -21,6 +21,9 @@ class CfgFunctions
 			class fpv_onSignalLost {};
 			class fpv_destroyUI {};
 			class fpv_droneInit {};
+			class fpv_addUavToInventory {};
+			class fpv_canDisassembly {};
+			class fpv_createUavOnItemCheck {};
 		};
 	};
 };

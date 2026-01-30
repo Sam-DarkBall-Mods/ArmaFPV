@@ -456,6 +456,48 @@ class CfgVehicles
 		{
 			libTextDesc="$STR_A3_CfgVehicles_UAV_01_base_Library0";
 		};
+		class UserActions
+		{
+			class DisassembleUAV
+			{
+				displayName="Put in inventory";
+				priority=0.5;
+				radius=7;
+				position="";
+				showWindow=0;
+				onlyForPlayer=1;
+				icon="";
+				condition="[this] call DB_fnc_fpv_canDisassembly";
+				statement="[this, player] call DB_fnc_fpv_addUavToInventory";
+			};
+		};
+	};
+
+	#define ARMAFPV_DISASSEMBLE(BAGCLASS) \
+	class assembleInfo \
+	{ \
+		primary=0; \
+		base=""; \
+		assembleTo=""; \
+		dissasembleTo[]={BAGCLASS}; \
+		displayName=""; \
+	};
+
+	#define ARMAFPV_BAG(BAGCLASS, BAGBASE, DISPLAY, TOCLASS) \
+	class BAGCLASS: BAGBASE \
+	{ \
+		scope=2; \
+		scopeCurator=2; \
+		displayName=DISPLAY; \
+		author="DarkBall"; \
+		class assembleInfo \
+		{ \
+			assembleTo=TOCLASS; \
+			base=""; \
+			displayName=DISPLAY; \
+			dissasembleTo[]={}; \
+			primary=1; \
+		}; \
 	};
 	class O_Crocus_AT: drone_base_F
 	{
@@ -598,17 +640,7 @@ class CfgVehicles
 		};
 		displayName="Crocus AT";
 		accuracy=0.5;
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"O_Crocus_AT_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("O_Crocus_AT_Bag")
 		textureList[]=
 		{
 			"Indep",
@@ -758,17 +790,7 @@ class CfgVehicles
 		model="\ArmaFPV\drone2\drone2.p3d";
 		icon="\ArmaFPV\data\drononmap.paa";
 		picture="\ArmaFPV\data\drononmap.paa";
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"O_Crocus_AP_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("O_Crocus_AP_Bag")
 		class EventHandlers
 		{
 			class ArmaFPV
@@ -795,17 +817,7 @@ class CfgVehicles
 			};
 			thermalMode[]={0,1};
 		};
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"O_Crocus_AT_TI_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("O_Crocus_AT_TI_Bag")
 	};
 	class O_Crocus_AP_TI: O_Crocus_AP
 	{
@@ -824,17 +836,7 @@ class CfgVehicles
 			};
 			thermalMode[]={0,1};
 		};
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"O_Crocus_AP_TI_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("O_Crocus_AP_TI_Bag")
 	};
 	class B_Crocus_AT: drone_base_F
 	{
@@ -977,17 +979,7 @@ class CfgVehicles
 		};
 		displayName="Crocus AT";
 		accuracy=0.5;
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"B_Crocus_AT_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("B_Crocus_AT_Bag")
 		textureList[]=
 		{
 			"Indep",
@@ -1137,17 +1129,7 @@ class CfgVehicles
 		model="\ArmaFPV\drone2\drone2.p3d";
 		icon="\ArmaFPV\data\drononmap.paa";
 		picture="\ArmaFPV\data\drononmap.paa";
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"B_Crocus_AP_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("B_Crocus_AP_Bag")
 		class EventHandlers
 		{
 			class ArmaFPV
@@ -1174,17 +1156,7 @@ class CfgVehicles
 			};
 			thermalMode[]={0,1};
 		};
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"B_Crocus_AT_TI_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("B_Crocus_AT_TI_Bag")
 	};
 	class B_Crocus_AP_TI: B_Crocus_AP
 	{
@@ -1203,17 +1175,7 @@ class CfgVehicles
 			};
 			thermalMode[]={0,1};
 		};
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"B_Crocus_AP_TI_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("B_Crocus_AP_TI_Bag")
 	};
 	class I_Crocus_AT: drone_base_F
 	{
@@ -1356,17 +1318,7 @@ class CfgVehicles
 		};
 		displayName="Crocus AT";
 		accuracy=0.5;
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"I_Crocus_AT_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("I_Crocus_AT_Bag")
 		textureList[]=
 		{
 			"Indep",
@@ -1516,17 +1468,7 @@ class CfgVehicles
 		model="\ArmaFPV\drone2\drone2.p3d";
 		icon="\ArmaFPV\data\drononmap.paa";
 		picture="\ArmaFPV\data\drononmap.paa";
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"I_Crocus_AP_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("I_Crocus_AP_Bag")
 		class EventHandlers
 		{
 			class ArmaFPV
@@ -1553,17 +1495,7 @@ class CfgVehicles
 			};
 			thermalMode[]={0,1};
 		};
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"I_Crocus_AT_TI_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("I_Crocus_AT_TI_Bag")
 	};
 	class I_Crocus_AP_TI: I_Crocus_AP
 	{
@@ -1582,17 +1514,7 @@ class CfgVehicles
 			};
 			thermalMode[]={0,1};
 		};
-		class assembleInfo
-		{
-			primary=0;
-			base="";
-			assembleTo="";
-			dissasembleTo[]=
-			{
-				"I_Crocus_AP_TI_Bag"
-			};
-			displayName="";
-		};
+		ARMAFPV_DISASSEMBLE("I_Crocus_AP_TI_Bag")
 	};
 	class Land_SatelliteAntenna_01_F;
 	class FPV_Retranslator: Land_SatelliteAntenna_01_F
@@ -1602,184 +1524,20 @@ class CfgVehicles
 		displayName="Signal Booster";
 	};
 	class B_UAV_01_backpack_F;
-	class O_Crocus_AT_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AT Bag OPFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="O_Crocus_AT";
-			base="";
-			displayName="Crocus AT";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class O_Crocus_AP_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AP Bag OPFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="O_Crocus_AP";
-			base="";
-			displayName="Crocus AP";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class B_Crocus_AT_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AT Bag BLUFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="B_Crocus_AT";
-			base="";
-			displayName="Crocus AT";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class B_Crocus_AP_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AP Bag BLUFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="B_Crocus_AP";
-			base="";
-			displayName="Crocus AP";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class I_Crocus_AT_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AT Bag IND";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="I_Crocus_AT";
-			base="";
-			displayName="Crocus AT";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class I_Crocus_AP_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AP Bag IND";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="I_Crocus_AP";
-			base="";
-			displayName="Crocus AP";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class O_Crocus_AT_TI_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AT TI Bag OPFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="O_Crocus_AT_TI";
-			base="";
-			displayName="Crocus AT TI";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class O_Crocus_AP_TI_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AP TI Bag OPFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="O_Crocus_AP_TI";
-			base="";
-			displayName="Crocus AP TI";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class B_Crocus_AT_TI_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AT TI Bag BLUFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="B_Crocus_AT_TI";
-			base="";
-			displayName="Crocus AT TI";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class B_Crocus_AP_TI_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AP TI Bag BLUFOR";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="B_Crocus_AP_TI";
-			base="";
-			displayName="Crocus AP TI";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class I_Crocus_AT_TI_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AT TI Bag IND";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="I_Crocus_AT_TI";
-			base="";
-			displayName="Crocus AT TI";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
-	class I_Crocus_AP_TI_Bag: B_UAV_01_backpack_F
-	{
-		scope=2;
-		scopeCurator=2;
-		displayName="Crocus AP TI Bag IND";
-		author="DarkBall";
-		class assembleInfo
-		{
-			assembleTo="I_Crocus_AP_TI";
-			base="";
-			displayName="Crocus AP TI";
-			dissasembleTo[]={};
-			primary=1;
-		};
-	};
+	class O_UAV_01_backpack_F;
+	class I_UAV_01_backpack_F;
+	ARMAFPV_BAG(O_Crocus_AT_Bag, O_UAV_01_backpack_F, "Crocus AT Bag OPFOR", "O_Crocus_AT")
+	ARMAFPV_BAG(O_Crocus_AP_Bag, O_UAV_01_backpack_F, "Crocus AP Bag OPFOR", "O_Crocus_AP")
+	ARMAFPV_BAG(O_Crocus_AT_TI_Bag, O_UAV_01_backpack_F, "Crocus AT TI Bag OPFOR", "O_Crocus_AT_TI")
+	ARMAFPV_BAG(O_Crocus_AP_TI_Bag, O_UAV_01_backpack_F, "Crocus AP TI Bag OPFOR", "O_Crocus_AP_TI")
+
+	ARMAFPV_BAG(B_Crocus_AT_Bag, B_UAV_01_backpack_F, "Crocus AT Bag BLUFOR", "B_Crocus_AT")
+	ARMAFPV_BAG(B_Crocus_AP_Bag, B_UAV_01_backpack_F, "Crocus AP Bag BLUFOR", "B_Crocus_AP")
+	ARMAFPV_BAG(B_Crocus_AT_TI_Bag, B_UAV_01_backpack_F, "Crocus AT TI Bag BLUFOR", "B_Crocus_AT_TI")
+	ARMAFPV_BAG(B_Crocus_AP_TI_Bag, B_UAV_01_backpack_F, "Crocus AP TI Bag BLUFOR", "B_Crocus_AP_TI")
+
+	ARMAFPV_BAG(I_Crocus_AT_Bag, I_UAV_01_backpack_F, "Crocus AT Bag IND", "I_Crocus_AT")
+	ARMAFPV_BAG(I_Crocus_AP_Bag, I_UAV_01_backpack_F, "Crocus AP Bag IND", "I_Crocus_AP")
+	ARMAFPV_BAG(I_Crocus_AT_TI_Bag, I_UAV_01_backpack_F, "Crocus AT TI Bag IND", "I_Crocus_AT_TI")
+	ARMAFPV_BAG(I_Crocus_AP_TI_Bag, I_UAV_01_backpack_F, "Crocus AP TI Bag IND", "I_Crocus_AP_TI")
 };

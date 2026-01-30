@@ -36,5 +36,7 @@ class CfgPatches
 #include "includes\CfgAmmo.hpp"
 #include "includes\CfgFontFamilies.hpp"
 #include "includes\CfgFunctions.hpp"
+#include "includes\CfgMagazines.hpp"
 #include "includes\CfgVehicles.hpp"
 #include "includes\Extended_PreInit_EventHandlers.hpp"
+#include "includes\Extended_PostInit_EventHandlers.hpp"

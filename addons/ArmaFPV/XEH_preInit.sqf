@@ -21,6 +21,15 @@ if (isNil "DB_fpv_droneTypes") then {
 	];
 };
 
+if (isNil "DB_fpv_dronesArray_items") then {
+	DB_fpv_dronesArray_items = [
+		"Item_Crocus_AT",
+		"Item_Crocus_AP",
+		"Item_Crocus_AT_TI",
+		"Item_Crocus_AP_TI"
+	];
+};
+
 if (isNil "DB_fpv_terminalTypes") then {
 	DB_fpv_terminalTypes = ["B_UavTerminal", "O_UavTerminal", "I_UavTerminal"];
 };
