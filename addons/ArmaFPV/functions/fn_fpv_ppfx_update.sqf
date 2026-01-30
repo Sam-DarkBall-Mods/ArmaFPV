@@ -25,8 +25,6 @@ private _fxRadial = missionNamespace getVariable ["DB_fpv_ppfx_fxRadial", -1];
 private _fxWet = missionNamespace getVariable ["DB_fpv_ppfx_fxWet", -1];
 
 private _q = missionNamespace getVariable ["DB_fpv_ppfx_input", 1];
-private _profile = missionNamespace getVariable ["DB_fpv_ppfx_profile", "ANALOG"];
-
 _q = (_q max 0) min 1;
 
 private _context = missionNamespace getVariable ["DB_fpv_ppfx_context", []];
@@ -97,7 +95,6 @@ private _severity = 1 - _q;
 private _noiseWeight = [_q, 0.9, 0.2] call _smoothstepInv;
 private _blurWeight = _severity ^ 1.7;
 private _aberrWeight = _severity ^ 2.2;
-private _resWeight = _severity ^ 2.0;
 
 private _envBoost = 1;
 if (_altAGL < 20 && { _q < 0.5 }) then { _envBoost = _envBoost * 1.25; };
@@ -107,22 +104,9 @@ if (_obstacles > 0) then { _envBoost = _envBoost * (1 + (0.03 * (_obstacles min 
 if (_terrainMask > 0) then { _envBoost = _envBoost * (1 + (_terrainMask min 1) * 0.4); };
 if (_maxDistance > 0) then { _envBoost = _envBoost * (1 + ((_distance / _maxDistance) min 1) * 0.25); };
 
-private _isAnalog = _profile isEqualTo "ANALOG";
-private _isDigital = _profile isEqualTo "DIGITAL";
-
-if (_isAnalog) then {
-	_noiseWeight = _noiseWeight * 1.1;
-	_blurWeight = _blurWeight * 0.6;
-	_aberrWeight = _aberrWeight * 0.9;
-	_resWeight = 0;
-};
-
-if (_isDigital) then {
-	_noiseWeight = _noiseWeight * 0.45;
-	_blurWeight = _blurWeight * 0.9;
-	_aberrWeight = _aberrWeight * 0.3;
-	_resWeight = _resWeight * 1.0;
-};
+_noiseWeight = _noiseWeight * 1.1;
+_blurWeight = _blurWeight * 0.6;
+_aberrWeight = _aberrWeight * 0.9;
 
 _noiseWeight = (_noiseWeight * _envBoost) min 1;
 _blurWeight = (_blurWeight * _envBoost) min 1;
@@ -152,11 +136,7 @@ if (_glitchType isEqualTo "") then {
 	private _chance = _chanceBase * _dt;
 
 	if ((random 1) < _chance) then {
-		private _types = if (_isDigital) then {
-			["FRAME_DROP", "FREEZE_HINT", "BLACK_PULSE"]
-		} else {
-			["LINE_TEAR", "COLOR_SHIFT", "BLACK_PULSE"]
-		};
+		private _types = ["LINE_TEAR", "COLOR_SHIFT", "BLACK_PULSE"];
 		_glitchType = selectRandom _types;
 		private _duration = 0.08 + (random 0.25) * (0.5 + _severity);
 		_glitchEnd = _now + _duration;
@@ -166,7 +146,6 @@ if (_glitchType isEqualTo "") then {
 
 private _glitchNoise = 0;
 private _glitchBlur = 0;
-private _glitchRes = 0;
 private _glitchRadial = 0;
 private _glitchWet = 0;
 private _colorShift = 0;
@@ -182,16 +161,6 @@ switch (_glitchType) do {
 	case "COLOR_SHIFT": {
 		_colorShift = 0.08 + _severity * 0.12;
 	};
-	case "FRAME_DROP": {
-		_glitchBlur = 0.5 + _severity * 0.4;
-		_glitchRes = 0.6 + _severity * 0.3;
-		_glitchRadial = 0.05;
-	};
-	case "FREEZE_HINT": {
-		_glitchBlur = 0.7 + _severity * 0.5;
-		_glitchRes = 0.7 + _severity * 0.3;
-		_glitchNoise = 0.35;
-	};
 	case "BLACK_PULSE": {
 		_pulse = -0.35;
 		_glitchNoise = 0.2;
@@ -201,31 +170,20 @@ switch (_glitchType) do {
 
 private _commitTime = if (_glitchType isEqualTo "") then { 0.03 } else { 0 };
 
+private _analogBase = 0.06;
 private _drift = (sin (_now * 2.1) * 0.03 + sin (_now * 0.7) * 0.015) * _severity;
 private _brightness = 1 + _drift + _pulse;
-private _contrast = 1 + (_severity * 0.4);
+private _contrast = 1 + (_severity * 0.4) + (_analogBase * 0.12);
 private _offset = 0;
 
 private _colorA = [0, 0, 0, 0];
-private _colorB = [1 + _colorShift, 1, 1 - _colorShift, 1];
+private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - (_analogBase * 0.01), 1];
 
-private _grain = (_noiseWeight + _glitchNoise) min 1;
-private _blur = (_blurWeight + _glitchBlur) min 1;
-private _chrom = (_aberrWeight * 0.025) min 0.06;
+private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
+private _blur = (_blurWeight + _glitchBlur + _analogBase * 0.08) min 1;
+private _chrom = (_aberrWeight * 0.025 + _analogBase * 0.004) min 0.06;
 
 private _resTarget = -1;
-if (_isDigital) then {
-	private _drop = (_resWeight + _glitchRes) min 1;
-	if (_drop > 0.01) then {
-		private _screenH = missionNamespace getVariable ["DB_fpv_ppfx_screenH", -1];
-		if (_screenH <= 0) then {
-			_screenH = (getResolution) select 1;
-			missionNamespace setVariable ["DB_fpv_ppfx_screenH", _screenH];
-		};
-		private _scale = (1 - (_drop * 0.65)) max 0.35;
-		_resTarget = (round (_screenH * _scale)) max 1;
-	};
-};
 
 if (_fxColor >= 0) then {
 	_fxColor ppEffectAdjust [

@@ -9,10 +9,6 @@
 if (!hasInterface) exitWith {};
 if (missionNamespace getVariable ["DB_fpv_ppfx_active", false]) exitWith {};
 
-if (isNil "DB_fpv_ppfx_profile") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_profile", "ANALOG"];
-};
-
 if (isNil "DB_fpv_ppfx_input") then {
 	missionNamespace setVariable ["DB_fpv_ppfx_input", 1];
 };

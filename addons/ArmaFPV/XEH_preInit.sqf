@@ -45,10 +45,6 @@ if (isNil "DB_fpv_connectLoopInterval") then {
 	DB_fpv_connectLoopInterval = 0.1;
 };
 
-if (isNil "DB_fpv_ppfx_profile") then {
-	DB_fpv_ppfx_profile = "ANALOG";
-};
-
 [ 
     "FPV_DefaultText",
     "EDITBOX",
@@ -82,18 +78,6 @@ private _fnc_registerAdminSettings = {
 		{ publicVariable "FPV_MaxFlightDistance" }
 	] call cba_settings_fnc_init;
 
-	[
-		"FPV_PpfxProfile",
-		"LIST",
-		["FPV Profile", "Analog/Digital PPFX profile"],
-		"FPV Settings",
-		[["ANALOG", "DIGITAL"], ["Analog", "Digital"], 0],
-		1,
-		{
-			DB_fpv_ppfx_profile = _this;
-			publicVariable "DB_fpv_ppfx_profile";
-		}
-	] call cba_settings_fnc_init;
 };
 
 missionNamespace setVariable ["DB_fpv_registerAdminSettings", _fnc_registerAdminSettings];
