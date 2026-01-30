@@ -194,15 +194,16 @@ if (_severity > 0.8) then {
 private _flickerBlackout = 0;
 if (_severity > 0.35) then {
 	private _flickerHz = 18 + (_severity * 14);
-	private _wave = (sin (_now * _flickerHz * 6.283)) max 0;
-	_flickerBlackout = _wave * (0.35 + (_severity * 0.25));
-	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + 0.08; };
+	private _phase = (_now * _flickerHz);
+	private _wave = ((sin (_phase * 6.283) + 1) * 0.5);
+	_flickerBlackout = _wave * (0.25 + (_severity * 0.2));
+	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + 0.06; };
 };
 
-private _finalBlackout = (_blackout max _flickerBlackout) min 0.7;
+private _finalBlackout = (_blackout max _flickerBlackout) min 0.55;
 private _brightness = _baseBrightness * (1 - _finalBlackout);
 if (_severity > 0.7) then {
-	_brightness = _brightness max 0.12;
+	_brightness = _brightness max 0.16;
 };
 private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _finalBlackout) + (1 * _finalBlackout);
 private _offset = 0;
