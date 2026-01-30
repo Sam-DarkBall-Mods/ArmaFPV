@@ -13,18 +13,6 @@ if (isNil "DB_fpv_ppfx_profile") then {
 	missionNamespace setVariable ["DB_fpv_ppfx_profile", "ANALOG"];
 };
 
-if (isNil "DB_fpv_ppfx_devEnabled") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_devEnabled", false];
-};
-
-if (isNil "DB_fpv_ppfx_devSignal") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_devSignal", 1];
-};
-
-if (isNil "DB_fpv_ppfx_devProfile") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_devProfile", "ANALOG"];
-};
-
 if (isNil "DB_fpv_ppfx_input") then {
 	missionNamespace setVariable ["DB_fpv_ppfx_input", 1];
 };

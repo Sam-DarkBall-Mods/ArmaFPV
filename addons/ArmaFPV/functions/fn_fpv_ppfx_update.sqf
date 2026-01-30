@@ -24,14 +24,8 @@ private _fxInvert = missionNamespace getVariable ["DB_fpv_ppfx_fxInvert", -1];
 private _fxRadial = missionNamespace getVariable ["DB_fpv_ppfx_fxRadial", -1];
 private _fxWet = missionNamespace getVariable ["DB_fpv_ppfx_fxWet", -1];
 
-private _devEnabled = missionNamespace getVariable ["DB_fpv_ppfx_devEnabled", false];
 private _q = missionNamespace getVariable ["DB_fpv_ppfx_input", 1];
 private _profile = missionNamespace getVariable ["DB_fpv_ppfx_profile", "ANALOG"];
-
-if (_devEnabled) then {
-	_q = missionNamespace getVariable ["DB_fpv_ppfx_devSignal", 1];
-	_profile = missionNamespace getVariable ["DB_fpv_ppfx_devProfile", "ANALOG"];
-};
 
 _q = (_q max 0) min 1;
 
@@ -159,9 +153,9 @@ if (_glitchType isEqualTo "") then {
 
 	if ((random 1) < _chance) then {
 		private _types = if (_isDigital) then {
-			["FRAME_DROP", "FREEZE_HINT", "BLACK_PULSE", "WHITE_PULSE"]
+			["FRAME_DROP", "FREEZE_HINT", "BLACK_PULSE"]
 		} else {
-			["LINE_TEAR", "COLOR_SHIFT", "BLACK_PULSE", "WHITE_PULSE"]
+			["LINE_TEAR", "COLOR_SHIFT", "BLACK_PULSE"]
 		};
 		_glitchType = selectRandom _types;
 		private _duration = 0.08 + (random 0.25) * (0.5 + _severity);
@@ -199,12 +193,8 @@ switch (_glitchType) do {
 		_glitchNoise = 0.35;
 	};
 	case "BLACK_PULSE": {
-		_pulse = -0.6;
-		_invert = 0.4;
-	};
-	case "WHITE_PULSE": {
-		_pulse = 0.7;
-		_invert = 0.9;
+		_pulse = -0.35;
+		_glitchNoise = 0.2;
 	};
 	default {};
 };
@@ -316,23 +306,4 @@ if (_q >= 0.99) then {
 	if (_fxInvert >= 0) then { _fxInvert ppEffectAdjust [0, 0, 0]; _fxInvert ppEffectCommit 0; };
 	if (_fxRadial >= 0) then { _fxRadial ppEffectAdjust [0, 0, 0, 0]; _fxRadial ppEffectCommit 0; };
 	if (_fxWet >= 0) then { _fxWet ppEffectAdjust [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; _fxWet ppEffectCommit 0; };
-};
-
-missionNamespace setVariable [
-	"DB_fpv_ppfx_debug",
-	[
-		"q", _q,
-		"state", _state,
-		"profile", _profile,
-		"weights", ["noise", _grain, "blur", _blur, "aberr", _chrom, "resTarget", _resTarget],
-		"glitch", _glitchType
-	]
-];
-
-if (_devEnabled) then {
-	private _lastLog = missionNamespace getVariable ["DB_fpv_ppfx_lastLog", 0];
-	if ((_now - _lastLog) > 0.5) then {
-		missionNamespace setVariable ["DB_fpv_ppfx_lastLog", _now];
-		diag_log format ["[ArmaFPV PPFX] q=%1 state=%2 profile=%3 glitch=%4", _q, _state, _profile, _glitchType];
-	};
 };
