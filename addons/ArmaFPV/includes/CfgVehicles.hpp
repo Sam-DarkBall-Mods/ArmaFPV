@@ -1,3 +1,5 @@
+#include "ArmaFPV_config_macros.hpp"
+
 class SensorTemplatePassiveRadar;
 class SensorTemplateAntiRadiation;
 class SensorTemplateActiveRadar;
@@ -77,8 +79,8 @@ class CfgVehicles
 		formationZ=10;
 		memoryPointTaskMarker="TaskMarker_1_pos";
 		memoryPointDriverOptics="pip_pilot_pos";
-		driverOpticsModel="\ArmaFPV\lancet_hud.p3d";
-		GunnerOpticsModel="\ArmaFPV\lancet_hud.p3d";
+		driverOpticsModel=QARMAFPV_PATH(lancet_hud.p3d);
+		GunnerOpticsModel=QARMAFPV_PATH(lancet_hud.p3d);
 		driverForceOptics=1;
 		disableInventory=1;
 		unitInfoType="RscUnitInfoParachute";
@@ -104,9 +106,9 @@ class CfgVehicles
 		epeImpulseDamageCoef=5;
 		fuelExplosionPower=0;
 		vehicleClass="Autonomous";
-		model="\ArmaFPV\drone.p3d";
-		icon="\ArmaFPV\data\drononmap.paa";
-		picture="\ArmaFPV\data\drononmap.paa";
+		model=QARMAFPV_PATH(drone.p3d);
+		icon=QARMAFPV_DATA(drononmap.paa);
+		picture=QARMAFPV_DATA(drononmap.paa);
 		class Reflectors
 		{
 		};
@@ -255,26 +257,26 @@ class CfgVehicles
 		};
 		soundEngineOnInt[]=
 		{
-			"ArmaFPV\sounds\quad_start_full_int.wav",
+			QARMAFPV_SOUND(quad_start_full_int.wav),
 			0.56234133,
 			1
 		};
 		soundEngineOnExt[]=
 		{
-			"ArmaFPV\sounds\quad_start_full_01.wav",
+			QARMAFPV_SOUND(quad_start_full_01.wav),
 			0.56234133,
 			1,
 			200
 		};
 		soundEngineOffInt[]=
 		{
-			"ArmaFPV\sounds\quad_stop_full_int.wav",
+			QARMAFPV_SOUND(quad_stop_full_int.wav),
 			0.56234133,
 			1
 		};
 		soundEngineOffExt[]=
 		{
-			"ArmaFPV\sounds\quad_stop_full_01.wav",
+			QARMAFPV_SOUND(quad_stop_full_01.wav),
 			0.56234133,
 			1,
 			200
@@ -375,7 +377,7 @@ class CfgVehicles
 			{
 				sound[]=
 				{
-					"ArmaFPV\sounds\quad_engine_full_01.wav",
+					QARMAFPV_SOUND(quad_engine_full_01.wav),
 					0.44668359,
 					1,
 					200
@@ -413,7 +415,7 @@ class CfgVehicles
 			{
 				sound[]=
 				{
-					"ArmaFPV\sounds\quad_engine_full_int.wav",
+					QARMAFPV_SOUND(quad_engine_full_int.wav),
 					0.56234133,
 					1
 				};
@@ -627,7 +629,7 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		editorPreview="\ArmaFPV\data\krokus1.jpg";
+		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		_generalMacro="O_Crocus_AT";
 		scope=2;
 		scopeCurator=2;
@@ -785,11 +787,11 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP";
-		model="\ArmaFPV\drone2\drone2.p3d";
-		icon="\ArmaFPV\data\drononmap.paa";
-		picture="\ArmaFPV\data\drononmap.paa";
+		model=QARMAFPV_PATH(drone2\drone2.p3d);
+		icon=QARMAFPV_DATA(drononmap.paa);
+		picture=QARMAFPV_DATA(drononmap.paa);
 		ARMAFPV_DISASSEMBLE("O_Crocus_AP_Bag")
 		class EventHandlers
 		{
@@ -806,7 +808,7 @@ class CfgVehicles
 		_generalMacro="O_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
 		{
@@ -825,7 +827,7 @@ class CfgVehicles
 		_generalMacro="O_Crocus_AP_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
 		class Viewoptics: Viewoptics
 		{
@@ -966,7 +968,7 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		editorPreview="\ArmaFPV\data\krokus1.jpg";
+		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		_generalMacro="B_Crocus_AT";
 		scope=2;
 		scopeCurator=2;
@@ -1124,11 +1126,11 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP";
-		model="\ArmaFPV\drone2\drone2.p3d";
-		icon="\ArmaFPV\data\drononmap.paa";
-		picture="\ArmaFPV\data\drononmap.paa";
+		model=QARMAFPV_PATH(drone2\drone2.p3d);
+		icon=QARMAFPV_DATA(drononmap.paa);
+		picture=QARMAFPV_DATA(drononmap.paa);
 		ARMAFPV_DISASSEMBLE("B_Crocus_AP_Bag")
 		class EventHandlers
 		{
@@ -1145,7 +1147,7 @@ class CfgVehicles
 		_generalMacro="B_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
 		{
@@ -1164,7 +1166,7 @@ class CfgVehicles
 		_generalMacro="B_Crocus_AP_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
 		class Viewoptics: Viewoptics
 		{
@@ -1305,7 +1307,7 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		editorPreview="\ArmaFPV\data\krokus1.jpg";
+		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		_generalMacro="I_Crocus_AT";
 		scope=2;
 		scopeCurator=2;
@@ -1463,11 +1465,11 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP";
-		model="\ArmaFPV\drone2\drone2.p3d";
-		icon="\ArmaFPV\data\drononmap.paa";
-		picture="\ArmaFPV\data\drononmap.paa";
+		model=QARMAFPV_PATH(drone2\drone2.p3d);
+		icon=QARMAFPV_DATA(drononmap.paa);
+		picture=QARMAFPV_DATA(drononmap.paa);
 		ARMAFPV_DISASSEMBLE("I_Crocus_AP_Bag")
 		class EventHandlers
 		{
@@ -1484,7 +1486,7 @@ class CfgVehicles
 		_generalMacro="I_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
 		{
@@ -1503,7 +1505,7 @@ class CfgVehicles
 		_generalMacro="I_Crocus_AP_TI";
 		scope=2;
 		scopeCurator=2;
-		editorPreview="\ArmaFPV\data\termo.jpg";
+		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
 		class Viewoptics: Viewoptics
 		{

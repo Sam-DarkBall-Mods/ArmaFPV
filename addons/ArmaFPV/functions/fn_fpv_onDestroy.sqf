@@ -7,11 +7,13 @@
 	Returns: nothing.
 */
 
+#include "\ArmaFPV\script_macros.hpp"
+
 params ["_uav"];
 
 if (isNull _uav) exitWith {};
 
-private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP", "O_Crocus_AT_TI", "O_Crocus_AP_TI", "B_Crocus_AT_TI", "B_Crocus_AP_TI", "I_Crocus_AT_TI", "I_Crocus_AP_TI"]];
+private _droneTypes = GETMVAR(DB_fpv_droneTypes, FPV_DRONE_TYPES);
 if !(typeOf _uav in _droneTypes) exitWith {};
 
 cutText ["", "PLAIN"];

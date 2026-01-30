@@ -6,24 +6,28 @@
 	Returns: nothing.
 */
 
-addMissionEventHandler ["EachFrame", {
-	private _player = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", player];
+#include "\ArmaFPV\script_macros.hpp"
+
+private _prevPfh = GETMVAR(DB_fpv_batteryPFH, -1);
+if (_prevPfh >= 0) then {
+	[_prevPfh] call CBA_fnc_removePerFrameHandler;
+};
+
+private _pfhId = [{
+	_this params ["_args", "_handle"];
+	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	private _uav = getConnectedUAV _player;
 
-	if (isNull _player) exitWith {
-		removeMissionEventHandler ["EachFrame", _thisEventHandler];
-	};
-
-	if (isNull _uav) exitWith {
-		removeMissionEventHandler ["EachFrame", _thisEventHandler];
+	if (isNull _player || { isNull _uav }) exitWith {
+		[_handle] call CBA_fnc_removePerFrameHandler;
 	};
 
 	private _currentBattery = fuel _uav;
-	private _leftVolt = uiNameSpace getVariable ["ArmaFPV_LeftVoltText", controlNull];
-	private _leftCurrent = uiNameSpace getVariable ["ArmaFPV_LeftCurrentText", controlNull];
-	private _leftMah = uiNameSpace getVariable ["ArmaFPV_LeftMahText", controlNull];
-	private _rightVolt = uiNameSpace getVariable ["ArmaFPV_RightVoltText", controlNull];
-	private _batteryPicture = uiNameSpace getVariable ["ArmaFPV_BatteryPicture", controlNull];
+	private _leftVolt = GETUVAR(ArmaFPV_LeftVoltText, controlNull);
+	private _leftCurrent = GETUVAR(ArmaFPV_LeftCurrentText, controlNull);
+	private _leftMah = GETUVAR(ArmaFPV_LeftMahText, controlNull);
+	private _rightVolt = GETUVAR(ArmaFPV_RightVoltText, controlNull);
+	private _batteryPicture = GETUVAR(ArmaFPV_BatteryPicture, controlNull);
 	private _picture = "";
 
 	switch (true) do {
@@ -63,7 +67,9 @@ addMissionEventHandler ["EachFrame", {
 		_batteryPicture ctrlSetText _picture;
 	};
 
-	if !(missionNamespace getVariable ["ArmaFPV_isControl", false]) exitWith {
-		removeMissionEventHandler ["EachFrame", _thisEventHandler];
+	if !(GETMVAR(ArmaFPV_isControl, false)) exitWith {
+		[_handle] call CBA_fnc_removePerFrameHandler;
 	};
-}];
+}, 0, []] call CBA_fnc_addPerFrameHandler;
+
+SETMVAR(DB_fpv_batteryPFH, _pfhId);

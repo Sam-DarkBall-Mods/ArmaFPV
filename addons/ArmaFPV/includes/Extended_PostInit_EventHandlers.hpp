@@ -1,6 +1,6 @@
 class Extended_PostInit_EventHandlers
 {
-	class my_postInit
+	class ArmaFPV_postInit
 	{
 		init="call compile preProcessFileLineNumbers '\ArmaFPV\XEH_postInit.sqf'";
 	};

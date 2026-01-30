@@ -6,8 +6,10 @@
 	Returns: nothing.
 */
 
+#include "\ArmaFPV\script_macros.hpp"
+
 if (!hasInterface) exitWith {};
-if (!(missionNamespace getVariable ["DB_fpv_ppfx_active", false])) exitWith {};
+if (!(GETMVAR(DB_fpv_ppfx_active, false))) exitWith {};
 
 private _now = diag_tickTime;
 private _dt = diag_deltaTime max 0.001;
@@ -15,16 +17,16 @@ private _dt = diag_deltaTime max 0.001;
 private _handles = missionNamespace getVariable ["DB_fpv_ppfx_handles", []];
 if (_handles isEqualTo []) exitWith {};
 
-private _fxColor = missionNamespace getVariable ["DB_fpv_ppfx_fxColor", -1];
-private _fxGrain = missionNamespace getVariable ["DB_fpv_ppfx_fxGrain", -1];
-private _fxBlur = missionNamespace getVariable ["DB_fpv_ppfx_fxBlur", -1];
-private _fxChrom = missionNamespace getVariable ["DB_fpv_ppfx_fxChrom", -1];
-private _fxResolution = missionNamespace getVariable ["DB_fpv_ppfx_fxResolution", -1];
-private _fxInvert = missionNamespace getVariable ["DB_fpv_ppfx_fxInvert", -1];
-private _fxRadial = missionNamespace getVariable ["DB_fpv_ppfx_fxRadial", -1];
-private _fxWet = missionNamespace getVariable ["DB_fpv_ppfx_fxWet", -1];
+private _fxColor = GETMVAR(DB_fpv_ppfx_fxColor, -1);
+private _fxGrain = GETMVAR(DB_fpv_ppfx_fxGrain, -1);
+private _fxBlur = GETMVAR(DB_fpv_ppfx_fxBlur, -1);
+private _fxChrom = GETMVAR(DB_fpv_ppfx_fxChrom, -1);
+private _fxResolution = GETMVAR(DB_fpv_ppfx_fxResolution, -1);
+private _fxInvert = GETMVAR(DB_fpv_ppfx_fxInvert, -1);
+private _fxRadial = GETMVAR(DB_fpv_ppfx_fxRadial, -1);
+private _fxWet = GETMVAR(DB_fpv_ppfx_fxWet, -1);
 
-private _q = missionNamespace getVariable ["DB_fpv_ppfx_input", 1];
+private _q = GETMVAR(DB_fpv_ppfx_input, 1);
 _q = (_q max 0) min 1;
 
 private _context = missionNamespace getVariable ["DB_fpv_ppfx_context", []];
@@ -47,11 +49,11 @@ private _obstacles = [_context, "obstacleCount", 0] call _getCtx;
 private _terrainMask = [_context, "terrainMask", 0] call _getCtx;
 private _lowAltFactor = (1 - ((_altAGL max 0) / 20) min 1) max 0;
 
-private _hysteresis = missionNamespace getVariable ["DB_fpv_ppfx_hysteresis", 0.05];
-private _minStateTime = missionNamespace getVariable ["DB_fpv_ppfx_minStateTime", 0.4];
+private _hysteresis = GETMVAR(DB_fpv_ppfx_hysteresis, 0.05);
+private _minStateTime = GETMVAR(DB_fpv_ppfx_minStateTime, 0.4);
 
-private _state = missionNamespace getVariable ["DB_fpv_ppfx_state", "CLEAN"];
-private _stateSince = missionNamespace getVariable ["DB_fpv_ppfx_stateSince", _now];
+private _state = GETMVAR(DB_fpv_ppfx_state, "CLEAN");
+private _stateSince = GETMVAR(DB_fpv_ppfx_stateSince, _now);
 
 private _nextState = _state;
 
@@ -82,8 +84,8 @@ if (_nextState != _state && { (_now - _stateSince) >= _minStateTime }) then {
 	_stateSince = _now;
 };
 
-missionNamespace setVariable ["DB_fpv_ppfx_state", _state];
-missionNamespace setVariable ["DB_fpv_ppfx_stateSince", _stateSince];
+SETMVAR(DB_fpv_ppfx_state, _state);
+SETMVAR(DB_fpv_ppfx_stateSince, _stateSince);
 
 private _smoothstepInv = {
 	params ["_x", "_high", "_low"];
@@ -115,7 +117,7 @@ _noiseWeight = (_noiseWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
 _blurWeight = (_blurWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
 _aberrWeight = (_aberrWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
 
-private _glitch = missionNamespace getVariable ["DB_fpv_ppfx_glitch", []];
+private _glitch = GETMVAR(DB_fpv_ppfx_glitch, []);
 private _glitchType = "";
 private _glitchEnd = 0;
 
@@ -127,7 +129,8 @@ if (_glitch isEqualType [] && { count _glitch >= 2 }) then {
 if (_glitchType != "" && { _now >= _glitchEnd }) then {
 	_glitchType = "";
 	_glitchEnd = 0;
-	missionNamespace setVariable ["DB_fpv_ppfx_glitch", []];
+	private _ppfxGlitchReset = [];
+	SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitchReset);
 };
 
 if (_glitchType isEqualTo "") then {
@@ -152,7 +155,8 @@ if (_glitchType isEqualTo "") then {
 			_duration = _short;
 		};
 		_glitchEnd = _now + _duration;
-		missionNamespace setVariable ["DB_fpv_ppfx_glitch", [_glitchType, _glitchEnd]];
+		private _ppfxGlitch = [_glitchType, _glitchEnd];
+		SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
 	};
 };
 

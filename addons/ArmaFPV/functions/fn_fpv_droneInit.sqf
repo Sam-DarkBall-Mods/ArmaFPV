@@ -7,11 +7,26 @@
 	Returns: nothing.
 */
 
+#include "\ArmaFPV\script_macros.hpp"
+
 params ["_uav"];
 
 if (isNull _uav) exitWith {};
 
-waitUntil { time > 1 };
+if (isNil "cba_common_waitUntilAndExecArray") exitWith {
+	_uav disableAI "ALL";
+	_uav setVariable ["DB_jammer_customUavBehavior", true, true];
+};
 
-_uav disableAI "ALL";
-_uav setVariable ["DB_jammer_customUavBehavior", true, true];
+[
+	{
+		params ["_uav"];
+		!isNull _uav
+	},
+	{
+		params ["_uav"];
+		_uav disableAI "ALL";
+		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
+	},
+	[_uav]
+] call CBA_fnc_waitUntilAndExecute;

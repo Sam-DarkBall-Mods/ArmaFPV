@@ -6,26 +6,28 @@
 	Returns: nothing.
 */
 
+#include "\ArmaFPV\script_macros.hpp"
+
 if (!hasInterface) exitWith {};
-if (missionNamespace getVariable ["DB_fpv_ppfx_active", false]) exitWith {};
+if (GETMVAR(DB_fpv_ppfx_active, false)) exitWith {};
 
 if (isNil "DB_fpv_ppfx_input") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_input", 1];
+	SETMVAR(DB_fpv_ppfx_input, 1);
 };
 
 if (isNil "DB_fpv_ppfx_hysteresis") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_hysteresis", 0.05];
+	SETMVAR(DB_fpv_ppfx_hysteresis, 0.05);
 };
 
 if (isNil "DB_fpv_ppfx_minStateTime") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_minStateTime", 0.4];
+	SETMVAR(DB_fpv_ppfx_minStateTime, 0.4);
 };
 
 if (isNil "DB_fpv_ppfx_priorityBase") then {
-	missionNamespace setVariable ["DB_fpv_ppfx_priorityBase", 1650];
+	SETMVAR(DB_fpv_ppfx_priorityBase, 1650);
 };
 
-private _priorityBase = missionNamespace getVariable ["DB_fpv_ppfx_priorityBase", 1650];
+private _priorityBase = GETMVAR(DB_fpv_ppfx_priorityBase, 1650);
 private _usedPriorities = missionNamespace getVariable ["DB_fpv_ppfx_usedPriorities", []];
 private _instancePriorities = [];
 
@@ -95,21 +97,24 @@ private _fxWet = _result # 0;
 _usedPriorities = _result # 1;
 if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
 
-missionNamespace setVariable ["DB_fpv_ppfx_usedPriorities", _usedPriorities];
-missionNamespace setVariable ["DB_fpv_ppfx_priorities", _instancePriorities];
-missionNamespace setVariable ["DB_fpv_ppfx_handles", [_fxColor, _fxGrain, _fxBlur, _fxChrom, _fxResolution, _fxInvert, _fxRadial, _fxWet]];
-missionNamespace setVariable ["DB_fpv_ppfx_fxColor", _fxColor];
-missionNamespace setVariable ["DB_fpv_ppfx_fxGrain", _fxGrain];
-missionNamespace setVariable ["DB_fpv_ppfx_fxBlur", _fxBlur];
-missionNamespace setVariable ["DB_fpv_ppfx_fxChrom", _fxChrom];
-missionNamespace setVariable ["DB_fpv_ppfx_fxResolution", _fxResolution];
-missionNamespace setVariable ["DB_fpv_ppfx_fxInvert", _fxInvert];
-missionNamespace setVariable ["DB_fpv_ppfx_fxRadial", _fxRadial];
-missionNamespace setVariable ["DB_fpv_ppfx_fxWet", _fxWet];
-missionNamespace setVariable ["DB_fpv_ppfx_active", true];
-missionNamespace setVariable ["DB_fpv_ppfx_state", "CLEAN"];
-missionNamespace setVariable ["DB_fpv_ppfx_stateSince", diag_tickTime];
-missionNamespace setVariable ["DB_fpv_ppfx_glitch", []];
+SETMVAR(DB_fpv_ppfx_usedPriorities, _usedPriorities);
+private _ppfxPriorities = _instancePriorities;
+SETMVAR(DB_fpv_ppfx_priorities, _ppfxPriorities);
+private _ppfxHandles = [_fxColor, _fxGrain, _fxBlur, _fxChrom, _fxResolution, _fxInvert, _fxRadial, _fxWet];
+SETMVAR(DB_fpv_ppfx_handles, _ppfxHandles);
+SETMVAR(DB_fpv_ppfx_fxColor, _fxColor);
+SETMVAR(DB_fpv_ppfx_fxGrain, _fxGrain);
+SETMVAR(DB_fpv_ppfx_fxBlur, _fxBlur);
+SETMVAR(DB_fpv_ppfx_fxChrom, _fxChrom);
+SETMVAR(DB_fpv_ppfx_fxResolution, _fxResolution);
+SETMVAR(DB_fpv_ppfx_fxInvert, _fxInvert);
+SETMVAR(DB_fpv_ppfx_fxRadial, _fxRadial);
+SETMVAR(DB_fpv_ppfx_fxWet, _fxWet);
+SETMVAR(DB_fpv_ppfx_active, true);
+SETMVAR(DB_fpv_ppfx_state, "CLEAN");
+SETMVAR(DB_fpv_ppfx_stateSince, diag_tickTime);
+private _ppfxGlitch = [];
+SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
 
 if (_fxColor >= 0) then {
 	_fxColor ppEffectAdjust [1, 1, 0, [0, 0, 0, 0], [1, 1, 1, 1], [0.299, 0.587, 0.114, 0]];
@@ -151,8 +156,13 @@ if (_fxWet >= 0) then {
 	_fxWet ppEffectCommit 0;
 };
 
-private _ehId = addMissionEventHandler ["EachFrame", {
-	call DB_fnc_fpv_ppfx_update;
-}];
+private _prevPfh = GETMVAR(DB_fpv_ppfx_pfhId, -1);
+if (_prevPfh >= 0) then {
+	[_prevPfh] call CBA_fnc_removePerFrameHandler;
+};
 
-missionNamespace setVariable ["DB_fpv_ppfx_ehId", _ehId];
+private _pfhId = [{
+	call DB_fnc_fpv_ppfx_update;
+}, 0, []] call CBA_fnc_addPerFrameHandler;
+
+SETMVAR(DB_fpv_ppfx_pfhId, _pfhId);
