@@ -63,7 +63,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.2);
                 text = "";
 
@@ -99,7 +100,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.2);
                 text = "75";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalText"", _this # 0];";
@@ -132,7 +134,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_compass.paa";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(30) / 2;
-                y = WY_POS + GRID_H(2.2);
+                y = WY_POS + GRID_H(2.6);
                 w = GRID_W(30);
                 h = GRID_H(2);
             };
@@ -143,7 +145,7 @@ class RscTitles
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassGroup"", _this # 0];";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(30) / 2;
-                y = WY_POS + GRID_H(1.2);
+                y = WY_POS + GRID_H(1.6);
                 w = GRID_W(30);
                 h = GRID_H(2);
 
@@ -160,7 +162,8 @@ class RscTitles
                             shadow = 1;
                         };
 
-                        shadow = 0;
+                        shadow = 2;
+                        shadowColor[] = {0, 0, 0, 1};
                         size = GRID_H(1.4);
                         text = "N";
                         onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassN"", _this # 0];";
@@ -182,7 +185,8 @@ class RscTitles
                             shadow = 1;
                         };
 
-                        shadow = 0;
+                        shadow = 2;
+                        shadowColor[] = {0, 0, 0, 1};
                         size = GRID_H(1.4);
                         text = "E";
                         onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassE"", _this # 0];";
@@ -204,7 +208,8 @@ class RscTitles
                             shadow = 1;
                         };
 
-                        shadow = 0;
+                        shadow = 2;
+                        shadowColor[] = {0, 0, 0, 1};
                         size = GRID_H(1.4);
                         text = "S";
                         onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassS"", _this # 0];";
@@ -226,7 +231,8 @@ class RscTitles
                             shadow = 1;
                         };
 
-                        shadow = 0;
+                        shadow = 2;
+                        shadowColor[] = {0, 0, 0, 1};
                         size = GRID_H(1.4);
                         text = "W";
                         onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassW"", _this # 0];";
@@ -250,13 +256,14 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.6);
                 text = "032";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_HeadingText"", _this # 0];";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(6) / 2;
-                y = WY_POS + GRID_H(4.2);
+                y = WY_POS + GRID_H(4.6);
                 w = GRID_W(6);
                 h = GRID_H(2);
             };
@@ -270,7 +277,7 @@ class RscTitles
                 text = "\ArmaFPV\pictures\osd_pointer_down.paa";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(0.9) / 2;
-                y = WY_POS + GRID_H(3.3);
+                y = WY_POS + GRID_H(3.7);
                 w = GRID_W(0.9);
                 h = GRID_H(0.9);
             };
@@ -360,7 +367,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.3);
                 text = "061";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_AltText"", _this # 0];";
@@ -382,7 +390,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.1);
                 text = "m";
 
@@ -403,7 +412,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.3);
                 text = "10483";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_RightText"", _this # 0];";
@@ -425,7 +435,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.1);
                 text = "ft/h";
 
@@ -446,7 +457,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.3);
                 text = "11861ft";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_DistText"", _this # 0];";
@@ -482,7 +494,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.2);
                 text = "15.0V";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_LeftVoltText"", _this # 0];";
@@ -504,7 +517,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.2);
                 text = "11.4A";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_LeftCurrentText"", _this # 0];";
@@ -526,7 +540,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.2);
                 text = "2406mAh";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_LeftMahText"", _this # 0];";
@@ -563,7 +578,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.2);
                 text = "12.3V";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_RightVoltText"", _this # 0];";
@@ -585,7 +601,8 @@ class RscTitles
                     shadow = 1;
                 };
 
-                shadow = 0;
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 size = GRID_H(1.2);
                 text = "11:45";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_TimeText"", _this # 0];";
