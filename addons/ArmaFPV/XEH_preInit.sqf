@@ -97,14 +97,6 @@ if (hasInterface) then {
 	if (isServer || { serverCommandAvailable "#kick" }) then {
 		call _fnc_registerAdminSettings;
 	} else {
-		[
-			{ !hasInterface || serverCommandAvailable "#kick" },
-			{
-				if (!hasInterface) exitWith {};
-				private _register = GETMVAR(DB_fpv_registerAdminSettings, {});
-				call _register;
-			},
-			[]
-		] call CBA_fnc_waitUntilAndExecute;
+		// Defer admin registration to postInit (CBA is not guaranteed in preInit).
 	};
 };
