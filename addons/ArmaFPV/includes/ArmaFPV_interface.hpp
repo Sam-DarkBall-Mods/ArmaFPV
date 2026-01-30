@@ -77,6 +77,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_signal.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalPicture"", _this # 0];";
 
@@ -112,6 +114,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_controller.paa";
 
                 x = WX_POS + W_WIDTH - GRID_W(2.6);
@@ -123,6 +127,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_compass.paa";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(30) / 2;
@@ -259,6 +265,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_pointer_down.paa";
 
                 x = WX_POS + W_WIDTH / 2 - GRID_W(0.9) / 2;
@@ -271,6 +279,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_center.paa";
 
                 x = 0.5 - GRID_W(2) / 2;
@@ -283,6 +293,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_vbar_left.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarLeft"", _this # 0];";
 
@@ -296,6 +308,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_vbar_right.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarRight"", _this # 0];";
 
@@ -309,6 +323,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_pointer_left.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerLeft"", _this # 0];";
 
@@ -322,6 +338,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_pointer_right.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerRight"", _this # 0];";
 
@@ -443,6 +461,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_p_icon.paa";
 
                 x = WX_POS + GRID_W(1);
@@ -521,6 +541,8 @@ class RscTitles
             {
                 idc = -1;
 
+                shadow = 2;
+                shadowColor[] = {0, 0, 0, 1};
                 text = "\ArmaFPV\pictures\osd_batt_icon.paa";
                 onLoad = "uiNameSpace setVariable [""ArmaFPV_BatteryPicture"", _this # 0];";
 
