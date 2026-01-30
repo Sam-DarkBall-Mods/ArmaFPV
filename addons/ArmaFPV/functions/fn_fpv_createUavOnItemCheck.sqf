@@ -31,13 +31,15 @@ if (local _uav && local _container) then {
 	[_uav, _container] remoteExecCall ["disableCollisionWith", 0, _uav];
 };
 
-private _cargo = magazineCargo _container;
+private _cargo = magazinesAmmoCargo _container;
 private _newCargo = [];
 {
-	if (_x != _item) then { _newCargo pushBack _x };
+	private _magClass = _x # 0;
+	private _magAmmo = _x # 1;
+	if (_magClass != _item) then { _newCargo pushBack [_magClass, _magAmmo] };
 } forEach _cargo;
 
 clearMagazineCargo _container;
 {
-	_container addMagazineCargo [_x, 1];
+	_container addMagazineAmmoCargo [_x # 0, 1, _x # 1];
 } forEach _newCargo;
