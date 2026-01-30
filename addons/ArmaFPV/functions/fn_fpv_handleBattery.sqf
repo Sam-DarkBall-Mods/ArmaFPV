@@ -19,8 +19,11 @@ addMissionEventHandler ["EachFrame", {
 	};
 
 	private _currentBattery = fuel _uav;
-	private _controlPicture = uiNameSpace getVariable ["ArmaFPV_BatteryPicture", controlNull];
-	private _controlText = uiNameSpace getVariable ["ArmaFPV_BatteryText", controlNull];
+	private _leftVolt = uiNameSpace getVariable ["ArmaFPV_LeftVoltText", controlNull];
+	private _leftCurrent = uiNameSpace getVariable ["ArmaFPV_LeftCurrentText", controlNull];
+	private _leftMah = uiNameSpace getVariable ["ArmaFPV_LeftMahText", controlNull];
+	private _rightVolt = uiNameSpace getVariable ["ArmaFPV_RightVoltText", controlNull];
+	private _batteryPicture = uiNameSpace getVariable ["ArmaFPV_BatteryPicture", controlNull];
 	private _picture = "";
 
 	switch (true) do {
@@ -32,12 +35,32 @@ addMissionEventHandler ["EachFrame", {
 		default { _picture = "\ArmaFPV\pictures\A75.paa" };
 	};
 
-	if (!isNull _controlPicture) then {
-		_controlPicture ctrlSetText _picture;
+	private _volt = (12 + (_currentBattery * 4.8));
+	private _cur = (5 + ((1 - _currentBattery) * 10));
+	private _mah = round (2000 + ((1 - _currentBattery) * 800));
+	private _voltRight = (10 + (_currentBattery * 4.0));
+	private _voltTxt = str ((round (_volt * 10)) / 10);
+	private _curTxt = str ((round (_cur * 10)) / 10);
+	private _voltRightTxt = str ((round (_voltRight * 10)) / 10);
+
+	if (!isNull _leftVolt) then {
+		_leftVolt ctrlSetText format ["%1V", _voltTxt];
 	};
 
-	if (!isNull _controlText) then {
-		_controlText ctrlSetText str(round(_currentBattery * 100));
+	if (!isNull _leftCurrent) then {
+		_leftCurrent ctrlSetText format ["%1A", _curTxt];
+	};
+
+	if (!isNull _leftMah) then {
+		_leftMah ctrlSetText format ["%1mAh", _mah];
+	};
+
+	if (!isNull _rightVolt) then {
+		_rightVolt ctrlSetText format ["%1V", _voltRightTxt];
+	};
+
+	if (!isNull _batteryPicture) then {
+		_batteryPicture ctrlSetText _picture;
 	};
 
 	if !(missionNamespace getVariable ["ArmaFPV_isControl", false]) exitWith {
