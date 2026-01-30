@@ -46,7 +46,6 @@ private _jammerFactor = [_context, "jammerFactor", 0] call _getCtx;
 private _obstacles = [_context, "obstacleCount", 0] call _getCtx;
 private _terrainMask = [_context, "terrainMask", 0] call _getCtx;
 private _lowAltFactor = (1 - ((_altAGL max 0) / 20) min 1) max 0;
-private _lowAltImpact = _lowAltFactor * _severity;
 
 private _hysteresis = missionNamespace getVariable ["DB_fpv_ppfx_hysteresis", 0.05];
 private _minStateTime = missionNamespace getVariable ["DB_fpv_ppfx_minStateTime", 0.4];
@@ -94,6 +93,7 @@ private _smoothstepInv = {
 };
 
 private _severity = 1 - _q;
+private _lowAltImpact = _lowAltFactor * _severity;
 private _noiseWeight = [_q, 0.95, 0.35] call _smoothstepInv;
 private _blurWeight = _severity ^ 1.7;
 private _aberrWeight = _severity ^ 2.2;
