@@ -23,13 +23,13 @@ private _fxRadial = missionNamespace getVariable ["DB_fpv_ppfx_fxRadial", -1];
 private _fxWet = missionNamespace getVariable ["DB_fpv_ppfx_fxWet", -1];
 
 if (_fxColor >= 0) then {
-	_fxColor ppEffectAdjust [1, 1, 0, [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 4]];
+	_fxColor ppEffectAdjust [1, 1, 0, [0, 0, 0, 0], [1, 1, 1, 1], [0.299, 0.587, 0.114, 0]];
 	_fxColor ppEffectCommit 0;
 	ppEffectDestroy _fxColor;
 };
 
 if (_fxGrain >= 0) then {
-	_fxGrain ppEffectAdjust [0, 1, 1, 0, 0, true];
+	_fxGrain ppEffectAdjust [0, 1, 1, 0, 0, 0];
 	_fxGrain ppEffectCommit 0;
 	ppEffectDestroy _fxGrain;
 };
@@ -47,7 +47,7 @@ if (_fxChrom >= 0) then {
 };
 
 if (_fxResolution >= 0) then {
-	_fxResolution ppEffectAdjust [1];
+	_fxResolution ppEffectAdjust [-1];
 	_fxResolution ppEffectCommit 0;
 	ppEffectDestroy _fxResolution;
 };
@@ -65,7 +65,7 @@ if (_fxRadial >= 0) then {
 };
 
 if (_fxWet >= 0) then {
-	_fxWet ppEffectAdjust [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	_fxWet ppEffectAdjust [0, 0, 0, 4.10, 3.70, 2.50, 1.85, 0, 0, 0, 0, 0, 0, 0, 0];
 	_fxWet ppEffectCommit 0;
 	ppEffectDestroy _fxWet;
 };

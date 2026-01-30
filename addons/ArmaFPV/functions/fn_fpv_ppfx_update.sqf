@@ -218,26 +218,39 @@ private _offset = 0;
 
 private _colorA = [0, 0, 0, 0];
 private _colorB = [1 + _colorShift, 1, 1 - _colorShift, 1];
-private _colorC = [0.33, 0.33, 0.15, 0.2];
-private _colorD = [0, 0, 0, 0, 0, 0, 4];
 
 private _grain = (_noiseWeight + _glitchNoise) min 1;
 private _blur = (_blurWeight + _glitchBlur) min 1;
 private _chrom = (_aberrWeight * 0.025) min 0.06;
 
-private _resScale = 1;
+private _resTarget = -1;
 if (_isDigital) then {
 	private _drop = (_resWeight + _glitchRes) min 1;
-	_resScale = (1 - (_drop * 0.65)) max 0.35;
+	if (_drop > 0.01) then {
+		private _screenH = missionNamespace getVariable ["DB_fpv_ppfx_screenH", -1];
+		if (_screenH <= 0) then {
+			_screenH = (getResolution) select 1;
+			missionNamespace setVariable ["DB_fpv_ppfx_screenH", _screenH];
+		};
+		private _scale = (1 - (_drop * 0.65)) max 0.35;
+		_resTarget = (round (_screenH * _scale)) max 1;
+	};
 };
 
 if (_fxColor >= 0) then {
-	_fxColor ppEffectAdjust [_brightness, _contrast, _offset, _colorA, _colorB, _colorC, _colorD];
+	_fxColor ppEffectAdjust [
+		_brightness,
+		_contrast,
+		_offset,
+		_colorA,
+		_colorB,
+		[0.299, 0.587, 0.114, 0]
+	];
 	_fxColor ppEffectCommit _commitTime;
 };
 
 if (_fxGrain >= 0) then {
-	_fxGrain ppEffectAdjust [_grain, 1, 1 + (_grain * 5), 0.5, 0.5, true];
+	_fxGrain ppEffectAdjust [_grain, 1, 1 + (_grain * 5), 0.5, 0.5, 0];
 	_fxGrain ppEffectCommit _commitTime;
 };
 
@@ -252,7 +265,7 @@ if (_fxChrom >= 0) then {
 };
 
 if (_fxResolution >= 0) then {
-	_fxResolution ppEffectAdjust [_resScale];
+	_fxResolution ppEffectAdjust [_resTarget];
 	_fxResolution ppEffectCommit _commitTime;
 };
 
@@ -269,26 +282,40 @@ if (_fxRadial >= 0) then {
 if (_fxWet >= 0) then {
 	private _wetParams = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 	if (_glitchWet > 0) then {
+		private _ampScale = 0.2 + (_glitchWet * 1.4);
+		private _randScale = 0.2 + (_glitchWet * 0.8);
+		private _posScale = 0.2 + (_glitchWet * 0.8);
 		_wetParams = [
 			_glitchWet,
 			_glitchWet * 0.6,
 			_glitchWet * 0.4,
-			_glitchWet * 0.8,
-			_glitchWet * 0.5,
-			_glitchWet * 0.5,
-			_now * 0.25,
-			_now * 0.33,
-			_glitchWet * 0.2,
-			_glitchWet * 0.2,
-			0,
-			0,
-			0,
-			0,
-			0
+			4.10,
+			3.70,
+			2.50,
+			1.85,
+			0.0054 * _ampScale,
+			0.0041 * _ampScale,
+			0.0090 * _ampScale,
+			0.0070 * _ampScale,
+			0.5 * _randScale,
+			0.3 * _randScale,
+			10.0 * _posScale,
+			6.0 * _posScale
 		];
 	};
 	_fxWet ppEffectAdjust _wetParams;
 	_fxWet ppEffectCommit _commitTime;
+};
+
+if (_q >= 0.99) then {
+	if (_fxColor >= 0) then { _fxColor ppEffectAdjust [1, 1, 0, [0, 0, 0, 0], [1, 1, 1, 1], [0.299, 0.587, 0.114, 0]]; _fxColor ppEffectCommit 0; };
+	if (_fxGrain >= 0) then { _fxGrain ppEffectAdjust [0, 1, 1, 0, 0, 0]; _fxGrain ppEffectCommit 0; };
+	if (_fxBlur >= 0) then { _fxBlur ppEffectAdjust [0]; _fxBlur ppEffectCommit 0; };
+	if (_fxChrom >= 0) then { _fxChrom ppEffectAdjust [0, 0, true]; _fxChrom ppEffectCommit 0; };
+	if (_fxResolution >= 0) then { _fxResolution ppEffectAdjust [-1]; _fxResolution ppEffectCommit 0; };
+	if (_fxInvert >= 0) then { _fxInvert ppEffectAdjust [0, 0, 0]; _fxInvert ppEffectCommit 0; };
+	if (_fxRadial >= 0) then { _fxRadial ppEffectAdjust [0, 0, 0, 0]; _fxRadial ppEffectCommit 0; };
+	if (_fxWet >= 0) then { _fxWet ppEffectAdjust [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; _fxWet ppEffectCommit 0; };
 };
 
 missionNamespace setVariable [
@@ -297,7 +324,7 @@ missionNamespace setVariable [
 		"q", _q,
 		"state", _state,
 		"profile", _profile,
-		"weights", ["noise", _grain, "blur", _blur, "aberr", _chrom, "resScale", _resScale],
+		"weights", ["noise", _grain, "blur", _blur, "aberr", _chrom, "resTarget", _resTarget],
 		"glitch", _glitchType
 	]
 ];
