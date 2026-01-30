@@ -55,8 +55,14 @@ private _pfhId = [{
 	private _clientActive = _uav getVariable ["DB_fpv_jammerClientActive", false];
 	private _clientUpdate = _uav getVariable ["DB_fpv_jammerClientUpdate", -1];
 	private _clientFresh = (_clientUpdate >= 0) && { (diag_tickTime - _clientUpdate) <= (FPV_SIGNAL_LOSS_DURATION + 1) };
+	private _lastContact = _uav getVariable ["DB_fpv_lastJammerContact", -1];
+	private _recentContact = (_lastContact >= 0) && { (diag_tickTime - _lastContact) <= (FPV_SIGNAL_LOSS_DURATION + 1) };
 
 	if (!_isActive && _clientActive && _clientFresh) then {
+		_isActive = true;
+	};
+
+	if (!_isActive && _recentContact) then {
 		_isActive = true;
 	};
 	private _jammerTime = _uav getVariable ["DB_fpv_jammerTime", 0];
