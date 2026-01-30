@@ -50,10 +50,11 @@ private _fnc_distanceImpact = {
 
 private _retranslatorsNearUAV = [_uav, 1500] call _fnc_findRetranslators;
 private _retranslatorsNearPlayer = [_player, 1500] call _fnc_findRetranslators;
+private _hasRetranslator = (_retranslatorsNearUAV isNotEqualTo []) || (_retranslatorsNearPlayer isNotEqualTo []);
 private _jammersNearUAV = [_uav, 1000] call _fnc_findJammers;
 
 private _baseMaxDistance = missionNamespace getVariable ["FPV_MaxFlightDistance", 4000];
-private _maxDistance = if ((_retranslatorsNearUAV isNotEqualTo []) || (_retranslatorsNearPlayer isNotEqualTo [])) then {
+private _maxDistance = if (_hasRetranslator) then {
 	_baseMaxDistance + 2500
 } else {
 	_baseMaxDistance
@@ -74,9 +75,13 @@ private _terrainFactor = if (_terrainBlocked) then {
 } else {
 	1
 };
+if (_hasRetranslator) then {
+	private _boost = 0.75 + (0.2 * _altFactor);
+	_terrainFactor = _terrainFactor max _boost;
+};
 private _signalStrength = _distanceImpact * _terrainFactor * _obstacleFactor;
 
-if ((_retranslatorsNearUAV isNotEqualTo []) || (_retranslatorsNearPlayer isNotEqualTo [])) then {
+if (_hasRetranslator) then {
 	_signalStrength = _signalStrength * 1.2;
 };
 
@@ -97,6 +102,9 @@ if (_distance > _maxDistance) then {
 };
 
 private _terrainMask = if (_terrainBlocked) then { 1 } else { (1 - _altFactor) max 0 };
+if (_hasRetranslator) then {
+	_terrainMask = _terrainMask * 0.4;
+};
 missionNamespace setVariable ["DB_fpv_signal_obstacles", _objectCount];
 missionNamespace setVariable ["DB_fpv_signal_terrainMask", _terrainMask];
 
