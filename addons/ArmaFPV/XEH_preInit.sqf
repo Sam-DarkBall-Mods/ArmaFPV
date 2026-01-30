@@ -37,10 +37,6 @@ if (isNil "DB_fpv_signalUpdateInterval") then {
 	DB_fpv_signalUpdateInterval = 0.2;
 };
 
-if (isNil "DB_fpv_connectRange") then {
-	DB_fpv_connectRange = 4000;
-};
-
 if (isNil "DB_fpv_connectLoopInterval") then {
 	DB_fpv_connectLoopInterval = 0.1;
 };

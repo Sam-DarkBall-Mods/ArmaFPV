@@ -1,6 +1,6 @@
 /*
 	ArmaFPV: FPV connection handler.
-	Purpose: manages UAV connectability and OSD lifecycle.
+	Purpose: manages OSD lifecycle while controlling FPV drones.
 	Context: client, runs post-init.
 	Params: none.
 	Returns: nothing.
@@ -10,8 +10,6 @@ if (!hasInterface) exitWith {};
 
 [] spawn {
 private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Crocus_AT", "O_Crocus_AP", "B_Crocus_AT", "B_Crocus_AP", "I_Crocus_AT", "I_Crocus_AP", "O_Crocus_AT_TI", "O_Crocus_AP_TI", "B_Crocus_AT_TI", "B_Crocus_AP_TI", "I_Crocus_AT_TI", "I_Crocus_AP_TI"]];
-	private _terminalTypes = missionNamespace getVariable ["DB_fpv_terminalTypes", ["B_UavTerminal", "O_UavTerminal", "I_UavTerminal"]];
-	private _connectRange = missionNamespace getVariable ["DB_fpv_connectRange", 4000];
 	private _loopInterval = missionNamespace getVariable ["DB_fpv_connectLoopInterval", 0.1];
 
 	while { true } do {
@@ -20,18 +18,6 @@ private _droneTypes = missionNamespace getVariable ["DB_fpv_droneTypes", ["O_Cro
 		if (isNull _player) then {
 			sleep _loopInterval;
 		} else {
-			private _assignedItems = assignedItems _player;
-			private _hasTerminal = (_terminalTypes findIf { _x in _assignedItems }) != -1;
-
-			if (_hasTerminal) then {
-				private _drones = vehicles select { (typeOf _x) in _droneTypes };
-				private _dronesNear = _player nearEntities [_droneTypes, _connectRange];
-
-				{ _player disableUAVConnectability [_x, true]; } forEach (_drones - _dronesNear);
-
-				{ _player enableUAVConnectability [_x, true]; } forEach _dronesNear;
-			};
-
 			private _uav = getConnectedUAV _player;
 			private _uavType = typeOf _uav;
 
