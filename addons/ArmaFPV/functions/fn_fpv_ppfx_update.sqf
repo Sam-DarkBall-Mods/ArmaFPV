@@ -134,6 +134,7 @@ if (_glitchType isEqualTo "") then {
 	if (_lowAltFactor > 0) then { _chanceBase = _chanceBase + (_lowAltFactor * 0.06); };
 	if (_inJammer) then { _chanceBase = _chanceBase + 0.06; };
 	if (_obstacles > 0) then { _chanceBase = _chanceBase + 0.02; };
+	if (_severity > 0.6) then { _chanceBase = _chanceBase + 0.04; };
 	private _chance = _chanceBase * _dt;
 
 	if ((random 1) < _chance) then {
@@ -144,8 +145,8 @@ if (_glitchType isEqualTo "") then {
 		_glitchType = selectRandom _types;
 		private _duration = 0.08 + (random 0.25) * (0.5 + _severity);
 		if (_glitchType isEqualTo "BLACKOUT") then {
-			private _short = 0.04 + (random 0.08);
-			if (_lowAltFactor > 0.4) then { _short = 0.03 + (random 0.05); };
+			private _short = 0.02 + (random 0.05);
+			if (_lowAltFactor > 0.4) then { _short = 0.02 + (random 0.04); };
 			_duration = _short;
 		};
 		_glitchEnd = _now + _duration;
@@ -176,8 +177,8 @@ switch (_glitchType) do {
 		_glitchNoise = 0.2;
 	};
 	case "BLACKOUT": {
-		_blackout = 1;
-		_glitchNoise = 0.45;
+		_blackout = 0.85;
+		_glitchNoise = 0.55;
 	};
 	default {};
 };
@@ -188,7 +189,7 @@ private _analogBase = 0.06;
 private _drift = (sin (_now * 2.1) * 0.03 + sin (_now * 0.7) * 0.015) * _severity;
 private _baseBrightness = 1 + _drift + _pulse;
 if (_severity > 0.8) then {
-	_baseBrightness = _baseBrightness max 0.18;
+	_baseBrightness = _baseBrightness max 0.28;
 };
 private _brightness = _baseBrightness * (1 - _blackout);
 private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _blackout) + (1 * _blackout);
