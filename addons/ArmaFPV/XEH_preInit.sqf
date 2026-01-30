@@ -7,33 +7,15 @@
 #include "\ArmaFPV\script_macros.hpp"
 
 if (isNil "DB_fpv_droneTypes") then {
-	DB_fpv_droneTypes = [
-		"O_Crocus_AT",
-		"O_Crocus_AP",
-		"B_Crocus_AT",
-		"B_Crocus_AP",
-		"I_Crocus_AT",
-		"I_Crocus_AP",
-		"O_Crocus_AT_TI",
-		"O_Crocus_AP_TI",
-		"B_Crocus_AT_TI",
-		"B_Crocus_AP_TI",
-		"I_Crocus_AT_TI",
-		"I_Crocus_AP_TI"
-	];
+	DB_fpv_droneTypes = FPV_DRONE_TYPES;
 };
 
 if (isNil "DB_fpv_dronesArray_items") then {
-	DB_fpv_dronesArray_items = [
-		"Item_Crocus_AT",
-		"Item_Crocus_AP",
-		"Item_Crocus_AT_TI",
-		"Item_Crocus_AP_TI"
-	];
+	DB_fpv_dronesArray_items = FPV_DRONE_ITEMS;
 };
 
 if (isNil "DB_fpv_terminalTypes") then {
-	DB_fpv_terminalTypes = ["B_UavTerminal", "O_UavTerminal", "I_UavTerminal"];
+	DB_fpv_terminalTypes = FPV_TERMINAL_TYPES;
 };
 
 if (isNil "DB_fpv_signalLossThreshold") then {

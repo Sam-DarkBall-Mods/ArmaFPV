@@ -28,7 +28,7 @@ if (isNil "DB_fpv_ppfx_priorityBase") then {
 };
 
 private _priorityBase = GETMVAR(DB_fpv_ppfx_priorityBase, 1650);
-private _usedPriorities = GETMVAR(DB_fpv_ppfx_usedPriorities, []);
+private _usedPriorities = missionNamespace getVariable ["DB_fpv_ppfx_usedPriorities", []];
 private _instancePriorities = [];
 
 private _createEffect = {
@@ -98,8 +98,10 @@ _usedPriorities = _result # 1;
 if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
 
 SETMVAR(DB_fpv_ppfx_usedPriorities, _usedPriorities);
-SETMVAR(DB_fpv_ppfx_priorities, _instancePriorities);
-SETMVAR(DB_fpv_ppfx_handles, [_fxColor, _fxGrain, _fxBlur, _fxChrom, _fxResolution, _fxInvert, _fxRadial, _fxWet]);
+private _ppfxPriorities = _instancePriorities;
+SETMVAR(DB_fpv_ppfx_priorities, _ppfxPriorities);
+private _ppfxHandles = [_fxColor, _fxGrain, _fxBlur, _fxChrom, _fxResolution, _fxInvert, _fxRadial, _fxWet];
+SETMVAR(DB_fpv_ppfx_handles, _ppfxHandles);
 SETMVAR(DB_fpv_ppfx_fxColor, _fxColor);
 SETMVAR(DB_fpv_ppfx_fxGrain, _fxGrain);
 SETMVAR(DB_fpv_ppfx_fxBlur, _fxBlur);
@@ -111,7 +113,8 @@ SETMVAR(DB_fpv_ppfx_fxWet, _fxWet);
 SETMVAR(DB_fpv_ppfx_active, true);
 SETMVAR(DB_fpv_ppfx_state, "CLEAN");
 SETMVAR(DB_fpv_ppfx_stateSince, diag_tickTime);
-SETMVAR(DB_fpv_ppfx_glitch, []);
+private _ppfxGlitch = [];
+SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
 
 if (_fxColor >= 0) then {
 	_fxColor ppEffectAdjust [1, 1, 0, [0, 0, 0, 0], [1, 1, 1, 1], [0.299, 0.587, 0.114, 0]];

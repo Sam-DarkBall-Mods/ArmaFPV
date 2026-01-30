@@ -9,7 +9,7 @@ class CfgFunctions
 			class fpv_createDialog {};
 			class fpv_getSignal {};
 			class fpv_handleBattery {};
-			class fpv_handleConnect { postInit = 1; };
+			class fpv_handleConnect {};
 			class fpv_handleSignal {};
 			class fpv_ppfx_start {};
 			class fpv_ppfx_stop {};

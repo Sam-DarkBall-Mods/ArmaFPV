@@ -14,7 +14,7 @@ if (!(GETMVAR(DB_fpv_ppfx_active, false))) exitWith {};
 private _now = diag_tickTime;
 private _dt = diag_deltaTime max 0.001;
 
-private _handles = GETMVAR(DB_fpv_ppfx_handles, []);
+private _handles = missionNamespace getVariable ["DB_fpv_ppfx_handles", []];
 if (_handles isEqualTo []) exitWith {};
 
 private _fxColor = GETMVAR(DB_fpv_ppfx_fxColor, -1);
@@ -29,7 +29,7 @@ private _fxWet = GETMVAR(DB_fpv_ppfx_fxWet, -1);
 private _q = GETMVAR(DB_fpv_ppfx_input, 1);
 _q = (_q max 0) min 1;
 
-private _context = GETMVAR(DB_fpv_ppfx_context, []);
+private _context = missionNamespace getVariable ["DB_fpv_ppfx_context", []];
 private _getCtx = {
 	params ["_ctx", "_key", "_default"];
 	private _idx = _ctx find _key;
@@ -129,7 +129,8 @@ if (_glitch isEqualType [] && { count _glitch >= 2 }) then {
 if (_glitchType != "" && { _now >= _glitchEnd }) then {
 	_glitchType = "";
 	_glitchEnd = 0;
-	SETMVAR(DB_fpv_ppfx_glitch, []);
+	private _ppfxGlitchReset = [];
+	SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitchReset);
 };
 
 if (_glitchType isEqualTo "") then {
@@ -154,7 +155,8 @@ if (_glitchType isEqualTo "") then {
 			_duration = _short;
 		};
 		_glitchEnd = _now + _duration;
-		SETMVAR(DB_fpv_ppfx_glitch, [_glitchType, _glitchEnd]);
+		private _ppfxGlitch = [_glitchType, _glitchEnd];
+		SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
 	};
 };
 

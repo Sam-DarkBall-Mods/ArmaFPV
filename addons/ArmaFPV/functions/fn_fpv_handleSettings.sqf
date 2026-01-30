@@ -31,7 +31,7 @@ if (hasInterface) then {
 	};
 };
 
-private _droneTypes = GETMVAR(DB_fpv_droneTypes, []);
+private _droneTypes = GETMVAR(DB_fpv_droneTypes, FPV_DRONE_TYPES);
 if (_droneTypes isEqualTo []) exitWith {};
 
 {

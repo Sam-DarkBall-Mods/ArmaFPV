@@ -8,6 +8,8 @@ if (!isNull _player) then {
 	_player setVariable ["DB_armafpv_playerPutID", _id];
 };
 
+call DB_fnc_fpv_handleConnect;
+
 ["loadout", {
 	params ["_player"];
 
@@ -26,7 +28,6 @@ if (hasInterface && {!isServer}) then {
 			if (!hasInterface) exitWith {};
 			private _register = GETMVAR(DB_fpv_registerAdminSettings, {});
 			call _register;
-		},
-		[]
+		}
 	] call CBA_fnc_waitUntilAndExecute;
 };
