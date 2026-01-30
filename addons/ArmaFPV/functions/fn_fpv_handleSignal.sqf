@@ -65,12 +65,16 @@
 			private _distance = _player distance _uav;
 			private _maxDistance = missionNamespace getVariable ["FPV_MaxFlightDistance", 1500];
 			private _inJammer = (missionNamespace getVariable ["DB_timeInJammerZone", 0]) > 0;
+			private _obstacles = missionNamespace getVariable ["DB_fpv_signal_obstacles", 0];
+			private _terrainMask = missionNamespace getVariable ["DB_fpv_signal_terrainMask", 0];
 
 			private _context = [
 				"altAGL", _altitude,
 				"distance", _distance,
 				"maxDistance", _maxDistance,
-				"inJammer", _inJammer
+				"inJammer", _inJammer,
+				"obstacleCount", _obstacles,
+				"terrainMask", _terrainMask
 			];
 
 			[_signal, _context] call DB_fnc_fpv_ppfx_setInput;

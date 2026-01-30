@@ -45,6 +45,7 @@ private _inJammer = [_context, "inJammer", false] call _getCtx;
 private _jammerFactor = [_context, "jammerFactor", 0] call _getCtx;
 private _obstacles = [_context, "obstacleCount", 0] call _getCtx;
 private _terrainMask = [_context, "terrainMask", 0] call _getCtx;
+private _lowAltFactor = (1 - ((_altAGL max 0) / 20) min 1) max 0;
 
 private _hysteresis = missionNamespace getVariable ["DB_fpv_ppfx_hysteresis", 0.05];
 private _minStateTime = missionNamespace getVariable ["DB_fpv_ppfx_minStateTime", 0.4];
@@ -130,6 +131,7 @@ if (_glitchType != "" && { _now >= _glitchEnd }) then {
 if (_glitchType isEqualTo "") then {
 	private _chanceBase = 0.01 + (_severity ^ 2) * 0.35;
 	if (_altAGL < 20) then { _chanceBase = _chanceBase + 0.03; };
+	if (_lowAltFactor > 0) then { _chanceBase = _chanceBase + (_lowAltFactor * 0.06); };
 	if (_inJammer) then { _chanceBase = _chanceBase + 0.06; };
 	if (_obstacles > 0) then { _chanceBase = _chanceBase + 0.02; };
 	private _chance = _chanceBase * _dt;
@@ -141,6 +143,11 @@ if (_glitchType isEqualTo "") then {
 		};
 		_glitchType = selectRandom _types;
 		private _duration = 0.08 + (random 0.25) * (0.5 + _severity);
+		if (_glitchType isEqualTo "BLACKOUT") then {
+			private _short = 0.04 + (random 0.08);
+			if (_lowAltFactor > 0.4) then { _short = 0.03 + (random 0.05); };
+			_duration = _short;
+		};
 		_glitchEnd = _now + _duration;
 		missionNamespace setVariable ["DB_fpv_ppfx_glitch", [_glitchType, _glitchEnd]];
 	};
@@ -179,14 +186,24 @@ private _commitTime = if (_glitchType isEqualTo "") then { 0.03 } else { 0 };
 
 private _analogBase = 0.06;
 private _drift = (sin (_now * 2.1) * 0.03 + sin (_now * 0.7) * 0.015) * _severity;
-private _brightness = (1 + _drift + _pulse) * (1 - _blackout);
+private _baseBrightness = 1 + _drift + _pulse;
+if (_severity > 0.8) then {
+	_baseBrightness = _baseBrightness max 0.18;
+};
+private _brightness = _baseBrightness * (1 - _blackout);
 private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _blackout) + (1 * _blackout);
 private _offset = 0;
 
 private _colorA = [0, 0, 0, _blackout];
-private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - (_analogBase * 0.01), 1];
+private _desat = (_lowAltFactor * (0.25 + (_severity * 0.35))) min 0.6;
+private _colorB = [
+	1 + _colorShift - (_desat * 0.08) + (_analogBase * 0.02),
+	1 - (_desat * 0.08),
+	1 - _colorShift - (_desat * 0.08) - (_analogBase * 0.01),
+	_desat
+];
 
-private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
+private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35 + (_lowAltFactor * 0.12)) min 1;
 private _blur = (_blurWeight + _glitchBlur + _analogBase * 0.08) min 1;
 private _chrom = (_aberrWeight * 0.025 + _analogBase * 0.004) min 0.06;
 
