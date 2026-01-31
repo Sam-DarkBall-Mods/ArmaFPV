@@ -10,6 +10,10 @@ class CfgPatches
 			"A3_Data_F_AoW_Loadorder",
 			"A3_Data_F",
 			"A3_Drones_F",
+			"cba_main",
+			"cba_common",
+			"cba_xeh",
+			"cba_xeh_a3",
 			"cba_settings"
 		};
 		requiredVersion=0.1;
@@ -20,7 +24,14 @@ class CfgPatches
 			"B_Crocus_AT",
 			"B_Crocus_AP",
 			"I_Crocus_AT",
-			"I_Crocus_AP"
+			"I_Crocus_AP",
+			"O_Crocus_AT_TI",
+			"O_Crocus_AP_TI",
+			"B_Crocus_AT_TI",
+			"B_Crocus_AP_TI",
+			"I_Crocus_AT_TI",
+			"I_Crocus_AP_TI",
+			"FPV_Retranslator"
 		};
 		weapons[]={};
 	};
@@ -30,5 +41,7 @@ class CfgPatches
 #include "includes\CfgAmmo.hpp"
 #include "includes\CfgFontFamilies.hpp"
 #include "includes\CfgFunctions.hpp"
+#include "includes\CfgMagazines.hpp"
 #include "includes\CfgVehicles.hpp"
 #include "includes\Extended_PreInit_EventHandlers.hpp"
+#include "includes\Extended_PostInit_EventHandlers.hpp"

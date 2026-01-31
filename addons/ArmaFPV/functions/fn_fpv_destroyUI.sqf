@@ -1,39 +1,29 @@
-private _delEffects = {
-	private _layer = missionNamespace getVariable ["DB_FPV_Layer_ID", -1];
+/*
+	ArmaFPV: UI/effects cleanup.
+	Purpose: hides the OSD and removes post-process effects.
+	Context: client when leaving FPV control.
+	Params: none.
+	Returns: nothing.
+*/
 
-	_layer cutText ["", "PLAIN"];
+#include "\ArmaFPV\script_macros.hpp"
 
-	private _ppEffect = missionNameSpace getVariable ["DB_fpv_ppEffect", []];
-		
-	if (_ppEffect isNotEqualTo []) then {
-		{
-			ppEffectDestroy _x;
-		} forEach _ppEffect;
+private _clearEffects = {
+	private _layer = GETMVAR(DB_FPV_Layer_ID, -1);
+	if (_layer >= 0) then {
+		_layer cutText ["", "PLAIN"];
 	};
 
-	if !(isNil "PP_chrom") then {
-		ppEffectDestroy PP_chrom;
-	};
-
-	if !(isNil "PP_wetD") then {
-		ppEffectDestroy PP_wetD;
-	};
-
-	if !(isNil "PP_colorC") then {
-		ppEffectDestroy PP_colorC;
-	};
-
-	if !(isNil "PP_dynamic") then {
-		ppEffectDestroy PP_dynamic;
-	};
-
-	if !(isNil "PP_film") then {
-		ppEffectDestroy PP_film;
-	};
+	call DB_fnc_fpv_ppfx_stop;
 };
 
-call _delEffects;
+call _clearEffects;
 
-sleep 1;
-
-call _delEffects;
+[
+	{
+		params ["_clearEffects"];
+		call _clearEffects;
+	},
+	[_clearEffects],
+	1
+] call CBA_fnc_waitAndExecute;

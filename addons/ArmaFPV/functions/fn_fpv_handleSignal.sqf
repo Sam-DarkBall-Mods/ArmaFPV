@@ -1,99 +1,223 @@
-[] spawn {
-	private _weakSignalDuration = 0;
-	private _specialEffectTime = 0;
+/*
+	ArmaFPV: signal level handler.
+	Purpose: updates the signal indicator and post-process effects based on link quality.
+	Context: client, active only while controlling the drone.
+	Params: none.
+	Returns: nothing.
+*/
 
-	while { missionNamespace getVariable ["ArmaFPV_isControl", false] } do {
-		// UI
-		private _player = missionNamespace getVariable ["bis_fnc_moduleRemoteControl_unit", player];
-		private _uav = getConnectedUAV _player;
-		
-		private _signal = [_player, _uav] call DB_fnc_fpv_getSignal;
-		private _altitude = getPos _uav select 2;
-		private _controlPicture = uiNameSpace getVariable ["ArmaFPV_SignalPicture", controlNull];
-		private _controlText = uiNameSpace getVariable ["ArmaFPV_SignalText", controlNull];
-		private _picture = "";
+#include "\ArmaFPV\script_macros.hpp"
 
-		if (_signal < 0.05) then {
-			_weakSignalDuration = _weakSignalDuration + 0.2;
-			if (_weakSignalDuration >= 5) then {
-				[_player, _uav] call DB_fnc_fpv_onSignalLost;
-				_weakSignalDuration = 0;
-			};
-		} else {
-			_weakSignalDuration = 0;
-		};
+private _loopInterval = GETMVAR(DB_fpv_signalUpdateInterval, FPV_SIGNAL_UPDATE_INTERVAL);
+private _ppfxInterval = GETMVAR(DB_fpv_ppfxUpdateInterval, FPV_PPFX_UPDATE_INTERVAL);
+private _state = [
+	diag_tickTime,
+	1,
+	diag_tickTime,
+	-1,
+	false
+];
 
-		if (_signal < 0.3 && _altitude < 20) then {
-			_randomChance = random 1;
-			
-			if (_randomChance > 0.9 && _specialEffectTime <= 0) then {
-				PP_colorC = ppEffectCreate ["ColorCorrections",1500];
-				PP_colorC ppEffectEnable true;
-				PP_colorC ppEffectAdjust [1.08,0.67,0.06,[0,0,0.45,0.06],[1,1,0.93,1.61],[0.33,0.33,0.15,0.2],[0,0,0,0,0,0,5]];
-				PP_colorC ppEffectCommit 0;
-				PP_dynamic = ppEffectCreate ["DynamicBlur",500];
-				PP_dynamic ppEffectEnable true;
-				PP_dynamic ppEffectAdjust [0.4];
-				PP_dynamic ppEffectCommit 0;
-				PP_film = ppEffectCreate ["FilmGrain",2000];
-				PP_film ppEffectEnable true;
-				PP_film ppEffectAdjust [1,0.47,4.26,0.5,0.5,true];
-				PP_film ppEffectCommit 0;
+call DB_fnc_fpv_ppfx_start;
 
-				_specialEffectTime = 2;
-			};
-		};
-
-		if (_specialEffectTime > 0) then {
-			_specialEffectTime = _specialEffectTime - 0.2;
-			
-			if (_specialEffectTime <= 0) then {
-				ppEffectDestroy PP_colorC;
-				ppEffectDestroy PP_dynamic;
-				ppEffectDestroy PP_film;
-			};
-		};
-
-		switch (true) do {
-			case (_signal > 0.75): { _picture = "\ArmaFPV\pictures\100.paa"; };
-			case (_signal > 0.5): { _picture = "\ArmaFPV\pictures\75.paa" };
-			case (_signal > 0.25): { _picture = "\ArmaFPV\pictures\50.paa" };
-			case (_signal > 0): { _picture = "\ArmaFPV\pictures\25.paa" };
-			case (_signal <= 0): { _picture = "\ArmaFPV\pictures\0.paa" };
-			default { _picture = "\ArmaFPV\pictures\100.paa" };
-		};
-
-		_controlPicture ctrlSetText _picture;
-		_controlText ctrlSetText str(round(_signal * 100));
-
-		// EFFECTS
-		private _ppEffect = missionNameSpace getVariable ["DB_fpv_ppEffect", []];
-		private _adjust = linearConversion [1, 0, _signal, 0.1, 1.0];
-		
-		if (_ppEffect isNotEqualTo []) then {
-			{
-				ppEffectDestroy _x;
-			} forEach _ppEffect;
-		};
-
-		private _PP_colorC = ppEffectCreate ["ColorCorrections", 1500];
-		_PP_colorC ppEffectEnable true;
-		_PP_colorC ppEffectAdjust [[1.08, 1.2, _adjust] call BIS_fnc_lerp, [0.67, 1, _adjust] call BIS_fnc_lerp, 0.06, [0,0,0.45,0.06], [1,1,0.93,1.61], [0.33, 0.33, 0.15, 0.2], [0, 0, 0, 0, 0, 0, 5]];
-		_PP_colorC ppEffectCommit 0;
-
-		private _PP_dynamic = ppEffectCreate ["DynamicBlur", 500];
-		_PP_dynamic ppEffectEnable true;
-		_PP_dynamic ppEffectAdjust [[0.2, 0.7, _adjust] call BIS_fnc_lerp];
-		_PP_dynamic ppEffectCommit 0;
-
-		private _PP_film = ppEffectCreate ["FilmGrain", 2000];
-		_PP_film ppEffectEnable true;
-		_PP_film ppEffectAdjust [[0.04, 1, _adjust] call BIS_fnc_lerp, 1, [4.09, 4.5, _adjust] call BIS_fnc_lerp, 0.5, 0.5, true];
-		_PP_film ppEffectCommit 0;
-
-
-		missionNameSpace setVariable ["DB_fpv_ppEffect", [_PP_colorC, _PP_dynamic, _PP_film]];
-
-		sleep 0.2;
-	};
+private _prevPfh = GETMVAR(DB_fpv_signalPFH, -1);
+if (_prevPfh >= 0) then {
+	[_prevPfh] call CBA_fnc_removePerFrameHandler;
 };
+
+private _pfhId = [{
+	_this params ["_args", "_handle"];
+	_args params ["_loopInterval", "_ppfxInterval", "_state"];
+
+	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
+	private _uav = getConnectedUAV _player;
+
+	if (isNull _player || { isNull _uav } || { !(GETMVAR(ArmaFPV_isControl, false)) }) exitWith {
+		[_handle] call CBA_fnc_removePerFrameHandler;
+		call DB_fnc_fpv_ppfx_stop;
+	};
+
+	private _now = diag_tickTime;
+	private _lastUpdate = _state # 0;
+	private _signal = _state # 1;
+	private _lastPpfxUpdate = _state # 2;
+	private _lastJammerBroadcast = _state # 3;
+	private _lastJammerActive = _state # 4;
+	private _doUpdate = (_now - _lastUpdate) >= _loopInterval;
+	private _doPpfxUpdate = (_now - _lastPpfxUpdate) >= _ppfxInterval;
+
+	private _altitude = (getPosATL _uav) select 2;
+	private _controlPicture = GETUVAR(ArmaFPV_SignalPicture, controlNull);
+	private _controlText = GETUVAR(ArmaFPV_SignalText, controlNull);
+	private _headingText = GETUVAR(ArmaFPV_HeadingText, controlNull);
+	private _compassGroup = GETUVAR(ArmaFPV_CompassGroup, controlNull);
+	private _compassN = GETUVAR(ArmaFPV_CompassN, controlNull);
+	private _compassE = GETUVAR(ArmaFPV_CompassE, controlNull);
+	private _compassS = GETUVAR(ArmaFPV_CompassS, controlNull);
+	private _compassW = GETUVAR(ArmaFPV_CompassW, controlNull);
+	private _vBarLeft = GETUVAR(ArmaFPV_VBarLeft, controlNull);
+	private _vBarRight = GETUVAR(ArmaFPV_VBarRight, controlNull);
+	private _vPointerLeft = GETUVAR(ArmaFPV_VPointerLeft, controlNull);
+	private _vPointerRight = GETUVAR(ArmaFPV_VPointerRight, controlNull);
+	private _altText = GETUVAR(ArmaFPV_AltText, controlNull);
+	private _rightText = GETUVAR(ArmaFPV_RightText, controlNull);
+	private _distText = GETUVAR(ArmaFPV_DefaultText, controlNull);
+	private _heading = (round (getDir _uav)) mod 360;
+	private _distance = _player distance _uav;
+	private _speedMs = vectorMagnitude (velocity _uav);
+	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
+
+	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
+	private _doJammerBroadcast = (_inJammer != _lastJammerActive) || { (_now - _lastJammerBroadcast) >= _loopInterval };
+	if (_doJammerBroadcast) then {
+		_uav setVariable ["DB_fpv_jammerClientActive", _inJammer, true];
+		_uav setVariable ["DB_fpv_jammerClientUpdate", _now, true];
+		if (_inJammer) then {
+			_uav setVariable ["DB_fpv_lastJammerContact", _now, true];
+		};
+		_state set [3, _now];
+		_state set [4, _inJammer];
+	};
+
+	if (_doUpdate || _doPpfxUpdate) then {
+		_signal = [_player, _uav] call DB_fnc_fpv_getSignal;
+		_state set [1, _signal];
+		if (_doUpdate) then { _state set [0, _now]; };
+		if (_doPpfxUpdate) then { _state set [2, _now]; };
+
+		if (_doUpdate) then {
+			private _picture = "";
+			switch (true) do {
+				case (_signal > 0.75): { _picture = "\ArmaFPV\pictures\100.paa"; };
+				case (_signal > 0.5): { _picture = "\ArmaFPV\pictures\75.paa"; };
+				case (_signal > 0.25): { _picture = "\ArmaFPV\pictures\50.paa"; };
+				case (_signal > 0): { _picture = "\ArmaFPV\pictures\25.paa"; };
+				case (_signal <= 0): { _picture = "\ArmaFPV\pictures\0.paa"; };
+				default { _picture = "\ArmaFPV\pictures\100.paa"; };
+			};
+
+			if (!isNull _controlPicture) then {
+				_controlPicture ctrlSetText _picture;
+			};
+
+			if (!isNull _controlText) then {
+				_controlText ctrlSetText str(round(_signal * 100));
+			};
+		};
+
+		private _maxDistance = GETMVAR(FPV_MaxFlightDistance, 4000);
+		private _obstacles = GETMVAR(DB_fpv_signal_obstacles, 0);
+		private _terrainMask = GETMVAR(DB_fpv_signal_terrainMask, 0);
+
+		private _context = [
+			"altAGL", _altitude,
+			"distance", _distance,
+			"maxDistance", _maxDistance,
+			"inJammer", _inJammer,
+			"obstacleCount", _obstacles,
+			"terrainMask", _terrainMask
+		];
+
+		[_signal, _context] call DB_fnc_fpv_ppfx_setInput;
+	};
+
+	private _jammerLowTime = _uav getVariable ["DB_fpv_jammerLowTime", 0];
+	private _isLost = _uav getVariable ["DB_fpv_isUAVsignalLost", false];
+
+	if (_inJammer && { _signal <= FPV_SIGNAL_LOSS_THRESHOLD } && { !_isLost }) then {
+		_jammerLowTime = _jammerLowTime + diag_deltaTime;
+		if (_jammerLowTime >= FPV_SIGNAL_LOSS_DURATION) then {
+			[_player, _uav] call DB_fnc_fpv_onSignalLost;
+			_jammerLowTime = 0;
+		};
+	} else {
+		_jammerLowTime = 0;
+	};
+
+	_uav setVariable ["DB_fpv_jammerLowTime", _jammerLowTime];
+
+	if (!isNull _headingText) then {
+		private _hTxt = if (_heading < 10) then {
+			format ["00%1", _heading]
+		} else {
+			if (_heading < 100) then { format ["0%1", _heading] } else { str _heading };
+		};
+		_headingText ctrlSetText _hTxt;
+	};
+
+	if (!isNull _compassGroup) then {
+		private _groupPos = ctrlPosition _compassGroup;
+		private _groupW = _groupPos # 2;
+		private _centerX = _groupW / 2;
+		private _halfW = _groupW / 2;
+		private _letters = [
+			[_compassN, 0],
+			[_compassE, 90],
+			[_compassS, 180],
+			[_compassW, 270]
+		];
+
+		{
+			private _ctrl = _x # 0;
+			private _angle = _x # 1;
+
+			if (!isNull _ctrl) then {
+				private _pos = ctrlPosition _ctrl;
+				private _w = _pos # 2;
+				private _h = _pos # 3;
+				private _y = _pos # 1;
+				private _offset = ((_angle - _heading + 540) mod 360) - 180;
+				private _xPos = _centerX + (_offset / 180) * _halfW - (_w / 2);
+
+				_ctrl ctrlSetPosition [_xPos, _y, _w, _h];
+				_ctrl ctrlCommit 0;
+			};
+		} forEach _letters;
+	};
+
+	if (!isNull _altText) then {
+		private _alt = (round _altitude) max 0;
+		_altText ctrlSetText format ["%1", _alt];
+	};
+
+	if (!isNull _rightText) then {
+		_rightText ctrlSetText format ["%1", _speedDisplay];
+	};
+
+	if (!isNull _distText) then {
+		private _defaultText = GETMVAR(FPV_DefaultText, "CROCUS");
+		_distText ctrlSetText _defaultText;
+	};
+
+	if (!isNull _vBarLeft && !isNull _vPointerLeft) then {
+		private _barPos = ctrlPosition _vBarLeft;
+		private _barY = _barPos # 1;
+		private _barH = _barPos # 3;
+		private _ptrPos = ctrlPosition _vPointerLeft;
+		private _ptrW = _ptrPos # 2;
+		private _ptrH = _ptrPos # 3;
+		private _altClamp = (_altitude max 0) min FPV_ALT_MAX;
+		private _altNorm = _altClamp / FPV_ALT_MAX;
+		private _yPos = _barY + (_barH * (1 - _altNorm)) - (_ptrH / 2);
+
+		_vPointerLeft ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
+		_vPointerLeft ctrlCommit 0;
+	};
+
+	if (!isNull _vBarRight && !isNull _vPointerRight) then {
+		private _barPos = ctrlPosition _vBarRight;
+		private _barY = _barPos # 1;
+		private _barH = _barPos # 3;
+		private _ptrPos = ctrlPosition _vPointerRight;
+		private _ptrW = _ptrPos # 2;
+		private _ptrH = _ptrPos # 3;
+		private _speedClamp = (_speedDisplay max 0) min FPV_SPEED_MAX;
+		private _speedNorm = _speedClamp / FPV_SPEED_MAX;
+		private _yPos = _barY + (_barH * (1 - _speedNorm)) - (_ptrH / 2);
+
+		_vPointerRight ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
+		_vPointerRight ctrlCommit 0;
+	};
+}, 0, [_loopInterval, _ppfxInterval, _state]] call CBA_fnc_addPerFrameHandler;
+
+SETMVAR(DB_fpv_signalPFH, _pfhId);
