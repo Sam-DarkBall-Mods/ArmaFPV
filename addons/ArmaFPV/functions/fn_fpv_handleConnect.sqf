@@ -46,6 +46,15 @@ private _pfhId = [{
 	if (_isFpv) then {
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
 		if (!_wasControl || _uiMissing) then {
+			if (_uiMissing && _wasControl) then {
+				diag_log text format [
+					"[ArmaFPV] UI missing while control=true: uav=%1 camOn=%2 camView=%3 time=%4",
+					_uav,
+					cameraOn,
+					cameraView,
+					diag_tickTime
+				];
+			};
 			SETMVAR(ArmaFPV_isControl, true);
 			call DB_fnc_fpv_createDialog;
 		};

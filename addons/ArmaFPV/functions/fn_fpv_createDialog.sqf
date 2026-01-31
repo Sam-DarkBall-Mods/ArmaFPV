@@ -9,6 +9,7 @@
 #include "\ArmaFPV\script_macros.hpp"
 
 private _layer = ("DB_FPV_Layer" call BIS_fnc_rscLayer);
+diag_log text format ["[ArmaFPV] createDialog: layer=%1 time=%2", _layer, diag_tickTime];
 _layer cutRsc ["ArmaFPV_Dialog", "PLAIN"];
 
 SETMVAR(DB_FPV_Layer_ID, _layer);

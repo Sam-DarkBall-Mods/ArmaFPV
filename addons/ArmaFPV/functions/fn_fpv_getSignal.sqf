@@ -77,6 +77,11 @@ private _terrainFactor = if (_terrainBlocked) then {
 } else {
 	1
 };
+if (_terrainBlocked && { _distance <= FPV_CLOSE_DISTANCE }) then {
+	private _closeAlpha = 1 - ((_distance / FPV_CLOSE_DISTANCE) min 1);
+	private _closeMin = FPV_CLOSE_TERRAIN_MIN + ((1 - FPV_CLOSE_TERRAIN_MIN) * _closeAlpha);
+	_terrainFactor = _terrainFactor max _closeMin;
+};
 if (_hasRetranslator) then {
 	private _boost = 0.75 + (0.2 * _altFactor);
 	_terrainFactor = _terrainFactor max _boost;
