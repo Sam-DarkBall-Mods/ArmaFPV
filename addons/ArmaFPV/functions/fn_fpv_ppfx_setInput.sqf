@@ -10,6 +10,9 @@
 
 #include "\ArmaFPV\script_macros.hpp"
 
+// Debug: disable all PPFX completely
+if (true) exitWith {};
+
 params [
 	"_signalQuality",
 	["_context", [], [[]]]

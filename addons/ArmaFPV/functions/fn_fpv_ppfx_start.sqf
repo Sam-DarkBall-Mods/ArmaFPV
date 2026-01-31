@@ -8,6 +8,10 @@
 
 #include "\ArmaFPV\script_macros.hpp"
 
+// Debug: disable all PPFX completely
+call DB_fnc_fpv_ppfx_stop;
+if (true) exitWith {};
+
 if (!hasInterface) exitWith {};
 if (GETMVAR(DB_fpv_ppfx_active, false)) exitWith {};
 
