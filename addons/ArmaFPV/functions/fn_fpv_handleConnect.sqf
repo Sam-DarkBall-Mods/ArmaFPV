@@ -42,16 +42,23 @@ private _pfhId = [{
 	private _isFpv = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView != "EXTERNAL" };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
+	private _layerId = GETMVAR(DB_FPV_Layer_ID, -1);
 
 	if (_isFpv) then {
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
 		if (!_wasControl || _uiMissing) then {
 			if (_uiMissing && _wasControl) then {
+				private _shown = shownHUD;
+				private _layerParams = if (_layerId >= 0) then { activeTitleEffectParams _layerId } else { [] };
 				diag_log text format [
-					"[ArmaFPV] UI missing while control=true: uav=%1 camOn=%2 camView=%3 time=%4",
+					"[ArmaFPV] UI missing while control=true: uav=%1 camOn=%2 camView=%3 shownHUD=%4 layer=%5 layerParams=%6 cutLayers=%7 time=%8",
 					_uav,
 					cameraOn,
 					cameraView,
+					_shown,
+					_layerId,
+					_layerParams,
+					allCutLayers,
 					diag_tickTime
 				];
 			};
