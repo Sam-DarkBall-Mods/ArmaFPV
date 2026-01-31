@@ -24,6 +24,7 @@ class RscTitles
         duration = 1e+038;
         movingEnable = false;
         enableSimulation = true;
+        onLoad = "uiNameSpace setVariable [""ArmaFPV_Display"", _this # 0];";
 
         class controlsBackground
         {

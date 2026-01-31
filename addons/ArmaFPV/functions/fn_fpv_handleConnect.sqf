@@ -18,12 +18,12 @@ if (_prevPfh >= 0) then {
 	[_prevPfh] call CBA_fnc_removePerFrameHandler;
 };
 
-private _state = [true, [], []];
+private _state = [true, [], [], displayNull, true, true];
 
 private _pfhId = [{
 	params ["_args", "_pfhId"];
 	_args params ["_droneTypes", "_state"];
-	_state params ["_hudShown", "_lastLayerParams", "_lastCutLayers"];
+	_state params ["_hudShown", "_lastLayerParams", "_lastCutLayers", "_lastDisplay", "_lastSigShown", "_lastTextShown"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	if (isNull _player) exitWith {};
@@ -49,42 +49,22 @@ private _pfhId = [{
 
 	if (_isFpv) then {
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
-		private _shown = shownHUD;
-		private _scriptedHud = false;
-		if (_shown isEqualType []) then {
-			_shown params ["_hud"];
-			_scriptedHud = _hud;
-		};
-		if (_scriptedHud != _hudShown) then {
-			_hudShown = _scriptedHud;
-			_state set [0, _hudShown];
-			diag_log text format [
-				"[ArmaFPV] showHUD change while control=true: scriptedHUD=%1 full=%2 time=%3",
-				_scriptedHud,
-				_shown,
-				diag_tickTime
-			];
-		};
+		private _display = GETUVAR(ArmaFPV_Display, displayNull);
+		private _sigCtrl = GETUVAR(ArmaFPV_SignalPicture, controlNull);
+		private _textCtrl = GETUVAR(ArmaFPV_SignalText, controlNull);
+		private _sigShown = if (isNull _sigCtrl) then { false } else { ctrlShown _sigCtrl };
+		private _textShown = if (isNull _textCtrl) then { false } else { ctrlShown _textCtrl };
 
-		if (_layerId >= 0) then {
-			private _layerParams = activeTitleEffectParams _layerId;
-			if !(_layerParams isEqualTo _lastLayerParams) then {
-				_state set [1, _layerParams];
-				diag_log text format [
-					"[ArmaFPV] layer params change: layer=%1 params=%2 time=%3",
-					_layerId,
-					_layerParams,
-					diag_tickTime
-				];
-			};
-		};
+		if (_display isNotEqualTo _lastDisplay || { _sigShown != _lastSigShown } || { _textShown != _lastTextShown }) then {
+			_state set [3, _display];
+			_state set [4, _sigShown];
+			_state set [5, _textShown];
 
-		private _cutLayers = allCutLayers;
-		if !(_cutLayers isEqualTo _lastCutLayers) then {
-			_state set [2, _cutLayers];
 			diag_log text format [
-				"[ArmaFPV] allCutLayers change: %1 time=%2",
-				_cutLayers,
+				"[ArmaFPV] UI state change: displayNull=%1 sigShown=%2 textShown=%3 time=%4",
+				isNull _display,
+				_sigShown,
+				_textShown,
 				diag_tickTime
 			];
 		};
