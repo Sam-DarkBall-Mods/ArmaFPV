@@ -25,6 +25,7 @@ class RscTitles
         movingEnable = false;
         enableSimulation = true;
         onLoad = "uiNameSpace setVariable [""ArmaFPV_Display"", _this # 0];";
+        onUnload = "diag_log text format ['[ArmaFPV] Dialog onUnload: time=%1 displayNull=%2', diag_tickTime, isNull (_this # 0)]; uiNameSpace setVariable ['ArmaFPV_Display', displayNull];";
 
         class controlsBackground
         {
