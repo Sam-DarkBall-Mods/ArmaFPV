@@ -39,11 +39,12 @@ private _pfhId = [{
 		SETMVAR(DB_fpv_lastUav, _uav);
 	};
 
-	private _isFpv = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView == "GUNNER" };
+	private _controlActive = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView in ["GUNNER", "EXTERNAL"] };
+	private _uiActive = _controlActive && { cameraView == "GUNNER" };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
 
-	if (_isFpv) then {
+	if (_controlActive) then {
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
 
 		if (!_wasControl) then {
@@ -68,9 +69,18 @@ private _pfhId = [{
 			];
 		};
 
-		if (!_wasControl || _uiMissing) then {
+		if (!_wasControl) then {
 			SETMVAR(ArmaFPV_isControl, true);
-			call DB_fnc_fpv_createDialog;
+		};
+
+		if (_uiActive) then {
+			if (_uiMissing) then {
+				call DB_fnc_fpv_createDialog;
+			};
+		} else {
+			if (!_uiMissing) then {
+				call DB_fnc_fpv_destroyUI;
+			};
 		};
 	} else {
 		if (_wasControl) then {

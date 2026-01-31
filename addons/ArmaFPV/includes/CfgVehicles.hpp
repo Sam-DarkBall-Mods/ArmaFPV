@@ -1523,7 +1523,7 @@ class CfgVehicles
 	{
 		scope=2;
 		scopeCurator=2;
-		displayName="Signal Booster";
+		displayName="FPV Signal Booster";
 	};
 	class B_UAV_01_backpack_F;
 	class O_UAV_01_backpack_F;
