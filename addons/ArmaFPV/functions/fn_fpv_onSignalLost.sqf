@@ -13,7 +13,11 @@ params ["_player", "_uav"];
 if (isNull _uav) exitWith {};
 if (_uav getVariable ["DB_fpv_isUAVsignalLost", false]) exitWith {};
 
-_uav engineOn false;
+if (local _uav) then {
+	_uav engineOn false;
+} else {
+	[_uav, false] remoteExec ["engineOn", 2];
+};
 
 if (!isNull _player) then {
 	_player connectTerminalToUAV objNull;
