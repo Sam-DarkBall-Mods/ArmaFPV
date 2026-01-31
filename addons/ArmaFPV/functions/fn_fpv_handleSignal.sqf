@@ -15,10 +15,7 @@ private _state = [
 	1,
 	diag_tickTime,
 	-1,
-	false,
-	displayNull,
-	true,
-	true
+	false
 ];
 
 call DB_fnc_fpv_ppfx_start;
@@ -46,9 +43,6 @@ private _pfhId = [{
 	private _lastPpfxUpdate = _state # 2;
 	private _lastJammerBroadcast = _state # 3;
 	private _lastJammerActive = _state # 4;
-	private _lastDisplay = _state # 5;
-	private _lastSigShown = _state # 6;
-	private _lastTextShown = _state # 7;
 	private _doUpdate = (_now - _lastUpdate) >= _loopInterval;
 	private _doPpfxUpdate = (_now - _lastPpfxUpdate) >= _ppfxInterval;
 
@@ -83,27 +77,6 @@ private _pfhId = [{
 		};
 		_state set [3, _now];
 		_state set [4, _inJammer];
-	};
-
-	// UI visibility probe (per-frame) to catch short flickers
-	private _display = GETUVAR(ArmaFPV_Display, displayNull);
-	private _sigCtrl = GETUVAR(ArmaFPV_SignalPicture, controlNull);
-	private _textCtrl = GETUVAR(ArmaFPV_SignalText, controlNull);
-	private _sigShown = if (isNull _sigCtrl) then { false } else { ctrlShown _sigCtrl };
-	private _textShown = if (isNull _textCtrl) then { false } else { ctrlShown _textCtrl };
-
-	if (_display isNotEqualTo _lastDisplay || { _sigShown != _lastSigShown } || { _textShown != _lastTextShown }) then {
-		_state set [5, _display];
-		_state set [6, _sigShown];
-		_state set [7, _textShown];
-		diag_log text format [
-			"[ArmaFPV] UI state change (per-frame): displayNull=%1 sigShown=%2 textShown=%3 time=%4 frame=%5",
-			isNull _display,
-			_sigShown,
-			_textShown,
-			diag_tickTime,
-			diag_frameNo
-		];
 	};
 
 	if (_doUpdate || _doPpfxUpdate) then {

@@ -18,12 +18,9 @@ if (_prevPfh >= 0) then {
 	[_prevPfh] call CBA_fnc_removePerFrameHandler;
 };
 
-private _state = [true, [], [], displayNull, true, true];
-
 private _pfhId = [{
 	params ["_args", "_pfhId"];
-	_args params ["_droneTypes", "_state"];
-	_state params ["_hudShown", "_lastLayerParams", "_lastCutLayers", "_lastDisplay", "_lastSigShown", "_lastTextShown"];
+	_args params ["_droneTypes"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	if (isNull _player) exitWith {};
@@ -45,45 +42,33 @@ private _pfhId = [{
 	private _isFpv = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView != "EXTERNAL" };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
-	private _layerId = GETMVAR(DB_FPV_Layer_ID, -1);
 
 	if (_isFpv) then {
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
-		private _display = GETUVAR(ArmaFPV_Display, displayNull);
-		private _sigCtrl = GETUVAR(ArmaFPV_SignalPicture, controlNull);
-		private _textCtrl = GETUVAR(ArmaFPV_SignalText, controlNull);
-		private _sigShown = if (isNull _sigCtrl) then { false } else { ctrlShown _sigCtrl };
-		private _textShown = if (isNull _textCtrl) then { false } else { ctrlShown _textCtrl };
 
-		if (_display isNotEqualTo _lastDisplay || { _sigShown != _lastSigShown } || { _textShown != _lastTextShown }) then {
-			_state set [3, _display];
-			_state set [4, _sigShown];
-			_state set [5, _textShown];
-
-			diag_log text format [
-				"[ArmaFPV] UI state change: displayNull=%1 sigShown=%2 textShown=%3 time=%4",
-				isNull _display,
-				_sigShown,
-				_textShown,
-				diag_tickTime
+		if (!_wasControl) then {
+			private _currentHud = shownHUD;
+			if ((count _currentHud) == 11) then {
+				SETMVAR(ArmaFPV_savedHUD, _currentHud);
+			} else {
+				SETMVAR(ArmaFPV_savedHUD, []);
+			};
+			showHUD [
+				true,  // scriptedHUD
+				false, // info
+				true,  // radar
+				true,  // compass
+				true,  // direction
+				true,  // menu
+				true,  // group
+				true,  // cursors
+				true,  // panels
+				true,  // kills
+				true   // showIcon3D
 			];
 		};
+
 		if (!_wasControl || _uiMissing) then {
-			if (_uiMissing && _wasControl) then {
-				private _shown = shownHUD;
-				private _layerParams = if (_layerId >= 0) then { activeTitleEffectParams _layerId } else { [] };
-				diag_log text format [
-					"[ArmaFPV] UI missing while control=true: uav=%1 camOn=%2 camView=%3 shownHUD=%4 layer=%5 layerParams=%6 cutLayers=%7 time=%8",
-					_uav,
-					cameraOn,
-					cameraView,
-					_shown,
-					_layerId,
-					_layerParams,
-					allCutLayers,
-					diag_tickTime
-				];
-			};
 			SETMVAR(ArmaFPV_isControl, true);
 			call DB_fnc_fpv_createDialog;
 		};
@@ -91,9 +76,14 @@ private _pfhId = [{
 		if (_wasControl) then {
 			SETMVAR(ArmaFPV_isControl, false);
 			call DB_fnc_fpv_destroyUI;
+			private _savedHud = GETMVAR(ArmaFPV_savedHUD, []);
+			if ((count _savedHud) == 11) then {
+				showHUD _savedHud;
+			};
+			SETMVAR(ArmaFPV_savedHUD, []);
 		};
 	};
-}, _loopInterval, [_droneTypes, _state]] call CBA_fnc_addPerFrameHandler;
+}, _loopInterval, [_droneTypes]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_connectPFH, _pfhId);
 
