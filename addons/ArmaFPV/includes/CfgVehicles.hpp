@@ -113,7 +113,7 @@ class CfgVehicles
 		{
 		};
 		startDuration=3;
-		maxSpeed=180;
+		maxSpeed=190;
 		precision=15;
 		steerAheadSimul=0.5;
 		steerAheadPlan=0.69999999;
