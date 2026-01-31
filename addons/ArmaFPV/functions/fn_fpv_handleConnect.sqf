@@ -18,9 +18,12 @@ if (_prevPfh >= 0) then {
 	[_prevPfh] call CBA_fnc_removePerFrameHandler;
 };
 
+private _state = [true, [], []];
+
 private _pfhId = [{
 	params ["_args", "_pfhId"];
-	_args params ["_droneTypes"];
+	_args params ["_droneTypes", "_state"];
+	_state params ["_hudShown", "_lastLayerParams", "_lastCutLayers"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	if (isNull _player) exitWith {};
@@ -46,6 +49,45 @@ private _pfhId = [{
 
 	if (_isFpv) then {
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
+		private _shown = shownHUD;
+		private _scriptedHud = false;
+		if (_shown isEqualType []) then {
+			_shown params ["_hud"];
+			_scriptedHud = _hud;
+		};
+		if (_scriptedHud != _hudShown) then {
+			_hudShown = _scriptedHud;
+			_state set [0, _hudShown];
+			diag_log text format [
+				"[ArmaFPV] showHUD change while control=true: scriptedHUD=%1 full=%2 time=%3",
+				_scriptedHud,
+				_shown,
+				diag_tickTime
+			];
+		};
+
+		if (_layerId >= 0) then {
+			private _layerParams = activeTitleEffectParams _layerId;
+			if !(_layerParams isEqualTo _lastLayerParams) then {
+				_state set [1, _layerParams];
+				diag_log text format [
+					"[ArmaFPV] layer params change: layer=%1 params=%2 time=%3",
+					_layerId,
+					_layerParams,
+					diag_tickTime
+				];
+			};
+		};
+
+		private _cutLayers = allCutLayers;
+		if !(_cutLayers isEqualTo _lastCutLayers) then {
+			_state set [2, _cutLayers];
+			diag_log text format [
+				"[ArmaFPV] allCutLayers change: %1 time=%2",
+				_cutLayers,
+				diag_tickTime
+			];
+		};
 		if (!_wasControl || _uiMissing) then {
 			if (_uiMissing && _wasControl) then {
 				private _shown = shownHUD;
@@ -71,7 +113,7 @@ private _pfhId = [{
 			call DB_fnc_fpv_destroyUI;
 		};
 	};
-}, _loopInterval, [_droneTypes]] call CBA_fnc_addPerFrameHandler;
+}, _loopInterval, [_droneTypes, _state]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_connectPFH, _pfhId);
 
