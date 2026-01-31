@@ -39,12 +39,35 @@ private _pfhId = [{
 		SETMVAR(DB_fpv_lastUav, _uav);
 	};
 
-	private _isFpv = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView != "EXTERNAL" };
+	private _isFpv = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView == "GUNNER" };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
 
 	if (_isFpv) then {
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
+
+		if (!_wasControl) then {
+			private _currentHud = shownHUD;
+			if ((count _currentHud) == 11) then {
+				SETMVAR(ArmaFPV_savedHUD, _currentHud);
+			} else {
+				SETMVAR(ArmaFPV_savedHUD, []);
+			};
+			showHUD [
+				true,  // scriptedHUD
+				false, // info
+				true,  // radar
+				true,  // compass
+				true,  // direction
+				true,  // menu
+				true,  // group
+				true,  // cursors
+				true,  // panels
+				true,  // kills
+				true   // showIcon3D
+			];
+		};
+
 		if (!_wasControl || _uiMissing) then {
 			SETMVAR(ArmaFPV_isControl, true);
 			call DB_fnc_fpv_createDialog;
@@ -53,6 +76,11 @@ private _pfhId = [{
 		if (_wasControl) then {
 			SETMVAR(ArmaFPV_isControl, false);
 			call DB_fnc_fpv_destroyUI;
+			private _savedHud = GETMVAR(ArmaFPV_savedHUD, []);
+			if ((count _savedHud) == 11) then {
+				showHUD _savedHud;
+			};
+			SETMVAR(ArmaFPV_savedHUD, []);
 		};
 	};
 }, _loopInterval, [_droneTypes]] call CBA_fnc_addPerFrameHandler;
