@@ -28,7 +28,7 @@ if (_uavType find "at" > -1) then {
 };
 
 if (_uavType find "ap" > -1) then {
-	_missileType = "FPV_RPG32_AP";
+	_missileType = "R_TBG32V_F";
 };
 
 if (_missileType isEqualTo "") exitWith {};
