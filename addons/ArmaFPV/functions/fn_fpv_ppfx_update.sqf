@@ -28,6 +28,9 @@ private _fxWet = GETMVAR(DB_fpv_ppfx_fxWet, -1);
 
 private _q = GETMVAR(DB_fpv_ppfx_input, 1);
 _q = (_q max 0) min 1;
+private _prevQ = GETMVAR(DB_fpv_ppfx_prevQ, _q);
+private _qDrop = (_prevQ - _q) max 0;
+SETMVAR(DB_fpv_ppfx_prevQ, _q);
 
 private _context = missionNamespace getVariable ["DB_fpv_ppfx_context", []];
 private _getCtx = {
@@ -99,6 +102,13 @@ private _lowAltImpact = _lowAltFactor * _severity;
 private _noiseWeight = [_q, 0.95, 0.35] call _smoothstepInv;
 private _blurWeight = _severity ^ 1.7;
 private _aberrWeight = _severity ^ 2.2;
+private _dropImpulse = (_qDrop * 2.0) min 0.35;
+
+if (_dropImpulse > 0) then {
+	_noiseWeight = (_noiseWeight + (_dropImpulse * 0.8)) min 1;
+	_blurWeight = (_blurWeight + (_dropImpulse * 0.5)) min 1;
+	_aberrWeight = (_aberrWeight + (_dropImpulse * 0.35)) min 1;
+};
 
 private _envBoost = 1;
 if (_altAGL < 20 && { _q < 0.5 }) then { _envBoost = _envBoost * 1.25; };
@@ -133,8 +143,23 @@ if (_glitchType != "" && { _now >= _glitchEnd }) then {
 	SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitchReset);
 };
 
+private _lastDropGlitch = GETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
+if (
+	_glitchType isEqualTo ""
+	&& { _q < 0.85 }
+	&& { _qDrop >= 0.03 }
+	&& { (_now - _lastDropGlitch) >= 0.25 }
+) then {
+	_glitchType = if (_q < 0.35) then { "BLACK_PULSE" } else { "LINE_TEAR" };
+	_glitchEnd = _now + (0.05 + ((_qDrop min 0.4) * 0.35));
+	private _ppfxDropGlitch = [_glitchType, _glitchEnd];
+	SETMVAR(DB_fpv_ppfx_glitch, _ppfxDropGlitch);
+	SETMVAR(DB_fpv_ppfx_lastDropGlitch, _now);
+};
+
 if (_glitchType isEqualTo "") then {
 	private _chanceBase = 0.01 + (_severity ^ 2) * 0.35;
+	_chanceBase = _chanceBase + ((_qDrop min 0.25) * 0.6);
 	if (_altAGL < 20) then { _chanceBase = _chanceBase + (0.03 * _severity); };
 	if (_lowAltImpact > 0) then { _chanceBase = _chanceBase + (_lowAltImpact * 0.08); };
 	if (_inJammer) then { _chanceBase = _chanceBase + 0.06; };
