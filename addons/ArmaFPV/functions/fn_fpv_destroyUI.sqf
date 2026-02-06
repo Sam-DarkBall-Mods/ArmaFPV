@@ -16,7 +16,6 @@ private _clearEffects = {
 
 	private _activeToken = GETMVAR(DB_fpv_pendingCleanupToken, -1);
 	if (_token isNotEqualTo _activeToken) exitWith {};
-	if (GETMVAR(ArmaFPV_isControl, false)) exitWith {};
 
 	private _layer = GETMVAR(DB_FPV_Layer_ID, -1);
 	if (_layer >= 0) then {
