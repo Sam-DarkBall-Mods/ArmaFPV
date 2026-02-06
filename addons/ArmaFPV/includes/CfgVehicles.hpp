@@ -1524,6 +1524,14 @@ class CfgVehicles
 		scope=2;
 		scopeCurator=2;
 		displayName="FPV Signal Booster";
+		armor=60;
+		armorStructural=2;
+		destrType="DestructBuilding";
+		explosionShielding=0.5;
+		class EventHandlers
+		{
+			init="(_this # 0) allowDamage true;";
+		};
 	};
 	class B_UAV_01_backpack_F;
 	class O_UAV_01_backpack_F;
