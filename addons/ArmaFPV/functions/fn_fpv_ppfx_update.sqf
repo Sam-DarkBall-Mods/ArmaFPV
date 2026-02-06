@@ -28,6 +28,9 @@ private _fxWet = GETMVAR(DB_fpv_ppfx_fxWet, -1);
 
 private _q = GETMVAR(DB_fpv_ppfx_input, 1);
 _q = (_q max 0) min 1;
+private _prevQ = GETMVAR(DB_fpv_ppfx_prevQ, _q);
+private _qDrop = (_prevQ - _q) max 0;
+SETMVAR(DB_fpv_ppfx_prevQ, _q);
 
 private _context = missionNamespace getVariable ["DB_fpv_ppfx_context", []];
 private _getCtx = {
@@ -99,6 +102,13 @@ private _lowAltImpact = _lowAltFactor * _severity;
 private _noiseWeight = [_q, 0.95, 0.35] call _smoothstepInv;
 private _blurWeight = _severity ^ 1.7;
 private _aberrWeight = _severity ^ 2.2;
+private _dropImpulse = (_qDrop * 2.0) min 0.35;
+
+if (_dropImpulse > 0) then {
+	_noiseWeight = (_noiseWeight + (_dropImpulse * 0.8)) min 1;
+	_blurWeight = (_blurWeight + (_dropImpulse * 0.5)) min 1;
+	_aberrWeight = (_aberrWeight + (_dropImpulse * 0.35)) min 1;
+};
 
 private _envBoost = 1;
 if (_altAGL < 20 && { _q < 0.5 }) then { _envBoost = _envBoost * 1.25; };
@@ -133,8 +143,23 @@ if (_glitchType != "" && { _now >= _glitchEnd }) then {
 	SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitchReset);
 };
 
+private _lastDropGlitch = GETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
+if (
+	_glitchType isEqualTo ""
+	&& { _q < 0.85 }
+	&& { _qDrop >= 0.03 }
+	&& { (_now - _lastDropGlitch) >= 0.25 }
+) then {
+	_glitchType = if (_q < 0.35) then { "BLACK_PULSE" } else { "LINE_TEAR" };
+	_glitchEnd = _now + (0.05 + ((_qDrop min 0.4) * 0.35));
+	private _ppfxDropGlitch = [_glitchType, _glitchEnd];
+	SETMVAR(DB_fpv_ppfx_glitch, _ppfxDropGlitch);
+	SETMVAR(DB_fpv_ppfx_lastDropGlitch, _now);
+};
+
 if (_glitchType isEqualTo "") then {
 	private _chanceBase = 0.01 + (_severity ^ 2) * 0.35;
+	_chanceBase = _chanceBase + ((_qDrop min 0.25) * 0.6);
 	if (_altAGL < 20) then { _chanceBase = _chanceBase + (0.03 * _severity); };
 	if (_lowAltImpact > 0) then { _chanceBase = _chanceBase + (_lowAltImpact * 0.08); };
 	if (_inJammer) then { _chanceBase = _chanceBase + 0.06; };
@@ -165,6 +190,7 @@ private _glitchBlur = 0;
 private _glitchRadial = 0;
 private _glitchWet = 0;
 private _colorShift = 0;
+private _stripePulse = 0;
 private _pulse = 0;
 private _blackout = 0;
 private _invert = 0;
@@ -189,7 +215,27 @@ switch (_glitchType) do {
 	default {};
 };
 
-private _commitTime = if (_glitchType isEqualTo "") then { 0.03 } else { 0 };
+if (_severity > 0.35) then {
+	private _stripeHz = 7 + (_severity * 13);
+	private _stripePhase = (_now * _stripeHz + (sin (_now * 3.1) * 0.35)) % 1;
+	private _stripeDuty = (0.22 - (_severity * 0.1)) max 0.08;
+	if (_stripePhase < _stripeDuty) then {
+		_stripePulse = (0.18 + (_severity * 0.42)) min 0.65;
+	};
+};
+
+if (_stripePulse > 0) then {
+	_glitchWet = (_glitchWet + (_stripePulse * 0.38)) min 0.45;
+	_glitchNoise = (_glitchNoise + (_stripePulse * 0.55)) min 1;
+	_glitchRadial = (_glitchRadial + (_stripePulse * 0.018)) min 0.06;
+	_colorShift = _colorShift + (_stripePulse * 0.045);
+};
+
+private _commitTime = if (_glitchType isEqualTo "") then {
+	if (_severity > 0.7) then { 0 } else { if (_severity > 0.35) then { 0.01 } else { 0.03 } }
+} else {
+	0
+};
 
 private _analogBase = 0.06;
 private _drift = (sin (_now * 2.1) * 0.03 + sin (_now * 0.7) * 0.015) * _severity;
@@ -214,7 +260,17 @@ if (_lowAltFactor > 0.25) then {
 	_microFlicker = _microWave * _microAmp;
 };
 
-private _finalBlackout = (_blackout max _flickerBlackout max _microFlicker) min 0.55;
+private _hardFlicker = 0;
+if (_severity > 0.45) then {
+	private _hardHz = 26 + (_severity * 34);
+	private _hardPhase = (_now * _hardHz) % 1;
+	private _hardDuty = (0.16 - (_severity * 0.08)) max 0.05;
+	if (_hardPhase < _hardDuty) then {
+		_hardFlicker = 0.08 + (_severity * 0.26);
+	};
+};
+
+private _finalBlackout = (_blackout max _flickerBlackout max _microFlicker max _hardFlicker) min 0.55;
 private _brightness = _baseBrightness * (1 - _finalBlackout);
 if (_severity > 0.7) then {
 	_brightness = _brightness max 0.16;
@@ -228,6 +284,11 @@ private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - 
 private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
 private _blur = (_blurWeight + _glitchBlur + _analogBase * 0.08) min 1;
 private _chrom = (_aberrWeight * 0.025 + _analogBase * 0.004) min 0.06;
+
+if (_stripePulse > 0) then {
+	_grain = (_grain + (_stripePulse * 0.22)) min 1;
+	_chrom = (_chrom + (_stripePulse * 0.012)) min 0.06;
+};
 
 private _resTarget = -1;
 
