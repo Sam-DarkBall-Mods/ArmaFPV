@@ -501,9 +501,19 @@ class CfgVehicles
 			primary=1; \
 		}; \
 	};
-	class O_Crocus_AT: drone_base_F
+	class ARMAFPV_Crocus_AT_Base: drone_base_F
 	{
 		author="$Sam";
+		scope=0;
+		scopeCurator=0;
+		editorPreview=QARMAFPV_DATA(krokus1.jpg);
+		displayName="Crocus AT";
+		accuracy=0.5;
+		textureList[]=
+		{
+			"Indep",
+			1
+		};
 		class SimpleObject
 		{
 			eden=1;
@@ -629,7 +639,27 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		editorPreview=QARMAFPV_DATA(krokus1.jpg);
+		class EventHandlers
+		{
+			class ArmaFPV
+			{
+				hit="_this call DB_fnc_fpv_onDestroy";
+				init="(_this # 0) call DB_fnc_fpv_droneInit;";
+			};
+		};
+	};
+
+	class ARMAFPV_Crocus_AP_Base: ARMAFPV_Crocus_AT_Base
+	{
+		editorPreview=QARMAFPV_DATA(termo.jpg);
+		displayName="Crocus AP";
+		model=QARMAFPV_PATH(drone2\drone2.p3d);
+		icon=QARMAFPV_DATA(drononmap.paa);
+		picture=QARMAFPV_DATA(drononmap.paa);
+	};
+
+	class O_Crocus_AT: ARMAFPV_Crocus_AT_Base
+	{
 		_generalMacro="O_Crocus_AT";
 		scope=2;
 		scopeCurator=2;
@@ -640,174 +670,27 @@ class CfgVehicles
 		{
 			"O_UAV_AI"
 		};
-		displayName="Crocus AT";
-		accuracy=0.5;
 		ARMAFPV_DISASSEMBLE("O_Crocus_AT_Bag")
-		textureList[]=
-		{
-			"Indep",
-			1
-		};
-		class EventHandlers
-		{
-			class ArmaFPV
-			{
-				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) call DB_fnc_fpv_droneInit;";
-			};
-		};
 	};
-	class O_Crocus_AP: O_Crocus_AT
+
+	class O_Crocus_AP: ARMAFPV_Crocus_AP_Base
 	{
-		author="$Sam";
 		_generalMacro="O_Crocus_AP";
-		scopeCurator=2;
-		class SimpleObject
-		{
-			eden=1;
-			animate[]=
-			{
- 
-				{
-					"damagehide",
-					0
-				},
- 
-				{
-					"rotorimpacthide",
-					0
-				},
- 
-				{
-					"tailrotorimpacthide",
-					0
-				},
- 
-				{
-					"propeller1_rotation",
-					0
-				},
- 
-				{
-					"propeller1_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller2_rotation",
-					0
-				},
- 
-				{
-					"propeller2_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller3_rotation",
-					0
-				},
- 
-				{
-					"propeller3_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller4_rotation",
-					0
-				},
- 
-				{
-					"propeller4_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller1_hide",
-					0
-				},
- 
-				{
-					"propeller1_blur_hide",
-					0
-				},
- 
-				{
-					"propeller2_hide",
-					0
-				},
- 
-				{
-					"propeller2_blur_hide",
-					0
-				},
- 
-				{
-					"propeller3_hide",
-					0
-				},
- 
-				{
-					"propeller3_blur_hide",
-					0
-				},
- 
-				{
-					"propeller4_hide",
-					0
-				},
- 
-				{
-					"propeller4_blur_hide",
-					0
-				},
- 
-				{
-					"mainturret",
-					0
-				},
- 
-				{
-					"maingun",
-					-0.050000001
-				}
-			};
-			hide[]=
-			{
-				"zasleh",
-				"tail rotor blur",
-				"main rotor blur",
-				"zadni svetlo",
-				"clan",
-				"podsvit pristroju",
-				"poskozeni"
-			};
-			verticalOffset=0.15000001;
-			verticalOffsetWorld=-0.001;
-			init="''";
-		};
-		editorPreview=QARMAFPV_DATA(termo.jpg);
-		displayName="Crocus AP";
-		model=QARMAFPV_PATH(drone2\drone2.p3d);
-		icon=QARMAFPV_DATA(drononmap.paa);
-		picture=QARMAFPV_DATA(drononmap.paa);
-		ARMAFPV_DISASSEMBLE("O_Crocus_AP_Bag")
-		class EventHandlers
-		{
-			class ArmaFPV
-			{
-				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) call DB_fnc_fpv_droneInit;";
-			};
-		};
-	};
-	class O_Crocus_AT_TI: O_Crocus_AT
-	{
-		author="$Sam";
-		_generalMacro="O_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
+		side=0;
+		faction="OPF_F";
+		crew="O_UAV_AI";
+		typicalCargo[]=
+		{
+			"O_UAV_AI"
+		};
+		ARMAFPV_DISASSEMBLE("O_Crocus_AP_Bag")
+	};
+
+	class O_Crocus_AT_TI: O_Crocus_AT
+	{
+		_generalMacro="O_Crocus_AT_TI";
 		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
@@ -821,12 +704,10 @@ class CfgVehicles
 		};
 		ARMAFPV_DISASSEMBLE("O_Crocus_AT_TI_Bag")
 	};
+
 	class O_Crocus_AP_TI: O_Crocus_AP
 	{
-		author="$Sam";
 		_generalMacro="O_Crocus_AP_TI";
-		scope=2;
-		scopeCurator=2;
 		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
 		class Viewoptics: Viewoptics
@@ -840,135 +721,9 @@ class CfgVehicles
 		};
 		ARMAFPV_DISASSEMBLE("O_Crocus_AP_TI_Bag")
 	};
-	class B_Crocus_AT: drone_base_F
+
+	class B_Crocus_AT: ARMAFPV_Crocus_AT_Base
 	{
-		author="$Sam";
-		class SimpleObject
-		{
-			eden=1;
-			animate[]=
-			{
- 
-				{
-					"damagehide",
-					0
-				},
- 
-				{
-					"rotorimpacthide",
-					0
-				},
- 
-				{
-					"tailrotorimpacthide",
-					0
-				},
- 
-				{
-					"propeller1_rotation",
-					0
-				},
- 
-				{
-					"propeller1_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller2_rotation",
-					0
-				},
- 
-				{
-					"propeller2_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller3_rotation",
-					0
-				},
- 
-				{
-					"propeller3_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller4_rotation",
-					0
-				},
- 
-				{
-					"propeller4_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller1_hide",
-					0
-				},
- 
-				{
-					"propeller1_blur_hide",
-					0
-				},
- 
-				{
-					"propeller2_hide",
-					0
-				},
- 
-				{
-					"propeller2_blur_hide",
-					0
-				},
- 
-				{
-					"propeller3_hide",
-					0
-				},
- 
-				{
-					"propeller3_blur_hide",
-					0
-				},
- 
-				{
-					"propeller4_hide",
-					0
-				},
- 
-				{
-					"propeller4_blur_hide",
-					0
-				},
- 
-				{
-					"mainturret",
-					0
-				},
- 
-				{
-					"maingun",
-					-0.050000001
-				}
-			};
-			hide[]=
-			{
-				"zasleh",
-				"tail rotor blur",
-				"main rotor blur",
-				"zadni svetlo",
-				"clan",
-				"podsvit pristroju",
-				"poskozeni"
-			};
-			verticalOffset=0.15000001;
-			verticalOffsetWorld=-0.001;
-			init="''";
-		};
-		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		_generalMacro="B_Crocus_AT";
 		scope=2;
 		scopeCurator=2;
@@ -979,174 +734,27 @@ class CfgVehicles
 		{
 			"B_UAV_AI"
 		};
-		displayName="Crocus AT";
-		accuracy=0.5;
 		ARMAFPV_DISASSEMBLE("B_Crocus_AT_Bag")
-		textureList[]=
-		{
-			"Indep",
-			1
-		};
-		class EventHandlers
-		{
-			class ArmaFPV
-			{
-				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) call DB_fnc_fpv_droneInit;";
-			};
-		};
 	};
-	class B_Crocus_AP: B_Crocus_AT
+
+	class B_Crocus_AP: ARMAFPV_Crocus_AP_Base
 	{
-		author="$Sam";
 		_generalMacro="B_Crocus_AP";
-		scopeCurator=2;
-		class SimpleObject
-		{
-			eden=1;
-			animate[]=
-			{
- 
-				{
-					"damagehide",
-					0
-				},
- 
-				{
-					"rotorimpacthide",
-					0
-				},
- 
-				{
-					"tailrotorimpacthide",
-					0
-				},
- 
-				{
-					"propeller1_rotation",
-					0
-				},
- 
-				{
-					"propeller1_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller2_rotation",
-					0
-				},
- 
-				{
-					"propeller2_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller3_rotation",
-					0
-				},
- 
-				{
-					"propeller3_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller4_rotation",
-					0
-				},
- 
-				{
-					"propeller4_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller1_hide",
-					0
-				},
- 
-				{
-					"propeller1_blur_hide",
-					0
-				},
- 
-				{
-					"propeller2_hide",
-					0
-				},
- 
-				{
-					"propeller2_blur_hide",
-					0
-				},
- 
-				{
-					"propeller3_hide",
-					0
-				},
- 
-				{
-					"propeller3_blur_hide",
-					0
-				},
- 
-				{
-					"propeller4_hide",
-					0
-				},
- 
-				{
-					"propeller4_blur_hide",
-					0
-				},
- 
-				{
-					"mainturret",
-					0
-				},
- 
-				{
-					"maingun",
-					-0.050000001
-				}
-			};
-			hide[]=
-			{
-				"zasleh",
-				"tail rotor blur",
-				"main rotor blur",
-				"zadni svetlo",
-				"clan",
-				"podsvit pristroju",
-				"poskozeni"
-			};
-			verticalOffset=0.15000001;
-			verticalOffsetWorld=-0.001;
-			init="''";
-		};
-		editorPreview=QARMAFPV_DATA(termo.jpg);
-		displayName="Crocus AP";
-		model=QARMAFPV_PATH(drone2\drone2.p3d);
-		icon=QARMAFPV_DATA(drononmap.paa);
-		picture=QARMAFPV_DATA(drononmap.paa);
-		ARMAFPV_DISASSEMBLE("B_Crocus_AP_Bag")
-		class EventHandlers
-		{
-			class ArmaFPV
-			{
-				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) call DB_fnc_fpv_droneInit;";
-			};
-		};
-	};
-	class B_Crocus_AT_TI: B_Crocus_AT
-	{
-		author="$Sam";
-		_generalMacro="B_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
+		side=1;
+		faction="BLU_F";
+		crew="B_UAV_AI";
+		typicalCargo[]=
+		{
+			"B_UAV_AI"
+		};
+		ARMAFPV_DISASSEMBLE("B_Crocus_AP_Bag")
+	};
+
+	class B_Crocus_AT_TI: B_Crocus_AT
+	{
+		_generalMacro="B_Crocus_AT_TI";
 		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
@@ -1160,12 +768,10 @@ class CfgVehicles
 		};
 		ARMAFPV_DISASSEMBLE("B_Crocus_AT_TI_Bag")
 	};
+
 	class B_Crocus_AP_TI: B_Crocus_AP
 	{
-		author="$Sam";
 		_generalMacro="B_Crocus_AP_TI";
-		scope=2;
-		scopeCurator=2;
 		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
 		class Viewoptics: Viewoptics
@@ -1179,135 +785,9 @@ class CfgVehicles
 		};
 		ARMAFPV_DISASSEMBLE("B_Crocus_AP_TI_Bag")
 	};
-	class I_Crocus_AT: drone_base_F
+
+	class I_Crocus_AT: ARMAFPV_Crocus_AT_Base
 	{
-		author="$Sam";
-		class SimpleObject
-		{
-			eden=1;
-			animate[]=
-			{
- 
-				{
-					"damagehide",
-					0
-				},
- 
-				{
-					"rotorimpacthide",
-					0
-				},
- 
-				{
-					"tailrotorimpacthide",
-					0
-				},
- 
-				{
-					"propeller1_rotation",
-					0
-				},
- 
-				{
-					"propeller1_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller2_rotation",
-					0
-				},
- 
-				{
-					"propeller2_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller3_rotation",
-					0
-				},
- 
-				{
-					"propeller3_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller4_rotation",
-					0
-				},
- 
-				{
-					"propeller4_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller1_hide",
-					0
-				},
- 
-				{
-					"propeller1_blur_hide",
-					0
-				},
- 
-				{
-					"propeller2_hide",
-					0
-				},
- 
-				{
-					"propeller2_blur_hide",
-					0
-				},
- 
-				{
-					"propeller3_hide",
-					0
-				},
- 
-				{
-					"propeller3_blur_hide",
-					0
-				},
- 
-				{
-					"propeller4_hide",
-					0
-				},
- 
-				{
-					"propeller4_blur_hide",
-					0
-				},
- 
-				{
-					"mainturret",
-					0
-				},
- 
-				{
-					"maingun",
-					-0.050000001
-				}
-			};
-			hide[]=
-			{
-				"zasleh",
-				"tail rotor blur",
-				"main rotor blur",
-				"zadni svetlo",
-				"clan",
-				"podsvit pristroju",
-				"poskozeni"
-			};
-			verticalOffset=0.15000001;
-			verticalOffsetWorld=-0.001;
-			init="''";
-		};
-		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		_generalMacro="I_Crocus_AT";
 		scope=2;
 		scopeCurator=2;
@@ -1318,174 +798,27 @@ class CfgVehicles
 		{
 			"I_UAV_AI"
 		};
-		displayName="Crocus AT";
-		accuracy=0.5;
 		ARMAFPV_DISASSEMBLE("I_Crocus_AT_Bag")
-		textureList[]=
-		{
-			"Indep",
-			1
-		};
-		class EventHandlers
-		{
-			class ArmaFPV
-			{
-				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) call DB_fnc_fpv_droneInit;";
-			};
-		};
 	};
-	class I_Crocus_AP: I_Crocus_AT
+
+	class I_Crocus_AP: ARMAFPV_Crocus_AP_Base
 	{
-		author="$Sam";
 		_generalMacro="I_Crocus_AP";
-		scopeCurator=2;
-		class SimpleObject
-		{
-			eden=1;
-			animate[]=
-			{
- 
-				{
-					"damagehide",
-					0
-				},
- 
-				{
-					"rotorimpacthide",
-					0
-				},
- 
-				{
-					"tailrotorimpacthide",
-					0
-				},
- 
-				{
-					"propeller1_rotation",
-					0
-				},
- 
-				{
-					"propeller1_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller2_rotation",
-					0
-				},
- 
-				{
-					"propeller2_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller3_rotation",
-					0
-				},
- 
-				{
-					"propeller3_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller4_rotation",
-					0
-				},
- 
-				{
-					"propeller4_blur_rotation",
-					0
-				},
- 
-				{
-					"propeller1_hide",
-					0
-				},
- 
-				{
-					"propeller1_blur_hide",
-					0
-				},
- 
-				{
-					"propeller2_hide",
-					0
-				},
- 
-				{
-					"propeller2_blur_hide",
-					0
-				},
- 
-				{
-					"propeller3_hide",
-					0
-				},
- 
-				{
-					"propeller3_blur_hide",
-					0
-				},
- 
-				{
-					"propeller4_hide",
-					0
-				},
- 
-				{
-					"propeller4_blur_hide",
-					0
-				},
- 
-				{
-					"mainturret",
-					0
-				},
- 
-				{
-					"maingun",
-					-0.050000001
-				}
-			};
-			hide[]=
-			{
-				"zasleh",
-				"tail rotor blur",
-				"main rotor blur",
-				"zadni svetlo",
-				"clan",
-				"podsvit pristroju",
-				"poskozeni"
-			};
-			verticalOffset=0.15000001;
-			verticalOffsetWorld=-0.001;
-			init="''";
-		};
-		editorPreview=QARMAFPV_DATA(termo.jpg);
-		displayName="Crocus AP";
-		model=QARMAFPV_PATH(drone2\drone2.p3d);
-		icon=QARMAFPV_DATA(drononmap.paa);
-		picture=QARMAFPV_DATA(drononmap.paa);
-		ARMAFPV_DISASSEMBLE("I_Crocus_AP_Bag")
-		class EventHandlers
-		{
-			class ArmaFPV
-			{
-				hit="_this call DB_fnc_fpv_onDestroy";
-				init="(_this # 0) call DB_fnc_fpv_droneInit;";
-			};
-		};
-	};
-	class I_Crocus_AT_TI: I_Crocus_AT
-	{
-		author="$Sam";
-		_generalMacro="I_Crocus_AT_TI";
 		scope=2;
 		scopeCurator=2;
+		side=2;
+		faction="IND_F";
+		crew="I_UAV_AI";
+		typicalCargo[]=
+		{
+			"I_UAV_AI"
+		};
+		ARMAFPV_DISASSEMBLE("I_Crocus_AP_Bag")
+	};
+
+	class I_Crocus_AT_TI: I_Crocus_AT
+	{
+		_generalMacro="I_Crocus_AT_TI";
 		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
 		class Viewoptics: Viewoptics
@@ -1499,12 +832,10 @@ class CfgVehicles
 		};
 		ARMAFPV_DISASSEMBLE("I_Crocus_AT_TI_Bag")
 	};
+
 	class I_Crocus_AP_TI: I_Crocus_AP
 	{
-		author="$Sam";
 		_generalMacro="I_Crocus_AP_TI";
-		scope=2;
-		scopeCurator=2;
 		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
 		class Viewoptics: Viewoptics
