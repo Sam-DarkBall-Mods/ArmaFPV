@@ -190,6 +190,7 @@ private _glitchBlur = 0;
 private _glitchRadial = 0;
 private _glitchWet = 0;
 private _colorShift = 0;
+private _stripePulse = 0;
 private _pulse = 0;
 private _blackout = 0;
 private _invert = 0;
@@ -214,7 +215,27 @@ switch (_glitchType) do {
 	default {};
 };
 
-private _commitTime = if (_glitchType isEqualTo "") then { 0.03 } else { 0 };
+if (_severity > 0.35) then {
+	private _stripeHz = 7 + (_severity * 13);
+	private _stripePhase = (_now * _stripeHz + (sin (_now * 3.1) * 0.35)) % 1;
+	private _stripeDuty = (0.22 - (_severity * 0.1)) max 0.08;
+	if (_stripePhase < _stripeDuty) then {
+		_stripePulse = (0.18 + (_severity * 0.42)) min 0.65;
+	};
+};
+
+if (_stripePulse > 0) then {
+	_glitchWet = (_glitchWet + (_stripePulse * 0.38)) min 0.45;
+	_glitchNoise = (_glitchNoise + (_stripePulse * 0.55)) min 1;
+	_glitchRadial = (_glitchRadial + (_stripePulse * 0.018)) min 0.06;
+	_colorShift = _colorShift + (_stripePulse * 0.045);
+};
+
+private _commitTime = if (_glitchType isEqualTo "") then {
+	if (_severity > 0.7) then { 0 } else { if (_severity > 0.35) then { 0.01 } else { 0.03 } }
+} else {
+	0
+};
 
 private _analogBase = 0.06;
 private _drift = (sin (_now * 2.1) * 0.03 + sin (_now * 0.7) * 0.015) * _severity;
@@ -239,7 +260,17 @@ if (_lowAltFactor > 0.25) then {
 	_microFlicker = _microWave * _microAmp;
 };
 
-private _finalBlackout = (_blackout max _flickerBlackout max _microFlicker) min 0.55;
+private _hardFlicker = 0;
+if (_severity > 0.45) then {
+	private _hardHz = 26 + (_severity * 34);
+	private _hardPhase = (_now * _hardHz) % 1;
+	private _hardDuty = (0.16 - (_severity * 0.08)) max 0.05;
+	if (_hardPhase < _hardDuty) then {
+		_hardFlicker = 0.08 + (_severity * 0.26);
+	};
+};
+
+private _finalBlackout = (_blackout max _flickerBlackout max _microFlicker max _hardFlicker) min 0.55;
 private _brightness = _baseBrightness * (1 - _finalBlackout);
 if (_severity > 0.7) then {
 	_brightness = _brightness max 0.16;
@@ -253,6 +284,11 @@ private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - 
 private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
 private _blur = (_blurWeight + _glitchBlur + _analogBase * 0.08) min 1;
 private _chrom = (_aberrWeight * 0.025 + _analogBase * 0.004) min 0.06;
+
+if (_stripePulse > 0) then {
+	_grain = (_grain + (_stripePulse * 0.22)) min 1;
+	_chrom = (_chrom + (_stripePulse * 0.012)) min 0.06;
+};
 
 private _resTarget = -1;
 
