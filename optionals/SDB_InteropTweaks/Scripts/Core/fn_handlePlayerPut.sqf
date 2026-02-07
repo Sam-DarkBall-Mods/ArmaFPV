@@ -13,13 +13,11 @@ private _containerClass = if (isNull _container) then { "<null>" } else { typeOf
 private _useAutonomy = _unit getVariable ["SDB_autonomyNextLaunch", missionNamespace getVariable ["sdbAutoEnableByDefault", false]];
 if !(_useAutonomy) exitWith {};
 
-private _supported = missionNamespace getVariable ["SDB_it_supportedUavClasses", []];
-if (_supported isEqualTo []) then {
-	private _classMapFn = missionNamespace getVariable ["SDB_it_fnc_getInteropClassMap", { [[], []] }];
-	private _classMap = call _classMapFn;
-	_supported = +(_classMap param [0, [], [[]]]);
-	_supported append (_classMap param [1, [], [[]]]);
-	missionNamespace setVariable ["SDB_it_supportedUavClasses", _supported];
+private _supportedFn = missionNamespace getVariable ["SDB_it_fnc_getSupportedUavClasses", {}];
+private _supported = if (_supportedFn isEqualTo {}) then {
+	missionNamespace getVariable ["SDB_it_supportedUavClasses", []]
+} else {
+	call _supportedFn
 };
 
 private _candidateClasses = [];

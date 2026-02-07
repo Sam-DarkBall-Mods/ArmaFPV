@@ -34,19 +34,20 @@ if !(_uav isKindOf "Air") exitWith {
 };
 
 if (_enforceSupported) then {
-	private _supported = missionNamespace getVariable ["SDB_it_supportedUavClasses", []];
-	if (_supported isEqualTo []) then {
-		private _classMapFn = missionNamespace getVariable ["SDB_it_fnc_getInteropClassMap", { [[], []] }];
-		private _classMap = call _classMapFn;
-		_supported = +(_classMap param [0, [], [[]]]);
-		_supported append (_classMap param [1, [], [[]]]);
-		missionNamespace setVariable ["SDB_it_supportedUavClasses", _supported];
+	private _supportedFn = missionNamespace getVariable ["SDB_it_fnc_getSupportedUavClasses", {}];
+	private _supported = [];
+	if (_supportedFn isEqualTo {}) then {
+		_supported = missionNamespace getVariable ["SDB_it_supportedUavClasses", []];
+	} else {
+		_supported = call _supportedFn;
 	};
 
 	private _uavClass = typeOf _uav;
-	if !(_uavClass in _supported) exitWith {
+	private _uavClassUpper = toUpper _uavClass;
+	private _supportedIndex = _supported findIf { (toUpper _x) isEqualTo _uavClassUpper };
+	if (_supportedIndex < 0) exitWith {
 		if !(_log isEqualTo {}) then {
-			["Autonomy start skipped: unsupported class", [_source, _uavClass]] call _log;
+			["Autonomy start skipped: unsupported class", [_source, _uavClass, _supported]] call _log;
 		};
 		false
 	};

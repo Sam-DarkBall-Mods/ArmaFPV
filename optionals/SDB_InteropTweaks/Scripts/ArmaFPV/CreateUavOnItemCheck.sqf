@@ -33,9 +33,9 @@ if !(_resolve isEqualTo {}) then {
 };
 
 private _before = [];
-	if (_expectedClass != "" && {!isNull _container}) then {
-		_before = nearestObjects [getPosATL _container, [_expectedClass], 8];
-	};
+if (_expectedClass != "" && {!isNull _container}) then {
+	_before = nearestObjects [getPosATL _container, [_expectedClass], 8];
+};
 
 if !(_log isEqualTo {}) then {
 	["ArmaFPV expected class resolved", [_item, _expectedClass, count _before]] call _log;
@@ -53,9 +53,6 @@ private _spawned = objNull;
 	};
 } forEach _after;
 
-if (isNull _spawned && {(count _after) > 0}) then {
-	_spawned = _after # 0;
-};
 if (isNull _spawned) exitWith {
 	if !(_log isEqualTo {}) then {
 		["ArmaFPV wrapper: UAV not found after spawn", [_unitName, _item, _expectedClass]] call _log;

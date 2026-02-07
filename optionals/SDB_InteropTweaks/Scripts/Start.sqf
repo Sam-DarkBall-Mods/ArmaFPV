@@ -16,6 +16,10 @@ if (isNil "SDB_it_fnc_tryStartAutonomy") then {
 	SDB_it_fnc_tryStartAutonomy = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_tryStartAutonomy.sqf";
 	SDB_SET_MVAR(SDB_it_fnc_tryStartAutonomy, SDB_it_fnc_tryStartAutonomy);
 };
+if (isNil "SDB_it_fnc_getSupportedUavClasses") then {
+	SDB_it_fnc_getSupportedUavClasses = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_getSupportedUavClasses.sqf";
+	SDB_SET_MVAR(SDB_it_fnc_getSupportedUavClasses, SDB_it_fnc_getSupportedUavClasses);
+};
 
 if (isNil "SDB_it_fnc_registerSettings") then {
 	SDB_it_fnc_registerSettings = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_registerSettings.sqf";

@@ -27,11 +27,12 @@ if !(_log isEqualTo {}) then {
 			SDB_SET_MVAR(SDB_it_fnc_handleAssembledUAV, SDB_it_fnc_handleAssembledUAV);
 		};
 
-		private _classMapFn = missionNamespace getVariable ["SDB_it_fnc_getInteropClassMap", { [[], []] }];
-		private _classMap = call _classMapFn;
-		private _supportedClasses = _classMap param [0, [], [[]]];
-		_supportedClasses append (_classMap param [1, [], [[]]]);
-		missionNamespace setVariable ["SDB_it_supportedUavClasses", _supportedClasses];
+		private _supportedFn = missionNamespace getVariable ["SDB_it_fnc_getSupportedUavClasses", {}];
+		private _supportedClasses = if (_supportedFn isEqualTo {}) then {
+			missionNamespace getVariable ["SDB_it_supportedUavClasses", []]
+		} else {
+			call _supportedFn
+		};
 
 		private _added = [
 			"SDB_it_weaponAssembled",
