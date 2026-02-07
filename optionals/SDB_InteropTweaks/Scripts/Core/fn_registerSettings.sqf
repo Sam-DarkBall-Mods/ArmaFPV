@@ -70,15 +70,6 @@ SDB_SET_MVAR(SDB_it_settingsRegistered, true);
 ] call CBA_fnc_addSetting;
 
 [
-	"sdbAutoNoise",
-	"SLIDER",
-	["Detection Noise", "Random noise added to confidence score."],
-	"SDB Interop Tweaks",
-	[0, 0.5, 0.12, 2],
-	true
-] call CBA_fnc_addSetting;
-
-[
 	"sdbAutoHorizontalFov",
 	"SLIDER",
 	["Horizontal FOV", "Horizontal search cone (degrees)."],

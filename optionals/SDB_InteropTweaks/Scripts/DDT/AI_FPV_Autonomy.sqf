@@ -79,7 +79,6 @@ private _fn_selectTarget = {
 	private _maxRange = missionNamespace getVariable ["sdbAutoMaxRange", 2500];
 	private _lockThreshold = missionNamespace getVariable ["sdbAutoLockThreshold", 0.62];
 	private _releaseThreshold = missionNamespace getVariable ["sdbAutoReleaseThreshold", 0.45];
-	private _noise = missionNamespace getVariable ["sdbAutoNoise", 0.12];
 	private _hFov = missionNamespace getVariable ["sdbAutoHorizontalFov", 95];
 	private _downAngle = missionNamespace getVariable ["sdbAutoDownAngle", 45];
 
@@ -132,18 +131,17 @@ private _fn_selectTarget = {
 		private _toPos = getPosASLVisual _candidate;
 		private _hits = lineIntersectsSurfaces [_from, _toPos, _vehicle, _candidate, true, 1, "VIEW", "FIRE"];
 		private _clearLOS = _hits isEqualTo [];
-		private _score = _quickScore;
-		if (!_clearLOS) then {
-			_score = _score * 0.35;
-		};
-		if !(_candidate isKindOf "Man") then {
-			_score = _score + 0.08;
-		};
-		_score = _score + ((random (_noise * 2)) - _noise);
-		_score = (_score max 0) min 1;
-		if (_score > _best) then {
-			_best = _score;
-			_bestTarget = _candidate;
+
+		if (_clearLOS) then {
+			private _score = _quickScore;
+			if !(_candidate isKindOf "Man") then {
+				_score = _score + 0.08;
+			};
+			_score = (_score max 0) min 1;
+			if (_score > _best) then {
+				_best = _score;
+				_bestTarget = _candidate;
+			};
 		};
 	} forEach _quick;
 
