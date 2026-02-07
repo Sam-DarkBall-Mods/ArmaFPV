@@ -50,6 +50,10 @@ if (isNil "SDB_it_fnc_patchArmaFPVInterop") then {
 	SDB_it_fnc_patchArmaFPVInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchArmaFPVInterop.sqf";
 	SDB_SET_MVAR(SDB_it_fnc_patchArmaFPVInterop, SDB_it_fnc_patchArmaFPVInterop);
 };
+if (isNil "SDB_it_fnc_patchArmaFPVMapKeyInterop") then {
+	SDB_it_fnc_patchArmaFPVMapKeyInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchArmaFPVMapKeyInterop.sqf";
+	SDB_SET_MVAR(SDB_it_fnc_patchArmaFPVMapKeyInterop, SDB_it_fnc_patchArmaFPVMapKeyInterop);
+};
 if (isNil "SDB_it_fnc_patchAssembleInterop") then {
 	SDB_it_fnc_patchAssembleInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchAssembleInterop.sqf";
 	SDB_SET_MVAR(SDB_it_fnc_patchAssembleInterop, SDB_it_fnc_patchAssembleInterop);
@@ -63,6 +67,7 @@ call SDB_it_fnc_registerSettings;
 call SDB_it_fnc_initPlayerAutonomy;
 call SDB_it_fnc_patchDDTInterop;
 call SDB_it_fnc_patchArmaFPVInterop;
+call SDB_it_fnc_patchArmaFPVMapKeyInterop;
 call SDB_it_fnc_patchAssembleInterop;
 call SDB_it_fnc_patchPutInterop;
 
