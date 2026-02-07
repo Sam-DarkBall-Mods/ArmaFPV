@@ -16,7 +16,7 @@ SDB_SET_MVAR(SDB_it_ddtPatchQueued, true);
 		if (isNil "ddtClassesFPV") then { ddtClassesFPV = []; };
 		if (isNil "ddtClassesFPVAT") then { ddtClassesFPVAT = []; };
 
-		private _classMapFn = SDB_GET_MVAR(SDB_it_fnc_getInteropClassMap, { [[], []] });
+		private _classMapFn = missionNamespace getVariable ["SDB_it_fnc_getInteropClassMap", { [[], []] }];
 		private _classMap = call _classMapFn;
 		private _fpvClasses = _classMap param [0, [], [[]]];
 		private _fpvatClasses = _classMap param [1, [], [[]]];

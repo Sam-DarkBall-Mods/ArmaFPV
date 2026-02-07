@@ -19,6 +19,16 @@ if !(_log isEqualTo {}) then {
 		if (SDB_GET_MVAR(SDB_it_armafpvPatched, false)) exitWith {};
 		SDB_SET_MVAR(SDB_it_armafpvPatched, true);
 
+		private _allowDirectPatch = missionNamespace getVariable ["sdbArmaFPVDirectPatch", false];
+		if !(_allowDirectPatch) exitWith {
+			if !(_log isEqualTo {}) then {
+				[
+					"ArmaFPV direct function patch skipped; relying on Put/WeaponAssembled interop",
+					[_allowDirectPatch]
+				] call _log;
+			};
+		};
+
 		if (isNil "DB_fnc_fpv_createUavOnItemCheck_original") then {
 			DB_fnc_fpv_createUavOnItemCheck_original = DB_fnc_fpv_createUavOnItemCheck;
 			missionNamespace setVariable ["DB_fnc_fpv_createUavOnItemCheck_original", DB_fnc_fpv_createUavOnItemCheck];

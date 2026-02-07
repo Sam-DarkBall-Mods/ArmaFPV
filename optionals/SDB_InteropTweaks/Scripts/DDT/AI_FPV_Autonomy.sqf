@@ -1,9 +1,18 @@
 /*
 	Autonomous FPV loop.
-	Purpose: emulate noisy CV+tracking and direct intercept guidance without waypoint steering.
+	Purpose: emulate noisy CV+tracking and direct intercept guidance with waypoint-route support.
 */
 
 params ["_drone", "_man"];
+
+if (isNull _drone) exitWith {};
+if !(alive _drone) exitWith {};
+
+// ArmaFPV disables UAV AI via disableAI "ALL" during init.
+// Re-enable autonomy-critical features before starting guidance logic.
+_drone enableAI "ALL";
+_drone disableAI "LIGHTS";
+_drone setPilotLight false;
 
 if (ddtDebug) then {
 	systemChat format ["%1 starting FPV AUTONOMY", _drone];
@@ -43,6 +52,25 @@ private _fn_flyTo = {
 
 	_vehicle setVectorDirAndUp [_dirVec, _up];
 	_vehicle setVelocity (_dirVec vectorMultiply _speed);
+};
+
+private _fn_getRouteWaypoint = {
+	params ["_vehicle"];
+
+	private _group = group _vehicle;
+	if (isNull _group) exitWith {
+		[false, [0, 0, 0], -1, 0]
+	};
+
+	private _waypointCount = count waypoints _group;
+	private _waypointIndex = currentWaypoint _group;
+	if (_waypointCount <= 1 || {_waypointIndex <= 0} || {_waypointIndex >= _waypointCount}) exitWith {
+		[false, [0, 0, 0], _waypointIndex, _waypointCount]
+	};
+
+	private _waypointPosAGL = waypointPosition [_group, _waypointIndex];
+	private _waypointPosASL = AGLToASL _waypointPosAGL;
+	[true, _waypointPosASL, _waypointIndex, _waypointCount]
 };
 
 private _fn_selectTarget = {
@@ -149,7 +177,7 @@ private _fn_stopLoop = {
 };
 
 private _fn_startLoop = {
-	params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_selectTarget", "_fn_stopLoop"];
+	params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_getRouteWaypoint", "_fn_selectTarget", "_fn_stopLoop"];
 
 	if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
 
@@ -171,7 +199,7 @@ private _fn_startLoop = {
 	private _pfhId = [
 		{
 			params ["_args", "_pfhId"];
-			_args params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_selectTarget", "_fn_stopLoop"];
+			_args params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_getRouteWaypoint", "_fn_selectTarget", "_fn_stopLoop"];
 
 			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {
 				[_drone, _man, _pfhId] call _fn_stopLoop;
@@ -214,7 +242,9 @@ private _fn_startLoop = {
 				private _toPos = getPosASLVisual _target;
 				private _distance = _from vectorDistance _toPos;
 				private _leadTime = (_distance / 70) min 1.2;
-				if (_target isKindOf "Man") then { _leadTime = _leadTime min 0.7; };
+				if (_target isKindOf "Man") then {
+					_leadTime = _leadTime min 0.7;
+				};
 
 				private _aimPos = _toPos vectorAdd ((velocity _target) vectorMultiply _leadTime);
 				private _speed = linearConversion [8, 300, _distance, _cruiseSpeed * 0.45, _cruiseSpeed, true];
@@ -237,22 +267,44 @@ private _fn_startLoop = {
 					};
 				};
 			} else {
-				if (_now >= _nextSearchTurn) then {
-					_nextSearchTurn = _now + 1.2 + (random 0.8);
-					_searchDir = _searchDir + ((random 30) - 15);
-				};
+				private _routeInfo = [_drone] call _fn_getRouteWaypoint;
+				private _hasRoute = _routeInfo # 0;
 
-				if (!isNull _man && {alive _man}) then {
-					if ((_drone distance2D _man) > ((missionNamespace getVariable ["sdbAutoMaxRange", 2500]) * 0.65)) then {
-						_searchDir = _drone getDir _man;
+				if (_hasRoute) then {
+					_state = "ROUTE";
+
+					private _waypointPosASL = +(_routeInfo # 1);
+					private _origin = getPosASLVisual _drone;
+					_waypointPosASL set [2, (_origin # 2) max (_waypointPosASL # 2)];
+
+					private _distanceToWaypoint = _origin vectorDistance _waypointPosASL;
+					private _routeSpeed = linearConversion [10, 1500, _distanceToWaypoint, _cruiseSpeed * 0.55, _cruiseSpeed * 0.9, true];
+					[_drone, _waypointPosASL, _routeSpeed] call _fn_flyTo;
+
+					if (ddtDebug) then {
+						private _wpIndex = _routeInfo # 2;
+						private _wpCount = _routeInfo # 3;
+						private _t = format ["%1 AUTO route wp:%2/%3 dist:%4", _drone, _wpIndex, _wpCount, round _distanceToWaypoint];
+						_t call DDT_fnc_Debug;
 					};
-				};
+				} else {
+					if (_now >= _nextSearchTurn) then {
+						_nextSearchTurn = _now + 1.2 + (random 0.8);
+						_searchDir = _searchDir + ((random 30) - 15);
+					};
 
-				private _origin = getPosASLVisual _drone;
-				private _searchVec = [sin _searchDir, cos _searchDir, 0] vectorMultiply 220;
-				private _searchAim = _origin vectorAdd _searchVec;
-				_searchAim set [2, (_origin # 2) max 8];
-				[_drone, _searchAim, _cruiseSpeed * 0.65] call _fn_flyTo;
+					if (!isNull _man && {alive _man}) then {
+						if ((_drone distance2D _man) > ((missionNamespace getVariable ["sdbAutoMaxRange", 2500]) * 0.65)) then {
+							_searchDir = _drone getDir _man;
+						};
+					};
+
+					private _origin = getPosASLVisual _drone;
+					private _searchVec = [sin _searchDir, cos _searchDir, 0] vectorMultiply 220;
+					private _searchAim = _origin vectorAdd _searchVec;
+					_searchAim set [2, (_origin # 2) max 8];
+					[_drone, _searchAim, _cruiseSpeed * 0.65] call _fn_flyTo;
+				};
 			};
 
 			_drone setVariable ["SDB_auto_target", _target];
@@ -263,7 +315,7 @@ private _fn_startLoop = {
 			_drone setVariable ["SDB_auto_nextSearchTurn", _nextSearchTurn];
 		},
 		0,
-		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop]
+		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop]
 	] call CBA_fnc_addPerFrameHandler;
 
 	_drone setVariable ["SDB_auto_pfh", _pfhId];
@@ -279,12 +331,12 @@ if (_takeOff) then {
 			((getPosATL _drone) select 2) > 1
 		},
 		{
-			params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_selectTarget", "_fn_stopLoop", "_fn_startLoop"];
+			params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_getRouteWaypoint", "_fn_selectTarget", "_fn_stopLoop", "_fn_startLoop"];
 			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
-			[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;
+			[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;
 		},
-		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop, _fn_startLoop]
+		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop, _fn_startLoop]
 	] call CBA_fnc_waitUntilAndExecute;
 } else {
-	[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;
+	[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;
 };
