@@ -42,12 +42,14 @@ private _fn_finishDeploy = {
 
 	private _mag = _man getVariable ["ddtRemoveMag", ""];
 	if !(_mag == "") then {
+		_magType = _mag;
 		_man removeMagazine _mag;
 		_man setVariable ["ddtRemoveMag", "", true];
 	};
 
 	private _item = _man getVariable ["ddtRemoveItem", ""];
 	if !(_item == "") then {
+		_itemType = _item;
 		_man removeItem _item;
 		_man setVariable ["ddtRemoveItem", "", true];
 	};
@@ -84,7 +86,7 @@ private _fn_finishDeploy = {
 	(group _drone) setVariable ["dceExclude", true, true];
 
 	if (ddtDebug) then {
-		(format ["%1 deployed %2 (%3) [autonomy]", _man, _droneClass, _drone]) call DDT_fnc_debug;
+		(format ["%1 deployed %2 (%3) [autonomy]", _man, _droneClass, _drone]) call DDT_fnc_Debug;
 	};
 
 	if !((side _drone) == (side _man)) then {
