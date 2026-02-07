@@ -3,14 +3,12 @@
 	Purpose: emulate noisy CV+tracking and direct intercept guidance without waypoint steering.
 */
 
-private _drone = _this select 0;
-private _man = _this select 1;
+params ["_drone", "_man"];
 
 if (ddtDebug) then {
 	systemChat format ["%1 starting FPV AUTONOMY", _drone];
 };
 
-private _droneType = toUpper (typeOf _drone);
 private _alt = 12 + (random 6);
 private _takeOff = true;
 
@@ -26,27 +24,6 @@ if (_drone isKindOf "B_SwitchBlade_600") then {
 _drone setAutonomous true;
 _drone flyInHeight _alt;
 _drone setVariable ["ddtAlt", _alt, true];
-
-if (_takeOff) then {
-	[_drone] spawn DDT_fnc_TakeOff;
-	while {true} do {
-		if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
-		if (((getPosATL _drone) select 2) > 1) exitWith {};
-		sleep 2;
-	};
-};
-if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
-
-_drone setCaptive false;
-
-private _target = objNull;
-private _bestScore = 0;
-private _trackedScore = 0;
-private _lastScan = -100;
-private _state = "SEARCH";
-private _searchDir = getDir _drone;
-private _nextSearchTurn = time + 1;
-private _engaged = false;
 
 private _fpvAtClasses = ["DRA_UAV_01_B", "DRA_UAV_01_O", "DRA_UAV_01_0", "DRA_UAV_01_I"];
 
@@ -69,7 +46,7 @@ private _fn_flyTo = {
 };
 
 private _fn_selectTarget = {
-	params ["_vehicle", "_operator", "_currentTarget", "_currentTrackedScore"];
+	params ["_vehicle", "_currentTarget", "_currentTrackedScore"];
 
 	private _maxRange = missionNamespace getVariable ["sdbAutoMaxRange", 2500];
 	private _lockThreshold = missionNamespace getVariable ["sdbAutoLockThreshold", 0.62];
@@ -159,76 +136,155 @@ private _fn_selectTarget = {
 	[_selected, _best, _tracked, _releaseThreshold]
 };
 
-while {true} do {
+private _fn_stopLoop = {
+	params ["_drone", "_man", "_pfhId"];
+
+	[_pfhId] call CBA_fnc_removePerFrameHandler;
+	_drone setVariable ["SDB_auto_pfh", -1];
+
+	private _engaged = _drone getVariable ["SDB_auto_engaged", false];
+	if (_engaged) exitWith {};
 	if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
-	if ((fuel _drone) <= 0.01) exitWith {};
-
-	private _now = time;
-	private _scanInterval = missionNamespace getVariable ["sdbAutoScanInterval", 0.25];
-	private _guideTick = missionNamespace getVariable ["sdbAutoGuideTick", 0.05];
-	private _cruiseSpeed = missionNamespace getVariable ["sdbAutoCruiseSpeed", 38];
-	private _terminalDistance = missionNamespace getVariable ["sdbAutoTerminalDistance", 10];
-
-	if ((_now - _lastScan) >= _scanInterval) then {
-		_lastScan = _now;
-		private _selection = [_drone, _man, _target, _trackedScore] call _fn_selectTarget;
-		_target = _selection # 0;
-		_bestScore = _selection # 1;
-		_trackedScore = _selection # 2;
-
-		if (isNull _target) then {
-			_state = "SEARCH";
-		} else {
-			_state = "TRACK";
-		};
-	};
-
-	if (_state == "TRACK" && {!isNull _target} && {alive _target}) then {
-		private _from = getPosASLVisual _drone;
-		private _toPos = getPosASLVisual _target;
-		private _distance = _from vectorDistance _toPos;
-		private _leadTime = (_distance / 70) min 1.2;
-		if (_target isKindOf "Man") then { _leadTime = _leadTime min 0.7; };
-
-		private _aimPos = _toPos vectorAdd ((velocity _target) vectorMultiply _leadTime);
-		private _speed = linearConversion [8, 300, _distance, _cruiseSpeed * 0.45, _cruiseSpeed, true];
-		[_drone, _aimPos, _speed] call _fn_flyTo;
-
-		if (ddtDebug) then {
-			private _t = format ["%1 AUTO score:%2 dist:%3", _drone, (round (_trackedScore * 100)), round _distance];
-			_t call DDT_fnc_Debug;
-		};
-
-		if (_distance <= _terminalDistance) exitWith {
-			_engaged = true;
-			if ([[(typeOf _drone)], _fpvAtClasses] call DDT_fnc_InArray) then {
-				[_drone, _target] spawn DDT_fnc_DRAattack;
-			} else {
-				[_drone, _target] spawn DDT_fnc_GuideToTarget;
-			};
-		};
-	} else {
-		if (_now >= _nextSearchTurn) then {
-			_nextSearchTurn = _now + 1.2 + (random 0.8);
-			_searchDir = _searchDir + ((random 30) - 15);
-		};
-
-		if (!isNull _man && {alive _man}) then {
-			if ((_drone distance2D _man) > ((missionNamespace getVariable ["sdbAutoMaxRange", 2500]) * 0.65)) then {
-				_searchDir = _drone getDir _man;
-			};
-		};
-
-		private _origin = getPosASLVisual _drone;
-		private _searchVec = [sin _searchDir, cos _searchDir, 0] vectorMultiply 220;
-		private _searchAim = _origin vectorAdd _searchVec;
-		_searchAim set [2, (_origin # 2) max 8];
-		[_drone, _searchAim, _cruiseSpeed * 0.65] call _fn_flyTo;
-	};
-
-	sleep _guideTick;
+	[_drone, _man] spawn DDT_fnc_RTB;
 };
 
-if (_engaged) exitWith {};
-if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
-[_drone, _man] spawn DDT_fnc_RTB;
+private _fn_startLoop = {
+	params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_selectTarget", "_fn_stopLoop"];
+
+	if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
+
+	private _oldPfh = _drone getVariable ["SDB_auto_pfh", -1];
+	if (_oldPfh >= 0) then {
+		[_oldPfh] call CBA_fnc_removePerFrameHandler;
+	};
+
+	_drone setCaptive false;
+	_drone setVariable ["SDB_auto_target", objNull];
+	_drone setVariable ["SDB_auto_trackedScore", 0];
+	_drone setVariable ["SDB_auto_lastScan", -100];
+	_drone setVariable ["SDB_auto_state", "SEARCH"];
+	_drone setVariable ["SDB_auto_searchDir", getDir _drone];
+	_drone setVariable ["SDB_auto_nextSearchTurn", time + 1];
+	_drone setVariable ["SDB_auto_nextGuide", 0];
+	_drone setVariable ["SDB_auto_engaged", false];
+
+	private _pfhId = [
+		{
+			params ["_args", "_pfhId"];
+			_args params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_selectTarget", "_fn_stopLoop"];
+
+			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {
+				[_drone, _man, _pfhId] call _fn_stopLoop;
+			};
+			if ((fuel _drone) <= 0.01) exitWith {
+				[_drone, _man, _pfhId] call _fn_stopLoop;
+			};
+
+			private _now = time;
+			private _guideTick = missionNamespace getVariable ["sdbAutoGuideTick", 0.05];
+			private _nextGuide = _drone getVariable ["SDB_auto_nextGuide", 0];
+			if (_now < _nextGuide) exitWith {};
+			_drone setVariable ["SDB_auto_nextGuide", _now + _guideTick];
+
+			private _scanInterval = missionNamespace getVariable ["sdbAutoScanInterval", 0.25];
+			private _cruiseSpeed = missionNamespace getVariable ["sdbAutoCruiseSpeed", 38];
+			private _terminalDistance = missionNamespace getVariable ["sdbAutoTerminalDistance", 10];
+
+			private _target = _drone getVariable ["SDB_auto_target", objNull];
+			private _trackedScore = _drone getVariable ["SDB_auto_trackedScore", 0];
+			private _lastScan = _drone getVariable ["SDB_auto_lastScan", -100];
+			private _state = _drone getVariable ["SDB_auto_state", "SEARCH"];
+			private _searchDir = _drone getVariable ["SDB_auto_searchDir", getDir _drone];
+			private _nextSearchTurn = _drone getVariable ["SDB_auto_nextSearchTurn", _now + 1];
+
+			if ((_now - _lastScan) >= _scanInterval) then {
+				_lastScan = _now;
+				private _selection = [_drone, _target, _trackedScore] call _fn_selectTarget;
+				_target = _selection # 0;
+				_trackedScore = _selection # 2;
+				if (isNull _target) then {
+					_state = "SEARCH";
+				} else {
+					_state = "TRACK";
+				};
+			};
+
+			if (_state == "TRACK" && {!isNull _target} && {alive _target}) then {
+				private _from = getPosASLVisual _drone;
+				private _toPos = getPosASLVisual _target;
+				private _distance = _from vectorDistance _toPos;
+				private _leadTime = (_distance / 70) min 1.2;
+				if (_target isKindOf "Man") then { _leadTime = _leadTime min 0.7; };
+
+				private _aimPos = _toPos vectorAdd ((velocity _target) vectorMultiply _leadTime);
+				private _speed = linearConversion [8, 300, _distance, _cruiseSpeed * 0.45, _cruiseSpeed, true];
+				[_drone, _aimPos, _speed] call _fn_flyTo;
+
+				if (ddtDebug) then {
+					private _t = format ["%1 AUTO score:%2 dist:%3", _drone, (round (_trackedScore * 100)), round _distance];
+					_t call DDT_fnc_Debug;
+				};
+
+				if (_distance <= _terminalDistance) exitWith {
+					_drone setVariable ["SDB_auto_engaged", true];
+					[_pfhId] call CBA_fnc_removePerFrameHandler;
+					_drone setVariable ["SDB_auto_pfh", -1];
+
+					if ([[(typeOf _drone)], _fpvAtClasses] call DDT_fnc_InArray) then {
+						[_drone, _target] spawn DDT_fnc_DRAattack;
+					} else {
+						[_drone, _target] spawn DDT_fnc_GuideToTarget;
+					};
+				};
+			} else {
+				if (_now >= _nextSearchTurn) then {
+					_nextSearchTurn = _now + 1.2 + (random 0.8);
+					_searchDir = _searchDir + ((random 30) - 15);
+				};
+
+				if (!isNull _man && {alive _man}) then {
+					if ((_drone distance2D _man) > ((missionNamespace getVariable ["sdbAutoMaxRange", 2500]) * 0.65)) then {
+						_searchDir = _drone getDir _man;
+					};
+				};
+
+				private _origin = getPosASLVisual _drone;
+				private _searchVec = [sin _searchDir, cos _searchDir, 0] vectorMultiply 220;
+				private _searchAim = _origin vectorAdd _searchVec;
+				_searchAim set [2, (_origin # 2) max 8];
+				[_drone, _searchAim, _cruiseSpeed * 0.65] call _fn_flyTo;
+			};
+
+			_drone setVariable ["SDB_auto_target", _target];
+			_drone setVariable ["SDB_auto_trackedScore", _trackedScore];
+			_drone setVariable ["SDB_auto_lastScan", _lastScan];
+			_drone setVariable ["SDB_auto_state", _state];
+			_drone setVariable ["SDB_auto_searchDir", _searchDir];
+			_drone setVariable ["SDB_auto_nextSearchTurn", _nextSearchTurn];
+		},
+		0,
+		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop]
+	] call CBA_fnc_addPerFrameHandler;
+
+	_drone setVariable ["SDB_auto_pfh", _pfhId];
+};
+
+if (_takeOff) then {
+	[_drone] spawn DDT_fnc_TakeOff;
+
+	[
+		{
+			params ["_drone", "_man"];
+			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith { true };
+			((getPosATL _drone) select 2) > 1
+		},
+		{
+			params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_selectTarget", "_fn_stopLoop", "_fn_startLoop"];
+			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
+			[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;
+		},
+		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop, _fn_startLoop]
+	] call CBA_fnc_waitUntilAndExecute;
+} else {
+	[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;
+};
