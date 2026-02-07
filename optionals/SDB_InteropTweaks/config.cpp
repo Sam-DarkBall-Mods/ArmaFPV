@@ -10,7 +10,8 @@ class CfgPatches
 		{
 			"DrongosDroneTweaks",
 			"ArmaFPV_Data",
-			"cba_main"
+			"cba_main",
+			"cba_settings"
 		};
 		requiredVersion = 0.1;
 	};
