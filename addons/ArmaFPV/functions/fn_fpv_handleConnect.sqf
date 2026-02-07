@@ -12,6 +12,7 @@ if (!hasInterface) exitWith {};
 
 private _droneTypes = GETMVAR(DB_fpv_droneTypes, FPV_DRONE_TYPES);
 private _loopInterval = GETMVAR(DB_fpv_connectLoopInterval, FPV_CONNECT_LOOP_INTERVAL);
+private _controlGracePeriod = GETMVAR(DB_fpv_controlGracePeriod, 0.75);
 
 private _prevPfh = GETMVAR(DB_fpv_connectPFH, -1);
 if (_prevPfh >= 0) then {
@@ -20,28 +21,43 @@ if (_prevPfh >= 0) then {
 
 private _pfhId = [{
 	params ["_args", "_pfhId"];
-	_args params ["_droneTypes"];
+	_args params ["_droneTypes", "_controlGracePeriod"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	if (isNull _player) exitWith {};
 
+	private _now = diag_tickTime;
 	private _uav = getConnectedUAV _player;
 	private _uavType = typeOf _uav;
 	private _lastUav = GETMVAR(DB_fpv_lastUav, objNull);
 
 	if (!isNull _lastUav && { _uav isNotEqualTo _lastUav }) then {
 		_lastUav setVariable ["DB_jammer_customUavBehavior", false, true];
+		SETMVAR(DB_fpv_controlGraceUntil, -1);
 	};
 
 	if (isNull _uav) then {
 		SETMVAR(DB_fpv_lastUav, objNull);
+		SETMVAR(DB_fpv_controlGraceUntil, -1);
 	} else {
 		SETMVAR(DB_fpv_lastUav, _uav);
 	};
 
-	private _controlActive = (_uavType in _droneTypes) && { cameraOn isEqualTo _uav } && { cameraView in ["GUNNER", "EXTERNAL"] };
-	private _uiActive = _controlActive && { cameraView == "GUNNER" };
+	private _cameraBound = cameraOn isEqualTo _uav;
+	private _cameraMode = cameraView;
+	private _directControlActive = (_uavType in _droneTypes) && { _cameraBound } && { _cameraMode in ["GUNNER", "EXTERNAL"] };
 	private _wasControl = GETMVAR(ArmaFPV_isControl, false);
+	private _graceUntil = GETMVAR(DB_fpv_controlGraceUntil, -1);
+
+	if (_directControlActive) then {
+		_graceUntil = _now + _controlGracePeriod;
+		SETMVAR(DB_fpv_controlGraceUntil, _graceUntil);
+	};
+
+	private _connectedControl = (_uavType in _droneTypes) && { !isNull _uav };
+	private _graceControlActive = _wasControl && { _connectedControl } && { _now <= _graceUntil };
+	private _controlActive = _directControlActive || { _graceControlActive };
+	private _uiActive = _controlActive && { _cameraBound } && { _cameraMode == "GUNNER" };
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
 	private _hudApplied = GETMVAR(ArmaFPV_hudApplied, false);
 
@@ -97,6 +113,7 @@ private _pfhId = [{
 	} else {
 		if (_wasControl) then {
 			SETMVAR(ArmaFPV_isControl, false);
+			SETMVAR(DB_fpv_controlGraceUntil, -1);
 			call DB_fnc_fpv_destroyUI;
 			private _savedHud = GETMVAR(ArmaFPV_savedHUD, []);
 			if ((count _savedHud) == 11) then {
@@ -106,7 +123,7 @@ private _pfhId = [{
 			SETMVAR(ArmaFPV_hudApplied, false);
 		};
 	};
-}, _loopInterval, [_droneTypes]] call CBA_fnc_addPerFrameHandler;
+}, _loopInterval, [_droneTypes, _controlGracePeriod]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_connectPFH, _pfhId);
 

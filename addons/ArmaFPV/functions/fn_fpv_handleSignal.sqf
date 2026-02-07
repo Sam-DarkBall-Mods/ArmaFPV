@@ -10,6 +10,7 @@
 
 private _loopInterval = GETMVAR(DB_fpv_signalUpdateInterval, FPV_SIGNAL_UPDATE_INTERVAL);
 private _ppfxInterval = GETMVAR(DB_fpv_ppfxUpdateInterval, FPV_PPFX_UPDATE_INTERVAL);
+private _jammerHeartbeatInterval = GETMVAR(DB_fpv_jammerHeartbeatInterval, 3);
 private _state = [
 	diag_tickTime,
 	1,
@@ -27,7 +28,7 @@ if (_prevPfh >= 0) then {
 
 private _pfhId = [{
 	_this params ["_args", "_handle"];
-	_args params ["_loopInterval", "_ppfxInterval", "_state"];
+	_args params ["_loopInterval", "_ppfxInterval", "_jammerHeartbeatInterval", "_state"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	private _uav = getConnectedUAV _player;
@@ -68,9 +69,12 @@ private _pfhId = [{
 	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
 
 	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
-	private _doJammerBroadcast = (_inJammer != _lastJammerActive) || { (_now - _lastJammerBroadcast) >= _loopInterval };
-	if (_doJammerBroadcast) then {
-		_uav setVariable ["DB_fpv_jammerClientActive", _inJammer, true];
+	private _jammerStateChanged = _inJammer != _lastJammerActive;
+	private _jammerHeartbeatDue = _inJammer && { (_now - _lastJammerBroadcast) >= _jammerHeartbeatInterval };
+	if (_jammerStateChanged || _jammerHeartbeatDue) then {
+		if (_jammerStateChanged) then {
+			_uav setVariable ["DB_fpv_jammerClientActive", _inJammer, true];
+		};
 		_uav setVariable ["DB_fpv_jammerClientUpdate", _now, true];
 		if (_inJammer) then {
 			_uav setVariable ["DB_fpv_lastJammerContact", _now, true];
@@ -218,6 +222,6 @@ private _pfhId = [{
 		_vPointerRight ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
 		_vPointerRight ctrlCommit 0;
 	};
-}, 0, [_loopInterval, _ppfxInterval, _state]] call CBA_fnc_addPerFrameHandler;
+}, 0, [_loopInterval, _ppfxInterval, _jammerHeartbeatInterval, _state]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_signalPFH, _pfhId);

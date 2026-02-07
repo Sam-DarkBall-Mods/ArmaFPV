@@ -36,7 +36,8 @@ private _fnc_countInterferingObjects = {
 
 private _fnc_findRetranslators = {
 	params ["_position", "_radius"];
-	_position nearObjects ["FPV_Retranslator", _radius]
+	private _retranslators = _position nearObjects ["FPV_Retranslator", _radius];
+	_retranslators select { alive _x }
 };
 
 private _fnc_findJammers = {
