@@ -8,6 +8,15 @@
 if (SDB_GET_MVAR(SDB_it_patchInitialized, false)) exitWith {};
 SDB_SET_MVAR(SDB_it_patchInitialized, true);
 
+if (isNil "SDB_it_fnc_log") then {
+	SDB_it_fnc_log = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_log.sqf";
+	SDB_SET_MVAR(SDB_it_fnc_log, SDB_it_fnc_log);
+};
+if (isNil "SDB_it_fnc_tryStartAutonomy") then {
+	SDB_it_fnc_tryStartAutonomy = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_tryStartAutonomy.sqf";
+	SDB_SET_MVAR(SDB_it_fnc_tryStartAutonomy, SDB_it_fnc_tryStartAutonomy);
+};
+
 if (isNil "SDB_it_fnc_registerSettings") then {
 	SDB_it_fnc_registerSettings = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_registerSettings.sqf";
 	SDB_SET_MVAR(SDB_it_fnc_registerSettings, SDB_it_fnc_registerSettings);
@@ -37,8 +46,23 @@ if (isNil "SDB_it_fnc_patchArmaFPVInterop") then {
 	SDB_it_fnc_patchArmaFPVInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchArmaFPVInterop.sqf";
 	SDB_SET_MVAR(SDB_it_fnc_patchArmaFPVInterop, SDB_it_fnc_patchArmaFPVInterop);
 };
+if (isNil "SDB_it_fnc_patchAssembleInterop") then {
+	SDB_it_fnc_patchAssembleInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchAssembleInterop.sqf";
+	SDB_SET_MVAR(SDB_it_fnc_patchAssembleInterop, SDB_it_fnc_patchAssembleInterop);
+};
+if (isNil "SDB_it_fnc_patchPutInterop") then {
+	SDB_it_fnc_patchPutInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchPutInterop.sqf";
+	SDB_SET_MVAR(SDB_it_fnc_patchPutInterop, SDB_it_fnc_patchPutInterop);
+};
 
 call SDB_it_fnc_registerSettings;
 call SDB_it_fnc_initPlayerAutonomy;
 call SDB_it_fnc_patchDDTInterop;
 call SDB_it_fnc_patchArmaFPVInterop;
+call SDB_it_fnc_patchAssembleInterop;
+call SDB_it_fnc_patchPutInterop;
+
+private _log = missionNamespace getVariable ["SDB_it_fnc_log", {}];
+if !(_log isEqualTo {}) then {
+	["Bootstrap complete", [hasInterface, isServer, didJIP]] call _log;
+};

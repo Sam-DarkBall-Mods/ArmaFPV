@@ -7,9 +7,15 @@
 if (SDB_GET_MVAR(SDB_it_armafpvPatchQueued, false)) exitWith {};
 SDB_SET_MVAR(SDB_it_armafpvPatchQueued, true);
 
+private _log = missionNamespace getVariable ["SDB_it_fnc_log", {}];
+if !(_log isEqualTo {}) then {
+	["ArmaFPV patch queued", []] call _log;
+};
+
 [
 	{ !isNil "DB_fnc_fpv_createUavOnItemCheck" },
 	{
+		private _log = missionNamespace getVariable ["SDB_it_fnc_log", {}];
 		if (SDB_GET_MVAR(SDB_it_armafpvPatched, false)) exitWith {};
 		SDB_SET_MVAR(SDB_it_armafpvPatched, true);
 
@@ -20,6 +26,10 @@ SDB_SET_MVAR(SDB_it_armafpvPatchQueued, true);
 
 		DB_fnc_fpv_createUavOnItemCheck = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\ArmaFPV\CreateUavOnItemCheck.sqf";
 		missionNamespace setVariable ["DB_fnc_fpv_createUavOnItemCheck", DB_fnc_fpv_createUavOnItemCheck];
+
+		if !(_log isEqualTo {}) then {
+			["ArmaFPV patch applied", [true]] call _log;
+		};
 	},
 	[]
 ] call CBA_fnc_waitUntilAndExecute;
