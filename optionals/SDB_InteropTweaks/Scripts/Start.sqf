@@ -33,7 +33,12 @@ if (isNil "SDB_it_fnc_patchDDTInterop") then {
 	SDB_it_fnc_patchDDTInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchDDTInterop.sqf";
 	SDB_SET_MVAR(SDB_it_fnc_patchDDTInterop, SDB_it_fnc_patchDDTInterop);
 };
+if (isNil "SDB_it_fnc_patchArmaFPVInterop") then {
+	SDB_it_fnc_patchArmaFPVInterop = compile preprocessFileLineNumbers "\SDB_InteropTweaks\Scripts\Core\fn_patchArmaFPVInterop.sqf";
+	SDB_SET_MVAR(SDB_it_fnc_patchArmaFPVInterop, SDB_it_fnc_patchArmaFPVInterop);
+};
 
 call SDB_it_fnc_registerSettings;
 call SDB_it_fnc_initPlayerAutonomy;
 call SDB_it_fnc_patchDDTInterop;
+call SDB_it_fnc_patchArmaFPVInterop;
