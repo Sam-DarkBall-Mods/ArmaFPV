@@ -12,8 +12,31 @@ missionNamespace setVariable ["SDB_it_patchInitialized", true];
 	if (isNil "ddtClassesFPV") then { ddtClassesFPV = []; };
 	if (isNil "ddtClassesFPVAT") then { ddtClassesFPVAT = []; };
 
-	{ ddtClassesFPV pushBackUnique _x; } forEach ["Item_Crocus_AP", "Item_Crocus_AP_TI"];
-	{ ddtClassesFPVAT pushBackUnique _x; } forEach ["Item_Crocus_AT", "Item_Crocus_AT_TI"];
+	{
+		ddtClassesFPV pushBackUnique _x;
+	} forEach [
+		"Item_Crocus_AP",
+		"Item_Crocus_AP_TI",
+		"B_Crocus_AP_TI_Bag",
+		"O_Crocus_AP_TI_Bag",
+		"I_Crocus_AP_TI_Bag",
+		"B_CROCUS_AP_TI",
+		"O_CROCUS_AP_TI",
+		"I_CROCUS_AP_TI"
+	];
+
+	{
+		ddtClassesFPVAT pushBackUnique _x;
+	} forEach [
+		"Item_Crocus_AT",
+		"Item_Crocus_AT_TI",
+		"B_Crocus_AT_TI_Bag",
+		"O_Crocus_AT_TI_Bag",
+		"I_Crocus_AT_TI_Bag",
+		"B_CROCUS_AT_TI",
+		"O_CROCUS_AT_TI",
+		"I_CROCUS_AT_TI"
+	];
 
 	if (isNil "DDT_fnc_ManGetUAV_original") then {
 		DDT_fnc_ManGetUAV_original = DDT_fnc_ManGetUAV;
