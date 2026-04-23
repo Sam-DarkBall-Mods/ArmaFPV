@@ -9,6 +9,8 @@ class CfgPatches
 		{
 			"A3_Data_F_AoW_Loadorder",
 			"A3_Data_F",
+			"A3_Weapons_F",
+			"A3_Weapons_F_Tank_Launchers_Vorona",
 			"A3_Drones_F",
 			"cba_main",
 			"cba_common",
@@ -31,9 +33,28 @@ class CfgPatches
 			"B_Crocus_AP_TI",
 			"I_Crocus_AT_TI",
 			"I_Crocus_AP_TI",
-			"FPV_Retranslator"
+			"FPV_Retranslator",
+			"O_Crocus_AT_Bag",
+			"O_Crocus_AP_Bag",
+			"O_Crocus_AT_TI_Bag",
+			"O_Crocus_AP_TI_Bag",
+			"B_Crocus_AT_Bag",
+			"B_Crocus_AP_Bag",
+			"B_Crocus_AT_TI_Bag",
+			"B_Crocus_AP_TI_Bag",
+			"I_Crocus_AT_Bag",
+			"I_Crocus_AP_Bag",
+			"I_Crocus_AT_TI_Bag",
+			"I_Crocus_AP_TI_Bag"
 		};
 		weapons[]={};
+		magazines[]=
+		{
+			"Item_Crocus_AT",
+			"Item_Crocus_AP",
+			"Item_Crocus_AT_TI",
+			"Item_Crocus_AP_TI"
+		};
 	};
 };
 

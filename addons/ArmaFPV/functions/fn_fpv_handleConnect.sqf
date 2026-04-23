@@ -30,15 +30,20 @@ private _pfhId = [{
 	private _uav = getConnectedUAV _player;
 	private _uavType = typeOf _uav;
 	private _lastUav = GETMVAR(DB_fpv_lastUav, objNull);
+	private _uavChanged = !isNull _lastUav && { _uav isNotEqualTo _lastUav };
 
-	if (!isNull _lastUav && { _uav isNotEqualTo _lastUav }) then {
+	if (_uavChanged) then {
 		_lastUav setVariable ["DB_jammer_customUavBehavior", false, true];
 		SETMVAR(DB_fpv_controlGraceUntil, -1);
+		SETMVAR(DB_timeInJammerZone, 0);
+		SETMVAR(DB_fpv_signal_obstacles, 0);
+		SETMVAR(DB_fpv_signal_terrainMask, 0);
 	};
 
 	if (isNull _uav) then {
 		SETMVAR(DB_fpv_lastUav, objNull);
 		SETMVAR(DB_fpv_controlGraceUntil, -1);
+		SETMVAR(DB_timeInJammerZone, 0);
 	} else {
 		SETMVAR(DB_fpv_lastUav, _uav);
 	};
@@ -59,6 +64,7 @@ private _pfhId = [{
 	private _controlActive = _directControlActive || { _graceControlActive };
 	private _uiActive = _controlActive && { _cameraBound } && { _cameraMode == "GUNNER" };
 	private _uiMissing = isNull GETUVAR(ArmaFPV_SignalPicture, controlNull);
+	private _uiNeedsReset = _uiMissing || { _uavChanged };
 	private _hudApplied = GETMVAR(ArmaFPV_hudApplied, false);
 
 	if (_controlActive) then {
@@ -95,7 +101,7 @@ private _pfhId = [{
 				];
 				SETMVAR(ArmaFPV_hudApplied, true);
 			};
-			if (_uiMissing) then {
+			if (_uiNeedsReset) then {
 				call DB_fnc_fpv_createDialog;
 			};
 		} else {

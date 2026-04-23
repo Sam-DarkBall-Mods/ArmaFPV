@@ -11,6 +11,8 @@
 private _loopInterval = GETMVAR(DB_fpv_signalUpdateInterval, FPV_SIGNAL_UPDATE_INTERVAL);
 private _ppfxInterval = GETMVAR(DB_fpv_ppfxUpdateInterval, FPV_PPFX_UPDATE_INTERVAL);
 private _jammerHeartbeatInterval = GETMVAR(DB_fpv_jammerHeartbeatInterval, 3);
+private _signalLossThreshold = GETMVAR(DB_fpv_signalLossThreshold, FPV_SIGNAL_LOSS_THRESHOLD);
+private _signalLossDuration = GETMVAR(DB_fpv_signalLossDuration, FPV_SIGNAL_LOSS_DURATION);
 private _state = [
 	diag_tickTime,
 	1,
@@ -21,6 +23,35 @@ private _state = [
 
 call DB_fnc_fpv_ppfx_start;
 
+private _initialPlayer = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
+private _initialUav = objNull;
+if (!isNull _initialPlayer) then {
+	_initialUav = getConnectedUAV _initialPlayer;
+};
+
+if (!isNull _initialPlayer && { !isNull _initialUav }) then {
+	private _initialSignal = [_initialPlayer, _initialUav] call DB_fnc_fpv_getSignal;
+	_state set [1, _initialSignal];
+
+	private _initialAltitude = (getPosATL _initialUav) select 2;
+	private _initialDistance = _initialPlayer distance _initialUav;
+	private _initialMaxDistance = GETMVAR(FPV_MaxFlightDistance, 4000);
+	private _initialInJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
+	private _initialObstacles = GETMVAR(DB_fpv_signal_obstacles, 0);
+	private _initialTerrainMask = GETMVAR(DB_fpv_signal_terrainMask, 0);
+	private _initialContext = [
+		"altAGL", _initialAltitude,
+		"distance", _initialDistance,
+		"maxDistance", _initialMaxDistance,
+		"inJammer", _initialInJammer,
+		"obstacleCount", _initialObstacles,
+		"terrainMask", _initialTerrainMask
+	];
+
+	[_initialSignal, _initialContext] call DB_fnc_fpv_ppfx_setInput;
+	call DB_fnc_fpv_ppfx_update;
+};
+
 private _prevPfh = GETMVAR(DB_fpv_signalPFH, -1);
 if (_prevPfh >= 0) then {
 	[_prevPfh] call CBA_fnc_removePerFrameHandler;
@@ -28,7 +59,7 @@ if (_prevPfh >= 0) then {
 
 private _pfhId = [{
 	_this params ["_args", "_handle"];
-	_args params ["_loopInterval", "_ppfxInterval", "_jammerHeartbeatInterval", "_state"];
+	_args params ["_loopInterval", "_ppfxInterval", "_jammerHeartbeatInterval", "_signalLossThreshold", "_signalLossDuration", "_state"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	private _uav = getConnectedUAV _player;
@@ -128,9 +159,9 @@ private _pfhId = [{
 	private _jammerLowTime = _uav getVariable ["DB_fpv_jammerLowTime", 0];
 	private _isLost = _uav getVariable ["DB_fpv_isUAVsignalLost", false];
 
-	if (_inJammer && { _signal <= FPV_SIGNAL_LOSS_THRESHOLD } && { !_isLost }) then {
+	if (_inJammer && { _signal <= _signalLossThreshold } && { !_isLost }) then {
 		_jammerLowTime = _jammerLowTime + diag_deltaTime;
-		if (_jammerLowTime >= FPV_SIGNAL_LOSS_DURATION) then {
+		if (_jammerLowTime >= _signalLossDuration) then {
 			[_player, _uav] call DB_fnc_fpv_onSignalLost;
 			_jammerLowTime = 0;
 		};
@@ -222,6 +253,6 @@ private _pfhId = [{
 		_vPointerRight ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
 		_vPointerRight ctrlCommit 0;
 	};
-}, 0, [_loopInterval, _ppfxInterval, _jammerHeartbeatInterval, _state]] call CBA_fnc_addPerFrameHandler;
+}, 0, [_loopInterval, _ppfxInterval, _jammerHeartbeatInterval, _signalLossThreshold, _signalLossDuration, _state]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_signalPFH, _pfhId);

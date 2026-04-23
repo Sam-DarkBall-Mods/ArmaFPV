@@ -188,7 +188,7 @@ class CfgVehicles
 			minAngleY=-150;
 			maxAngleY=150;
 		};
-		class Viewoptics: ViewOptics
+		class ViewOptics: ViewOptics
 		{
 			initAngleX=0;
 			minAngleX=0;
@@ -693,7 +693,7 @@ class CfgVehicles
 		_generalMacro="O_Crocus_AT_TI";
 		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
-		class Viewoptics: Viewoptics
+		class ViewOptics: ViewOptics
 		{
 			visionMode[]=
 			{
@@ -710,7 +710,7 @@ class CfgVehicles
 		_generalMacro="O_Crocus_AP_TI";
 		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
-		class Viewoptics: Viewoptics
+		class ViewOptics: ViewOptics
 		{
 			visionMode[]=
 			{
@@ -757,7 +757,7 @@ class CfgVehicles
 		_generalMacro="B_Crocus_AT_TI";
 		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
-		class Viewoptics: Viewoptics
+		class ViewOptics: ViewOptics
 		{
 			visionMode[]=
 			{
@@ -774,7 +774,7 @@ class CfgVehicles
 		_generalMacro="B_Crocus_AP_TI";
 		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
-		class Viewoptics: Viewoptics
+		class ViewOptics: ViewOptics
 		{
 			visionMode[]=
 			{
@@ -821,7 +821,7 @@ class CfgVehicles
 		_generalMacro="I_Crocus_AT_TI";
 		editorPreview=QARMAFPV_DATA(krokus1.jpg);
 		displayName="Crocus AT TI";
-		class Viewoptics: Viewoptics
+		class ViewOptics: ViewOptics
 		{
 			visionMode[]=
 			{
@@ -838,7 +838,7 @@ class CfgVehicles
 		_generalMacro="I_Crocus_AP_TI";
 		editorPreview=QARMAFPV_DATA(termo.jpg);
 		displayName="Crocus AP TI";
-		class Viewoptics: Viewoptics
+		class ViewOptics: ViewOptics
 		{
 			visionMode[]=
 			{
