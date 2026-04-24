@@ -72,7 +72,7 @@ if (!isNull _operator && { isPlayer _operator }) then {
 		{
 			params ["_operator"];
 			if (!isNull _operator) then {
-				[_operator, 1] remoteExecCall ["addScore", 2];
+				[_operator] remoteExecCall ["DB_fnc_fpv_restoreDroneLossScore", 2];
 			};
 		},
 		[_operator],
