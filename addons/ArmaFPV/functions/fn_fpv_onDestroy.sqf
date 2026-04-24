@@ -29,8 +29,13 @@ if (hasInterface) then {
 
 private _killer = driver _uav;
 private _instigator = (UAVControl _uav) # 0;
+private _operator = _instigator;
 private _missileType = "";
 private _uavType = toLower (typeOf _uav);
+
+if (isNull _operator && { hasInterface }) then {
+	_operator = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
+};
 
 if (_uavType find "at" > -1) then {
 	_missileType = "FPV_RPG42_AT";
@@ -61,6 +66,19 @@ _missile setVectorDirAndUp [vectorDir _uav, vectorUp _uav];
 } forEach crew _uav;
 
 deleteVehicle _uav;
+
+if (!isNull _operator && { isPlayer _operator }) then {
+	[
+		{
+			params ["_operator"];
+			if (!isNull _operator) then {
+				[_operator, 1] remoteExecCall ["addScore", 2];
+			};
+		},
+		[_operator],
+		0.25
+	] call CBA_fnc_waitAndExecute;
+};
 
 [
 	{
