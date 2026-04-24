@@ -9,11 +9,18 @@
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
-if (GETMVAR(DB_fpv_ppfx_active, false)) exitWith {};
 
-if (isNil "DB_fpv_ppfx_input") then {
-	SETMVAR(DB_fpv_ppfx_input, 1);
-};
+SETMVAR(DB_fpv_ppfx_input, 1);
+private _ppfxContext = [];
+SETMVAR(DB_fpv_ppfx_context, _ppfxContext);
+SETMVAR(DB_fpv_ppfx_state, "CLEAN");
+SETMVAR(DB_fpv_ppfx_stateSince, diag_tickTime);
+SETMVAR(DB_fpv_ppfx_prevQ, 1);
+SETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
+private _ppfxGlitch = [];
+SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
+
+if (GETMVAR(DB_fpv_ppfx_active, false)) exitWith {};
 
 if (isNil "DB_fpv_ppfx_hysteresis") then {
 	SETMVAR(DB_fpv_ppfx_hysteresis, 0.05);
@@ -115,7 +122,7 @@ SETMVAR(DB_fpv_ppfx_state, "CLEAN");
 SETMVAR(DB_fpv_ppfx_stateSince, diag_tickTime);
 SETMVAR(DB_fpv_ppfx_prevQ, GETMVAR(DB_fpv_ppfx_input, 1));
 SETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
-private _ppfxGlitch = [];
+_ppfxGlitch = [];
 SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
 
 if (_fxColor >= 0) then {

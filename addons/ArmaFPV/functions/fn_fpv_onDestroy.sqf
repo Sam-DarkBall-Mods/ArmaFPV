@@ -15,13 +15,27 @@ if (isNull _uav) exitWith {};
 
 private _droneTypes = GETMVAR(DB_fpv_droneTypes, FPV_DRONE_TYPES);
 if !(typeOf _uav in _droneTypes) exitWith {};
+if (_uav getVariable ["DB_fpv_isDetonating", false]) exitWith {};
+_uav setVariable ["DB_fpv_isDetonating", true, true];
 
 cutText ["", "PLAIN"];
 
+if (hasInterface) then {
+	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
+	if (!isNull _player && { (getConnectedUAV _player) isEqualTo _uav }) then {
+		call DB_fnc_fpv_destroyUI;
+	};
+};
+
 private _killer = driver _uav;
 private _instigator = (UAVControl _uav) # 0;
+private _operator = _instigator;
 private _missileType = "";
 private _uavType = toLower (typeOf _uav);
+
+if (isNull _operator && { hasInterface }) then {
+	_operator = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
+};
 
 if (_uavType find "at" > -1) then {
 	_missileType = "FPV_RPG42_AT";
@@ -47,7 +61,24 @@ _missile setVectorDirAndUp [vectorDir _uav, vectorUp _uav];
 [_missile, [_killer, _instigator]] remoteExec ["setShotParents", 2];
 [_missile, true] remoteExec ["hideObjectGlobal", 2];
 
+{
+	_uav deleteVehicleCrew _x;
+} forEach crew _uav;
+
 deleteVehicle _uav;
+
+if (!isNull _operator && { isPlayer _operator }) then {
+	[
+		{
+			params ["_operator"];
+			if (!isNull _operator) then {
+				[_operator] remoteExecCall ["DB_fnc_fpv_restoreDroneLossScore", 2];
+			};
+		},
+		[_operator],
+		0.25
+	] call CBA_fnc_waitAndExecute;
+};
 
 [
 	{

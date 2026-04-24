@@ -24,6 +24,7 @@ class CfgFunctions
 			class fpv_addUavToInventory {};
 			class fpv_canDisassembly {};
 			class fpv_createUavOnItemCheck {};
+			class fpv_restoreDroneLossScore {};
 		};
 	};
 };
