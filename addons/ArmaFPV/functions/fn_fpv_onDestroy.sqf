@@ -49,29 +49,29 @@ private _shotParents = [_uav, _instigator];
 [_missile, _shotParents] remoteExec ["setShotParents", 2];
 [_missile, true] remoteExec ["hideObjectGlobal", 2];
 
-if (!isNull _operator && { isPlayer _operator }) then {
-	[
-		{
-			params ["_operator"];
-			if (!isNull _operator) then {
-				[_operator] remoteExecCall ["DB_fnc_fpv_restoreDroneLossScore", 2];
-			};
-		},
-		[_operator],
-		0.25
-	] call CBA_fnc_waitAndExecute;
-};
-
 [
 	{
 		_this params ["_missile", "_shotParents"];
 		(getShotParents _missile) isEqualTo _shotParents;
 	},
 	{
-		_this params ["_missile", "", "_uav"];
+		_this params ["_missile", "", "_uav", "_operator"];
 		deleteVehicleCrew _uav;
 		triggerAmmo _missile;
 		deleteVehicle _uav;
+
+		if (!isNull _operator && { isPlayer _operator }) then {
+			[
+				{
+					params ["_operator"];
+					if (!isNull _operator) then {
+						[_operator] remoteExecCall ["DB_fnc_fpv_restoreDroneLossScore", 2];
+					};
+				},
+				[_operator],
+				0.25
+			] call CBA_fnc_waitAndExecute;
+		};
 	},
-	[_missile, _shotParents, _uav]
+	[_missile, _shotParents, _uav, _operator]
 ] call CBA_fnc_waitUntilAndExecute;

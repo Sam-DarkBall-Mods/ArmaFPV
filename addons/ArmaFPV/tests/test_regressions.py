@@ -39,6 +39,15 @@ class ArmaFpvRegressionTests(unittest.TestCase):
         self.assertIn("DB_fpv_timeInJammerZone", signal_source)
         self.assertRegex(signal_source, r"_now\s*-\s*_lastSignalUpdate")
 
+    def test_jammer_state_resets_when_control_session_changes(self) -> None:
+        source = read("functions/fn_fpv_handleConnect.sqf")
+        reset_guard = source.index("if (!_wasControl || { _uavChanged }) then")
+        dialog_creation = source.index("call DB_fnc_fpv_createDialog")
+        self.assertLess(reset_guard, dialog_creation)
+        self.assertIn('_uav setVariable ["DB_fpv_lastSignalUpdate", nil]', source)
+        self.assertIn('_uav setVariable ["DB_fpv_timeInJammerZone", 0]', source)
+        self.assertIn('_uav setVariable ["DB_fpv_jammerLowTime", 0]', source)
+
     def test_ppfx_oscillators_use_sqf_degrees(self) -> None:
         source = read("functions/fn_fpv_ppfx_update.sqf")
         self.assertNotIn("6.283", source)
@@ -67,7 +76,17 @@ class ArmaFpvRegressionTests(unittest.TestCase):
         config_source = read("includes/CfgVehicles.hpp")
         self.assertIn("_shotParents = [_uav, _instigator]", source)
         self.assertLess(source.index("getShotParents"), source.index("deleteVehicle _uav"))
+        self.assertLess(source.index("deleteVehicle _uav"), source.index("DB_fnc_fpv_restoreDroneLossScore"))
         self.assertRegex(config_source, r"\bkilled\s*=")
+
+    def test_drone_initialization_preserves_waypoint_ai(self) -> None:
+        for path in (
+            ADDON / "functions/fn_fpv_droneInit.sqf",
+            ROOT / "vnd_main/functions/fn_fpv_droneInit.sqf",
+        ):
+            with self.subTest(path=path.relative_to(ROOT)):
+                source = path.read_text(encoding="utf-8")
+                self.assertNotIn('disableAI "ALL"', source)
 
     def test_detonation_uses_multiplayer_uav_control_syntax(self) -> None:
         source = read("functions/fn_fpv_onDestroy.sqf")

@@ -56,6 +56,12 @@ private _pfhId = [{
 	private _hudApplied = GETMVAR(ArmaFPV_hudApplied, false);
 
 	if (_controlActive) then {
+		if (!_wasControl || { _uavChanged }) then {
+			_uav setVariable ["DB_fpv_lastSignalUpdate", nil];
+			_uav setVariable ["DB_fpv_timeInJammerZone", 0];
+			_uav setVariable ["DB_fpv_jammerLowTime", 0];
+		};
+
 		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
 
 		if (!_wasControl) then {
