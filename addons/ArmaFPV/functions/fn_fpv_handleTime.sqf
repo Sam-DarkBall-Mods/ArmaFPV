@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: flight time timer.
-	Purpose: shows the control time on the OSD.
-	Context: client, active only while controlling the drone.
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
@@ -14,7 +6,7 @@ private _uav = getConnectedUAV _player;
 if (isNull _player) exitWith {};
 if (isNull _uav) exitWith {};
 
-if (isNil { _uav getVariable ["DB_fpv_savedTime", nil] }) then {
+if (_uav isNil "DB_fpv_savedTime") then {
 	_uav setVariable ["DB_fpv_savedTime", 0];
 };
 

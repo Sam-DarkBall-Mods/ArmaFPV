@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: signal level handler.
-	Purpose: updates the signal indicator and post-process effects based on link quality.
-	Context: client, active only while controlling the drone.
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 private _loopInterval = GETMVAR(DB_fpv_signalUpdateInterval, FPV_SIGNAL_UPDATE_INTERVAL);
@@ -33,17 +25,19 @@ if (!isNull _initialPlayer && { !isNull _initialUav }) then {
 	private _initialSignal = [_initialPlayer, _initialUav] call DB_fnc_fpv_getSignal;
 	_state set [1, _initialSignal];
 
-	private _initialAltitude = (getPosATL _initialUav) select 2;
+	private _initialAltitude = (getPosATL _initialUav) # 2;
 	private _initialDistance = _initialPlayer distance _initialUav;
-	private _initialMaxDistance = GETMVAR(FPV_MaxFlightDistance, 4000);
-	private _initialInJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
-	private _initialObstacles = GETMVAR(DB_fpv_signal_obstacles, 0);
-	private _initialTerrainMask = GETMVAR(DB_fpv_signal_terrainMask, 0);
+	private _initialMaxDistance = _initialUav getVariable ["DB_fpv_signalMaxDistance", GETMVAR(FPV_MaxFlightDistance, 4000)];
+	private _initialInJammer = _initialUav getVariable ["DB_fpv_inJammer", false];
+	private _initialJammerFactor = _initialUav getVariable ["DB_fpv_jammerFactor", 0];
+	private _initialObstacles = _initialUav getVariable ["DB_fpv_signalObstacles", 0];
+	private _initialTerrainMask = _initialUav getVariable ["DB_fpv_signalTerrainMask", 0];
 	private _initialContext = [
 		"altAGL", _initialAltitude,
 		"distance", _initialDistance,
 		"maxDistance", _initialMaxDistance,
 		"inJammer", _initialInJammer,
+		"jammerFactor", _initialJammerFactor,
 		"obstacleCount", _initialObstacles,
 		"terrainMask", _initialTerrainMask
 	];
@@ -78,7 +72,7 @@ private _pfhId = [{
 	private _doUpdate = (_now - _lastUpdate) >= _loopInterval;
 	private _doPpfxUpdate = (_now - _lastPpfxUpdate) >= _ppfxInterval;
 
-	private _altitude = (getPosATL _uav) select 2;
+	private _altitude = (getPosATL _uav) # 2;
 	private _controlPicture = GETUVAR(ArmaFPV_SignalPicture, controlNull);
 	private _controlText = GETUVAR(ArmaFPV_SignalText, controlNull);
 	private _headingText = GETUVAR(ArmaFPV_HeadingText, controlNull);
@@ -99,7 +93,15 @@ private _pfhId = [{
 	private _speedMs = vectorMagnitude (velocity _uav);
 	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
 
-	private _inJammer = GETMVAR(DB_timeInJammerZone, 0) > 0;
+	private _sampleSignal = _doUpdate || _doPpfxUpdate;
+	if (_sampleSignal) then {
+		_signal = [_player, _uav] call DB_fnc_fpv_getSignal;
+		_state set [1, _signal];
+		if (_doUpdate) then { _state set [0, _now]; };
+		if (_doPpfxUpdate) then { _state set [2, _now]; };
+	};
+
+	private _inJammer = _uav getVariable ["DB_fpv_inJammer", false];
 	private _jammerStateChanged = _inJammer != _lastJammerActive;
 	private _jammerHeartbeatDue = _inJammer && { (_now - _lastJammerBroadcast) >= _jammerHeartbeatInterval };
 	if (_jammerStateChanged || _jammerHeartbeatDue) then {
@@ -114,12 +116,7 @@ private _pfhId = [{
 		_state set [4, _inJammer];
 	};
 
-	if (_doUpdate || _doPpfxUpdate) then {
-		_signal = [_player, _uav] call DB_fnc_fpv_getSignal;
-		_state set [1, _signal];
-		if (_doUpdate) then { _state set [0, _now]; };
-		if (_doPpfxUpdate) then { _state set [2, _now]; };
-
+	if (_sampleSignal) then {
 		if (_doUpdate) then {
 			private _picture = "";
 			switch (true) do {
@@ -140,15 +137,17 @@ private _pfhId = [{
 			};
 		};
 
-		private _maxDistance = GETMVAR(FPV_MaxFlightDistance, 4000);
-		private _obstacles = GETMVAR(DB_fpv_signal_obstacles, 0);
-		private _terrainMask = GETMVAR(DB_fpv_signal_terrainMask, 0);
+		private _maxDistance = _uav getVariable ["DB_fpv_signalMaxDistance", GETMVAR(FPV_MaxFlightDistance, 4000)];
+		private _jammerFactor = _uav getVariable ["DB_fpv_jammerFactor", 0];
+		private _obstacles = _uav getVariable ["DB_fpv_signalObstacles", 0];
+		private _terrainMask = _uav getVariable ["DB_fpv_signalTerrainMask", 0];
 
 		private _context = [
 			"altAGL", _altitude,
 			"distance", _distance,
 			"maxDistance", _maxDistance,
 			"inJammer", _inJammer,
+			"jammerFactor", _jammerFactor,
 			"obstacleCount", _obstacles,
 			"terrainMask", _terrainMask
 		];

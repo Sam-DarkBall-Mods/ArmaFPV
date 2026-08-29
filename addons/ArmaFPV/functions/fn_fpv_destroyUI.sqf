@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: UI/effects cleanup.
-	Purpose: hides the OSD and removes post-process effects.
-	Context: client when leaving FPV control.
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 private _cleanupToken = diag_frameNo;

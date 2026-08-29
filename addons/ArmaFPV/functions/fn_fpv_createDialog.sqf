@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: create OSD interface.
-	Purpose: creates the UI layer and starts battery/signal/time handlers.
-	Context: client when entering FPV control.
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 SETMVAR(DB_fpv_pendingCleanupToken, -1);

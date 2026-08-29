@@ -2,32 +2,26 @@ if (!hasInterface) exitWith {};
 
 #include "\ArmaFPV\script_macros.hpp"
 
-private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
-if (!isNull _player) then {
-	private _id = _player addEventHandler ["Put", { _this call DB_fnc_fpv_createUavOnItemCheck }];
-	_player setVariable ["DB_armafpv_playerPutID", _id];
-};
-
 call DB_fnc_fpv_handleConnect;
 
-["loadout", {
-	params ["_player"];
+["unit", {
+	params ["_player", "_oldPlayer"];
 
-	private _oldId = _player getVariable ["DB_armafpv_playerPutID", -1];
-	if (_oldId != -1) then { _player removeEventHandler ["Put", _oldId]; };
-	if !(isPlayer _player) exitWith {};
+	if (!isNull _oldPlayer) then {
+		private _oldId = _oldPlayer getVariable ["DB_armafpv_playerPutID", -1];
+		if (_oldId >= 0) then {
+			_oldPlayer removeEventHandler ["Put", _oldId];
+			_oldPlayer setVariable ["DB_armafpv_playerPutID", -1];
+		};
+	};
+
+	if (isNull _player || { !isPlayer _player }) exitWith {};
+
+	private _existingId = _player getVariable ["DB_armafpv_playerPutID", -1];
+	if (_existingId >= 0) then {
+		_player removeEventHandler ["Put", _existingId];
+	};
 
 	private _newId = _player addEventHandler ["Put", { _this call DB_fnc_fpv_createUavOnItemCheck }];
 	_player setVariable ["DB_armafpv_playerPutID", _newId];
-}] call CBA_fnc_addPlayerEventHandler;
-
-if (hasInterface && {!isServer}) then {
-	[
-		{ !hasInterface || serverCommandAvailable "#kick" },
-		{
-			if (!hasInterface) exitWith {};
-			private _register = GETMVAR(DB_fpv_registerAdminSettings, {});
-			call _register;
-		}
-	] call CBA_fnc_waitUntilAndExecute;
-};
+}, true] call CBA_fnc_addPlayerEventHandler;

@@ -1,13 +1,3 @@
-/*
-	ArmaFPV: signal loss handler.
-	Purpose: disables drone control and marks the UAV as signal lost.
-	Context: client/server depending on the caller.
-	Params: [_player, _uav]
-		_player - operator.
-		_uav - UAV object.
-	Returns: nothing.
-*/
-
 params ["_player", "_uav"];
 
 if (isNull _uav) exitWith {};
@@ -16,7 +6,7 @@ if (_uav getVariable ["DB_fpv_isUAVsignalLost", false]) exitWith {};
 if (local _uav) then {
 	_uav engineOn false;
 } else {
-	[_uav, false] remoteExec ["engineOn", 2];
+	[_uav, false] remoteExecCall ["engineOn", _uav];
 };
 
 if (!isNull _player) then {

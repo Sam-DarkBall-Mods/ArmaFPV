@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: start FPV PPFX module.
-	Purpose: creates post-process effects once and registers an EachFrame update.
-	Context: client only.
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
@@ -13,8 +5,6 @@ if (!hasInterface) exitWith {};
 SETMVAR(DB_fpv_ppfx_input, 1);
 private _ppfxContext = [];
 SETMVAR(DB_fpv_ppfx_context, _ppfxContext);
-SETMVAR(DB_fpv_ppfx_state, "CLEAN");
-SETMVAR(DB_fpv_ppfx_stateSince, diag_tickTime);
 SETMVAR(DB_fpv_ppfx_prevQ, 1);
 SETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
 private _ppfxGlitch = [];
@@ -22,15 +12,7 @@ SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
 
 if (GETMVAR(DB_fpv_ppfx_active, false)) exitWith {};
 
-if (isNil "DB_fpv_ppfx_hysteresis") then {
-	SETMVAR(DB_fpv_ppfx_hysteresis, 0.05);
-};
-
-if (isNil "DB_fpv_ppfx_minStateTime") then {
-	SETMVAR(DB_fpv_ppfx_minStateTime, 0.4);
-};
-
-if (isNil "DB_fpv_ppfx_priorityBase") then {
+if (missionNamespace isNil "DB_fpv_ppfx_priorityBase") then {
 	SETMVAR(DB_fpv_ppfx_priorityBase, 1650);
 };
 
@@ -84,16 +66,6 @@ private _fxChrom = _result # 0;
 _usedPriorities = _result # 1;
 if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
 
-_result = ["Resolution", _priorityBase, _usedPriorities] call _createEffect;
-private _fxResolution = _result # 0;
-_usedPriorities = _result # 1;
-if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
-
-_result = ["ColorInversion", _priorityBase, _usedPriorities] call _createEffect;
-private _fxInvert = _result # 0;
-_usedPriorities = _result # 1;
-if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
-
 _result = ["RadialBlur", _priorityBase, _usedPriorities] call _createEffect;
 private _fxRadial = _result # 0;
 _usedPriorities = _result # 1;
@@ -107,19 +79,15 @@ if ((_result # 2) >= 0) then { _instancePriorities pushBack (_result # 2); };
 SETMVAR(DB_fpv_ppfx_usedPriorities, _usedPriorities);
 private _ppfxPriorities = _instancePriorities;
 SETMVAR(DB_fpv_ppfx_priorities, _ppfxPriorities);
-private _ppfxHandles = [_fxColor, _fxGrain, _fxBlur, _fxChrom, _fxResolution, _fxInvert, _fxRadial, _fxWet];
+private _ppfxHandles = [_fxColor, _fxGrain, _fxBlur, _fxChrom, _fxRadial, _fxWet];
 SETMVAR(DB_fpv_ppfx_handles, _ppfxHandles);
 SETMVAR(DB_fpv_ppfx_fxColor, _fxColor);
 SETMVAR(DB_fpv_ppfx_fxGrain, _fxGrain);
 SETMVAR(DB_fpv_ppfx_fxBlur, _fxBlur);
 SETMVAR(DB_fpv_ppfx_fxChrom, _fxChrom);
-SETMVAR(DB_fpv_ppfx_fxResolution, _fxResolution);
-SETMVAR(DB_fpv_ppfx_fxInvert, _fxInvert);
 SETMVAR(DB_fpv_ppfx_fxRadial, _fxRadial);
 SETMVAR(DB_fpv_ppfx_fxWet, _fxWet);
 SETMVAR(DB_fpv_ppfx_active, true);
-SETMVAR(DB_fpv_ppfx_state, "CLEAN");
-SETMVAR(DB_fpv_ppfx_stateSince, diag_tickTime);
 SETMVAR(DB_fpv_ppfx_prevQ, GETMVAR(DB_fpv_ppfx_input, 1));
 SETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
 _ppfxGlitch = [];
@@ -143,16 +111,6 @@ if (_fxBlur >= 0) then {
 if (_fxChrom >= 0) then {
 	_fxChrom ppEffectAdjust [0, 0, true];
 	_fxChrom ppEffectCommit 0;
-};
-
-if (_fxResolution >= 0) then {
-	_fxResolution ppEffectAdjust [-1];
-	_fxResolution ppEffectCommit 0;
-};
-
-if (_fxInvert >= 0) then {
-	_fxInvert ppEffectAdjust [0, 0, 0];
-	_fxInvert ppEffectCommit 0;
 };
 
 if (_fxRadial >= 0) then {

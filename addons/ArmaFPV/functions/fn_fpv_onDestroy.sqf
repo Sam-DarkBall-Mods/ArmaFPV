@@ -1,12 +1,3 @@
-/*
-	ArmaFPV: FPV drone detonation.
-	Purpose: replaces the drone with a munition and triggers the explosion.
-	Context: local where called (usually the operator client).
-	Params: [_uav]
-		_uav - FPV drone object.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 params ["_uav"];
@@ -18,8 +9,6 @@ if !(typeOf _uav in _droneTypes) exitWith {};
 if (_uav getVariable ["DB_fpv_isDetonating", false]) exitWith {};
 _uav setVariable ["DB_fpv_isDetonating", true, true];
 
-cutText ["", "PLAIN"];
-
 if (hasInterface) then {
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	if (!isNull _player && { (getConnectedUAV _player) isEqualTo _uav }) then {
@@ -27,14 +16,20 @@ if (hasInterface) then {
 	};
 };
 
-private _killer = driver _uav;
-private _instigator = (UAVControl _uav) # 0;
+private _controllers = UAVControl [_uav, "crew"];
+if (_controllers isEqualTo []) then {
+	_controllers = UAVControl [_uav, "allbutdead"];
+};
+private _instigator = _controllers param [0, objNull];
 private _operator = _instigator;
 private _missileType = "";
 private _uavType = toLower (typeOf _uav);
 
 if (isNull _operator && { hasInterface }) then {
 	_operator = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
+};
+if (isNull _instigator) then {
+	_instigator = _operator;
 };
 
 if (_uavType find "at" > -1) then {
@@ -47,25 +42,12 @@ if (_uavType find "ap" > -1) then {
 
 if (_missileType isEqualTo "") exitWith {};
 
-if (!isNull _killer) then {
-	if (local _killer) then {
-		_killer setCaptive false;
-	} else {
-		[_killer, false] remoteExec ["setCaptive", 2];
-	};
-};
-
 private _missile = createVehicle [_missileType, _uav modelToWorld [0, 0, 0]];
 _missile setVectorDirAndUp [vectorDir _uav, vectorUp _uav];
 
-[_missile, [_killer, _instigator]] remoteExec ["setShotParents", 2];
+private _shotParents = [_uav, _instigator];
+[_missile, _shotParents] remoteExec ["setShotParents", 2];
 [_missile, true] remoteExec ["hideObjectGlobal", 2];
-
-{
-	_uav deleteVehicleCrew _x;
-} forEach crew _uav;
-
-deleteVehicle _uav;
 
 if (!isNull _operator && { isPlayer _operator }) then {
 	[
@@ -86,8 +68,10 @@ if (!isNull _operator && { isPlayer _operator }) then {
 		(getShotParents _missile) isEqualTo _shotParents;
 	},
 	{
-		_this params ["_missile"];
+		_this params ["_missile", "", "_uav"];
+		deleteVehicleCrew _uav;
 		triggerAmmo _missile;
+		deleteVehicle _uav;
 	},
-	[_missile, [_killer, _instigator]]
+	[_missile, _shotParents, _uav]
 ] call CBA_fnc_waitUntilAndExecute;

@@ -1,84 +1,61 @@
-/*
-	ArmaFPV: PreInit and base settings.
-	Purpose: registers CBA settings and shared module constants.
-	Context: runs on all machines during preInit.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
-if (isNil "DB_fpv_droneTypes") then {
+if (missionNamespace isNil "DB_fpv_droneTypes") then {
 	DB_fpv_droneTypes = FPV_DRONE_TYPES;
 };
 
-if (isNil "DB_fpv_dronesArray_items") then {
+if (missionNamespace isNil "DB_fpv_dronesArray_items") then {
 	DB_fpv_dronesArray_items = FPV_DRONE_ITEMS;
 };
 
-if (isNil "DB_fpv_terminalTypes") then {
-	DB_fpv_terminalTypes = FPV_TERMINAL_TYPES;
-};
-
-if (isNil "DB_fpv_signalLossThreshold") then {
+if (missionNamespace isNil "DB_fpv_signalLossThreshold") then {
 	DB_fpv_signalLossThreshold = FPV_SIGNAL_LOSS_THRESHOLD;
 };
 
-if (isNil "DB_fpv_signalLossDuration") then {
+if (missionNamespace isNil "DB_fpv_signalLossDuration") then {
 	DB_fpv_signalLossDuration = FPV_SIGNAL_LOSS_DURATION;
 };
 
-if (isNil "DB_fpv_signalUpdateInterval") then {
+if (missionNamespace isNil "DB_fpv_signalUpdateInterval") then {
 	DB_fpv_signalUpdateInterval = FPV_SIGNAL_UPDATE_INTERVAL;
 };
 
-if (isNil "DB_fpv_connectLoopInterval") then {
+if (missionNamespace isNil "DB_fpv_connectLoopInterval") then {
 	DB_fpv_connectLoopInterval = FPV_CONNECT_LOOP_INTERVAL;
 };
 
-[ 
-    "FPV_DefaultText",
-    "EDITBOX",
-    ["Default Text", "Enter the text"],
-    "FPV Settings",
-    "CROCUS",
-    0,
-    { call DB_fnc_fpv_handleSettings }
-] call cba_settings_fnc_init;
-
-private _fnc_registerAdminSettings = {
-	if (GETMVAR(DB_fpv_adminSettingsRegistered, false)) exitWith {};
-	SETMVAR(DB_fpv_adminSettingsRegistered, true);
-
-	[
-		"FPV_isUavCaptive",
-		"CHECKBOX",
-		["AI Cannot See FPV Drones", ""],
-		"FPV Settings",
-		true,
-		1,
-		{
-			publicVariable "FPV_isUavCaptive";
-			call DB_fnc_fpv_handleSettings;
-		}
-	] call cba_settings_fnc_init;
-
-	[
-		"FPV_MaxFlightDistance",
-		"SLIDER",
-		["Max Flight Distance", ""],
-		"FPV Settings",
-		[1500, 12000, 4000, 0],
-		1,
-		{ publicVariable "FPV_MaxFlightDistance" }
-	] call cba_settings_fnc_init;
-
+private _fnc_sanitizeText = {
+	params ["_value"];
+	private _allowedChars = toArray "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,;\/ ";
+	if ((toArray _value) findIf { !(_x in _allowedChars) } >= 0) exitWith { "" };
+	_value
 };
 
-SETMVAR(DB_fpv_registerAdminSettings, _fnc_registerAdminSettings);
+[
+	"FPV_DefaultText",
+	"EDITBOX",
+	["Default Text", "Enter the text"],
+	"FPV Settings",
+	["CROCUS", false, _fnc_sanitizeText],
+	false,
+	{ call DB_fnc_fpv_handleSettings }
+] call CBA_fnc_addSetting;
 
-if (hasInterface) then {
-	if (isServer || { serverCommandAvailable "#kick" }) then {
-		call _fnc_registerAdminSettings;
-	} else {
-		// Defer admin registration to postInit (CBA is not guaranteed in preInit).
-	};
-};
+[
+	"FPV_isUavCaptive",
+	"CHECKBOX",
+	["AI Cannot See FPV Drones", ""],
+	"FPV Settings",
+	true,
+	true,
+	{ call DB_fnc_fpv_handleSettings }
+] call CBA_fnc_addSetting;
+
+[
+	"FPV_MaxFlightDistance",
+	"SLIDER",
+	["Max Flight Distance", ""],
+	"FPV Settings",
+	[1500, 12000, 4000, 0],
+	true
+] call CBA_fnc_addSetting;

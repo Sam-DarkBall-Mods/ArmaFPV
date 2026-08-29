@@ -1,13 +1,3 @@
-/*
-	ArmaFPV: set PPFX input.
-	Purpose: updates signal quality and context for the PPFX module.
-	Context: scheduled or unscheduled.
-	Params:
-		0: signalQuality (Number, 0..1)
-		1: context (Array, optional)
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 params [

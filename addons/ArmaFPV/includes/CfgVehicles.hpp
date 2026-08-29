@@ -644,7 +644,9 @@ class CfgVehicles
 			class ArmaFPV
 			{
 				hit="_this call DB_fnc_fpv_onDestroy";
+				killed="_this call DB_fnc_fpv_onDestroy";
 				init="(_this # 0) call DB_fnc_fpv_droneInit;";
+				local="if (_this # 1) then { (_this # 0) call DB_fnc_fpv_droneInit; };";
 			};
 		};
 	};

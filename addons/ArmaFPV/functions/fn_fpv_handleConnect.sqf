@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: FPV connection handler.
-	Purpose: manages OSD lifecycle while controlling FPV drones.
-	Context: client, runs post-init.
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
@@ -35,15 +27,11 @@ private _pfhId = [{
 	if (_uavChanged) then {
 		_lastUav setVariable ["DB_jammer_customUavBehavior", false, true];
 		SETMVAR(DB_fpv_controlGraceUntil, -1);
-		SETMVAR(DB_timeInJammerZone, 0);
-		SETMVAR(DB_fpv_signal_obstacles, 0);
-		SETMVAR(DB_fpv_signal_terrainMask, 0);
 	};
 
 	if (isNull _uav) then {
 		SETMVAR(DB_fpv_lastUav, objNull);
 		SETMVAR(DB_fpv_controlGraceUntil, -1);
-		SETMVAR(DB_timeInJammerZone, 0);
 	} else {
 		SETMVAR(DB_fpv_lastUav, _uav);
 	};

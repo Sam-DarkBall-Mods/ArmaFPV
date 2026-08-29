@@ -30,23 +30,11 @@ private _uavClass = format ["%1%2", _sidePrefix, _uavType];
 if !(isClass (configFile >> "CfgVehicles" >> _uavClass)) exitWith {};
 
 private _cargo = magazinesAmmoCargo _container;
-private _newCargo = [];
-private _removedItem = false;
-{
-	private _magClass = _x # 0;
-	private _magAmmo = _x # 1;
-
-	if (!_removedItem && { _magClass isEqualTo _item }) then {
-		_removedItem = true;
-	} else {
-		_newCargo pushBack [_magClass, _magAmmo];
-	};
-} forEach _cargo;
-
-if (!_removedItem) exitWith {};
+if (_cargo findIf { (_x # 0) isEqualTo _item } < 0) exitWith {};
 
 private _pos = getPosATL _container;
 private _uav = createVehicle [_uavClass, _pos, [], 0, "CAN_COLLIDE"];
+if (isNull _uav) exitWith {};
 createVehicleCrew _uav;
 
 if (local _uav && local _container) then {
@@ -55,7 +43,4 @@ if (local _uav && local _container) then {
 	[_uav, _container] remoteExecCall ["disableCollisionWith", 0, _uav];
 };
 
-clearMagazineCargoGlobal _container;
-{
-	_container addMagazineAmmoCargo [_x # 0, 1, _x # 1];
-} forEach _newCargo;
+_container addMagazineAmmoCargo [_item, -1, 0];

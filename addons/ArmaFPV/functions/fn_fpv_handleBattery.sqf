@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: battery indicator handler.
-	Purpose: updates the battery icon and percentage on the OSD.
-	Context: client, active only while controlling the drone.
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 private _prevPfh = GETMVAR(DB_fpv_batteryPFH, -1);

@@ -1,11 +1,3 @@
-/*
-	ArmaFPV: update FPV PPFX module.
-	Purpose: updates PP effects every frame based on signal quality.
-	Context: unscheduled (EachFrame).
-	Params: none.
-	Returns: nothing.
-*/
-
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
@@ -21,8 +13,6 @@ private _fxColor = GETMVAR(DB_fpv_ppfx_fxColor, -1);
 private _fxGrain = GETMVAR(DB_fpv_ppfx_fxGrain, -1);
 private _fxBlur = GETMVAR(DB_fpv_ppfx_fxBlur, -1);
 private _fxChrom = GETMVAR(DB_fpv_ppfx_fxChrom, -1);
-private _fxResolution = GETMVAR(DB_fpv_ppfx_fxResolution, -1);
-private _fxInvert = GETMVAR(DB_fpv_ppfx_fxInvert, -1);
 private _fxRadial = GETMVAR(DB_fpv_ppfx_fxRadial, -1);
 private _fxWet = GETMVAR(DB_fpv_ppfx_fxWet, -1);
 
@@ -51,44 +41,6 @@ private _jammerFactor = [_context, "jammerFactor", 0] call _getCtx;
 private _obstacles = [_context, "obstacleCount", 0] call _getCtx;
 private _terrainMask = [_context, "terrainMask", 0] call _getCtx;
 private _lowAltFactor = (1 - ((_altAGL max 0) / 20) min 1) max 0;
-
-private _hysteresis = GETMVAR(DB_fpv_ppfx_hysteresis, 0.05);
-private _minStateTime = GETMVAR(DB_fpv_ppfx_minStateTime, 0.4);
-
-private _state = GETMVAR(DB_fpv_ppfx_state, "CLEAN");
-private _stateSince = GETMVAR(DB_fpv_ppfx_stateSince, _now);
-
-private _nextState = _state;
-
-switch (_state) do {
-	case "CLEAN": {
-		if (_q < 0.85 - _hysteresis) then { _nextState = "MINOR"; };
-	};
-	case "MINOR": {
-		if (_q >= 0.85 + _hysteresis) then { _nextState = "CLEAN"; };
-		if (_q < 0.65 - _hysteresis) then { _nextState = "MED"; };
-	};
-	case "MED": {
-		if (_q >= 0.65 + _hysteresis) then { _nextState = "MINOR"; };
-		if (_q < 0.40 - _hysteresis) then { _nextState = "SEVERE"; };
-	};
-	case "SEVERE": {
-		if (_q >= 0.40 + _hysteresis) then { _nextState = "MED"; };
-		if (_q < 0.15 - _hysteresis) then { _nextState = "LOST"; };
-	};
-	case "LOST": {
-		if (_q >= 0.15 + _hysteresis) then { _nextState = "SEVERE"; };
-	};
-	default { _nextState = "CLEAN"; };
-};
-
-if (_nextState != _state && { (_now - _stateSince) >= _minStateTime }) then {
-	_state = _nextState;
-	_stateSince = _now;
-};
-
-SETMVAR(DB_fpv_ppfx_state, _state);
-SETMVAR(DB_fpv_ppfx_stateSince, _stateSince);
 
 private _smoothstepInv = {
 	params ["_x", "_high", "_low"];
@@ -186,14 +138,12 @@ if (_glitchType isEqualTo "") then {
 };
 
 private _glitchNoise = 0;
-private _glitchBlur = 0;
 private _glitchRadial = 0;
 private _glitchWet = 0;
 private _colorShift = 0;
 private _stripePulse = 0;
 private _pulse = 0;
 private _blackout = 0;
-private _invert = 0;
 
 switch (_glitchType) do {
 	case "LINE_TEAR": {
@@ -217,7 +167,7 @@ switch (_glitchType) do {
 
 if (_severity > 0.35) then {
 	private _stripeHz = 7 + (_severity * 13);
-	private _stripePhase = (_now * _stripeHz + (sin (_now * 3.1) * 0.35)) % 1;
+	private _stripePhase = (_now * _stripeHz + (sin (deg (_now * 3.1)) * 0.35)) % 1;
 	private _stripeDuty = (0.22 - (_severity * 0.1)) max 0.08;
 	if (_stripePhase < _stripeDuty) then {
 		_stripePulse = (0.18 + (_severity * 0.42)) min 0.65;
@@ -238,7 +188,7 @@ private _commitTime = if (_glitchType isEqualTo "") then {
 };
 
 private _analogBase = 0.06;
-private _drift = (sin (_now * 2.1) * 0.03 + sin (_now * 0.7) * 0.015) * _severity;
+private _drift = (sin (deg (_now * 2.1)) * 0.03 + sin (deg (_now * 0.7)) * 0.015) * _severity;
 private _baseBrightness = 1 + _drift + _pulse;
 if (_severity > 0.8) then {
 	_baseBrightness = _baseBrightness max 0.28;
@@ -246,8 +196,7 @@ if (_severity > 0.8) then {
 private _flickerBlackout = 0;
 if (_severity > 0.35) then {
 	private _flickerHz = 18 + (_severity * 14);
-	private _phase = (_now * _flickerHz);
-	private _wave = ((sin (_phase * 6.283) + 1) * 0.5);
+	private _wave = ((sin (_now * _flickerHz * 360) + 1) * 0.5);
 	_flickerBlackout = _wave * (0.25 + (_severity * 0.2));
 	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + (0.06 * _severity); };
 };
@@ -255,7 +204,7 @@ if (_severity > 0.35) then {
 private _microFlicker = 0;
 if (_lowAltFactor > 0.25) then {
 	private _microHz = 24 + (_lowAltFactor * 12);
-	private _microWave = ((sin (_now * _microHz * 6.283) + 1) * 0.5);
+	private _microWave = ((sin (_now * _microHz * 360) + 1) * 0.5);
 	private _microAmp = 0.04 + ((1 - _q) * 0.06);
 	_microFlicker = _microWave * _microAmp;
 };
@@ -282,15 +231,13 @@ private _colorA = [0, 0, 0, _finalBlackout];
 private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - (_analogBase * 0.01), 1];
 
 private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
-private _blur = (_blurWeight + _glitchBlur + _analogBase * 0.08) min 1;
+private _blur = (_blurWeight + _analogBase * 0.08) min 1;
 private _chrom = (_aberrWeight * 0.025 + _analogBase * 0.004) min 0.06;
 
 if (_stripePulse > 0) then {
 	_grain = (_grain + (_stripePulse * 0.22)) min 1;
 	_chrom = (_chrom + (_stripePulse * 0.012)) min 0.06;
 };
-
-private _resTarget = -1;
 
 if (_fxColor >= 0) then {
 	_fxColor ppEffectAdjust [
@@ -317,16 +264,6 @@ if (_fxBlur >= 0) then {
 if (_fxChrom >= 0) then {
 	_fxChrom ppEffectAdjust [_chrom, _chrom, true];
 	_fxChrom ppEffectCommit _commitTime;
-};
-
-if (_fxResolution >= 0) then {
-	_fxResolution ppEffectAdjust [_resTarget];
-	_fxResolution ppEffectCommit _commitTime;
-};
-
-if (_fxInvert >= 0) then {
-	_fxInvert ppEffectAdjust [_invert, _invert, _invert];
-	_fxInvert ppEffectCommit _commitTime;
 };
 
 if (_fxRadial >= 0) then {
@@ -367,8 +304,6 @@ if (_q >= 0.99) then {
 	if (_fxGrain >= 0) then { _fxGrain ppEffectAdjust [0, 1, 1, 0, 0, 0]; _fxGrain ppEffectCommit 0; };
 	if (_fxBlur >= 0) then { _fxBlur ppEffectAdjust [0]; _fxBlur ppEffectCommit 0; };
 	if (_fxChrom >= 0) then { _fxChrom ppEffectAdjust [0, 0, true]; _fxChrom ppEffectCommit 0; };
-	if (_fxResolution >= 0) then { _fxResolution ppEffectAdjust [-1]; _fxResolution ppEffectCommit 0; };
-	if (_fxInvert >= 0) then { _fxInvert ppEffectAdjust [0, 0, 0]; _fxInvert ppEffectCommit 0; };
 	if (_fxRadial >= 0) then { _fxRadial ppEffectAdjust [0, 0, 0, 0]; _fxRadial ppEffectCommit 0; };
 	if (_fxWet >= 0) then { _fxWet ppEffectAdjust [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; _fxWet ppEffectCommit 0; };
 };
