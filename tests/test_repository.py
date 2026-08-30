@@ -39,6 +39,7 @@ class RepositoryContractTests(unittest.TestCase):
         launch = project["hemtt"]["launch"]["default"]
         self.assertIn("450814997", launch["workshop"])
         self.assertTrue(launch["binarize"])
+        self.assertFalse(launch["file_patching"])
 
 
 if __name__ == "__main__":
