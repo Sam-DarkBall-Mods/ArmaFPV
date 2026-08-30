@@ -104,7 +104,10 @@ class ReleaseToolTests(unittest.TestCase):
             "release-payload/releases/*.zip release-payload/SHA256SUMS", release
         )
         self.assertNotIn("release-payload/* --repo", release)
-        self.assertIn("uses: ./.github/workflows/publish-steam.yml", release)
+        self.assertIn(
+            "uses: Sam-DarkBall-Mods/ArmaFPV/.github/workflows/publish-steam.yml@main",
+            release,
+        )
         self.assertIn("workflow_dispatch:", steam)
         self.assertIn("runs-on: [self-hosted, Windows, X64, steam]", steam)
         self.assertIn("Get-FileHash", steam)
