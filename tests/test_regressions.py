@@ -12,9 +12,10 @@ def read(relative_path: str) -> str:
 
 
 class ArmaFpvRegressionTests(unittest.TestCase):
-    def test_deployment_removes_one_item_without_rebuilding_cargo(self) -> None:
+    def test_deployment_removes_dropped_item_by_class(self) -> None:
         source = read("functions/fn_fpv_createUavOnItemCheck.sqf")
-        self.assertIn("_container addMagazineAmmoCargo [_item, -1", source)
+        self.assertIn("_container addMagazineCargoGlobal [_item, -1]", source)
+        self.assertNotIn("addMagazineAmmoCargo", source)
         self.assertNotIn("clearMagazineCargo", source)
         self.assertNotIn("_newCargo", source)
 
