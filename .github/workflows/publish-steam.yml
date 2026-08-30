@@ -47,7 +47,7 @@ jobs:
   publish:
     name: Steam Workshop
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     environment: steam-production
     env:
       STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
@@ -58,51 +58,83 @@ jobs:
         with:
           ref: ${{ inputs.tag }}
 
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
       - name: Download and verify release
-        shell: bash
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          mkdir release-payload
-          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir release-payload
-          (cd release-payload && sha256sum --check SHA256SUMS)
+          $payload = Join-Path $PWD "release-payload"
+          New-Item -ItemType Directory -Path $payload | Out-Null
+          gh release download $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --dir $payload
+          if ($LASTEXITCODE -ne 0) { throw "GitHub Release download failed" }
+
+          $checksumLine = Get-Content (Join-Path $payload "SHA256SUMS") | Select-Object -First 1
+          $checksum = $checksumLine.Trim() -split '\s+', 2
+          if ($checksum.Count -ne 2) { throw "Invalid SHA256SUMS" }
+
+          $archiveName = $checksum[1].Trim()
+          $archive = Join-Path $payload $archiveName
+          if (-not (Test-Path -LiteralPath $archive)) { throw "Release archive not found" }
+          $actualHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash
+          if ($actualHash -ne $checksum[0]) { throw "Release checksum mismatch" }
 
       - name: Require Steam credentials
-        shell: bash
+        shell: pwsh
         run: |
-          test -n "$STEAM_USERNAME"
-          test -n "$STEAM_CONFIG_VDF"
+          if ([string]::IsNullOrWhiteSpace($env:STEAM_USERNAME)) { throw "STEAM_USERNAME is required" }
+          if ([string]::IsNullOrWhiteSpace($env:STEAM_CONFIG_VDF)) { throw "STEAM_CONFIG_VDF is required" }
 
       - name: Install SteamCMD
-        shell: bash
+        shell: pwsh
         run: |
-          mkdir -p "$RUNNER_TEMP/steamcmd"
-          curl -fsSL https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz | tar -xz -C "$RUNNER_TEMP/steamcmd"
-          "$RUNNER_TEMP/steamcmd/steamcmd.sh" +quit
+          $steamRoot = Join-Path $env:RUNNER_TEMP "steamcmd"
+          $steamArchive = Join-Path $env:RUNNER_TEMP "steamcmd.zip"
+          New-Item -ItemType Directory -Path $steamRoot | Out-Null
+          Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile $steamArchive
+          Expand-Archive -LiteralPath $steamArchive -DestinationPath $steamRoot
+          & (Join-Path $steamRoot "steamcmd.exe") "+quit"
+          if ($LASTEXITCODE -ne 0) { throw "SteamCMD setup failed" }
 
       - name: Restore Steam login token
-        shell: bash
+        shell: pwsh
         run: |
-          mkdir -p "$HOME/Steam/config"
-          printf '%s' "$STEAM_CONFIG_VDF" > "$HOME/Steam/config/config.vdf"
+          $configPath = Join-Path $env:RUNNER_TEMP "steamcmd\config\config.vdf"
+          New-Item -ItemType Directory -Path (Split-Path $configPath) -Force | Out-Null
+          [System.IO.File]::WriteAllText($configPath, $env:STEAM_CONFIG_VDF, [System.Text.UTF8Encoding]::new($false))
 
       - name: Prepare Workshop content
-        shell: bash
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          archive=$(find release-payload -maxdepth 1 -name '*.zip' -print -quit)
-          test -n "$archive"
-          mkdir workshop-content
-          unzip -q "$archive" -d workshop-content
-          content=$(find workshop-content -mindepth 1 -maxdepth 1 -type d -print -quit)
-          test -n "$content"
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > "$RUNNER_TEMP/changenote.txt"
-          python3 -B tools/write_workshop_vdf.py --content "$content" --output "$RUNNER_TEMP/workshop.vdf" --change-note-file "$RUNNER_TEMP/changenote.txt"
+          $archives = @(Get-ChildItem "release-payload" -Filter "*.zip" -File)
+          if ($archives.Count -ne 1) { throw "Expected exactly one release archive" }
+
+          $workshopRoot = Join-Path $PWD "workshop-content"
+          Expand-Archive -LiteralPath $archives[0].FullName -DestinationPath $workshopRoot
+          $content = @(Get-ChildItem $workshopRoot -Directory)
+          if ($content.Count -ne 1) { throw "Expected exactly one Workshop content directory" }
+
+          $changeNote = gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --json body --jq .body
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($changeNote)) { throw "Release changelog is missing" }
+          $changeNotePath = Join-Path $env:RUNNER_TEMP "changenote.txt"
+          [System.IO.File]::WriteAllText($changeNotePath, ($changeNote -join [Environment]::NewLine), [System.Text.UTF8Encoding]::new($false))
+
+          $vdfPath = Join-Path $env:RUNNER_TEMP "workshop.vdf"
+          python -B tools/write_workshop_vdf.py --content $content[0].FullName --output $vdfPath --change-note-file $changeNotePath
+          if ($LASTEXITCODE -ne 0) { throw "Workshop VDF generation failed" }
 
       - name: Upload to Workshop
-        shell: bash
+        shell: pwsh
         run: |
-          "$RUNNER_TEMP/steamcmd/steamcmd.sh" +login "$STEAM_USERNAME" +workshop_build_item "$RUNNER_TEMP/workshop.vdf" +quit
+          $steamCmd = Join-Path $env:RUNNER_TEMP "steamcmd\steamcmd.exe"
+          $vdfPath = Join-Path $env:RUNNER_TEMP "workshop.vdf"
+          & $steamCmd "+login" $env:STEAM_USERNAME "+workshop_build_item" $vdfPath "+quit"
+          if ($LASTEXITCODE -ne 0) { throw "Steam Workshop upload failed" }
