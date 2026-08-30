@@ -1,0 +1,108 @@
+name: Publish existing release to Steam
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub Release tag to publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: steam-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+
+      - name: Validate tag and release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor HEAD origin/main
+          python3 -B tools/release_contract.py "$RELEASE_TAG"
+          test -n "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body)"
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '[.assets[].name | select(endswith(".zip"))] | length')" -eq 1
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '[.assets[].name | select(. == "SHA256SUMS")] | length')" -eq 1
+
+  publish:
+    name: Steam Workshop
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: steam-production
+    env:
+      STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
+      STEAM_CONFIG_VDF: ${{ secrets.STEAM_CONFIG_VDF }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Download and verify release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          mkdir release-payload
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir release-payload
+          (cd release-payload && sha256sum --check SHA256SUMS)
+
+      - name: Require Steam credentials
+        shell: bash
+        run: |
+          test -n "$STEAM_USERNAME"
+          test -n "$STEAM_CONFIG_VDF"
+
+      - name: Install SteamCMD
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/steamcmd"
+          curl -fsSL https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz | tar -xz -C "$RUNNER_TEMP/steamcmd"
+          "$RUNNER_TEMP/steamcmd/steamcmd.sh" +quit
+
+      - name: Restore Steam login token
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/steamcmd/config"
+          printf '%s' "$STEAM_CONFIG_VDF" > "$RUNNER_TEMP/steamcmd/config/config.vdf"
+
+      - name: Prepare Workshop content
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          archive=$(find release-payload -maxdepth 1 -name '*.zip' -print -quit)
+          test -n "$archive"
+          mkdir workshop-content
+          unzip -q "$archive" -d workshop-content
+          content=$(find workshop-content -mindepth 1 -maxdepth 1 -type d -print -quit)
+          test -n "$content"
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > "$RUNNER_TEMP/changenote.txt"
+          python3 -B tools/write_workshop_vdf.py --content "$content" --output "$RUNNER_TEMP/workshop.vdf" --change-note-file "$RUNNER_TEMP/changenote.txt"
+
+      - name: Upload to Workshop
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/steamcmd/steamcmd.sh" +login "$STEAM_USERNAME" +workshop_build_item "$RUNNER_TEMP/workshop.vdf" +quit
