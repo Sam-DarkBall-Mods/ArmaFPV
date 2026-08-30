@@ -115,6 +115,24 @@ class ArmaFpvRegressionTests(unittest.TestCase):
         source = read("config.cpp")
         self.assertRegex(source, r"requiredVersion\s*=\s*2\.22\s*;")
 
+    def test_deploy_backpacks_are_small_and_lightweight(self) -> None:
+        source = read("includes/CfgVehicles.hpp")
+        macro = source[
+            source.index("#define ARMAFPV_BAG") : source.index(
+                "class ARMAFPV_Crocus_AT_Base"
+            )
+        ]
+        self.assertIn("mass=20", macro)
+        self.assertIn("maximumLoad=0", macro)
+        self.assertNotIn("UAV_01_backpack_F", source)
+        for backpack in (
+            "B_AssaultPack_ocamo",
+            "B_AssaultPack_mcamo",
+            "B_AssaultPack_khk",
+        ):
+            with self.subTest(backpack=backpack):
+                self.assertEqual(source.count(backpack), 5)
+
     def test_default_text_is_sanitized_at_the_setting_boundary(self) -> None:
         preinit_source = read("XEH_preInit.sqf")
         settings_source = read("functions/fn_fpv_handleSettings.sqf")
