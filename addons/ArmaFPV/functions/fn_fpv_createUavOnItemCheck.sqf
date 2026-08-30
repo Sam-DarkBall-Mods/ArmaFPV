@@ -43,4 +43,4 @@ if (local _uav && local _container) then {
 	[_uav, _container] remoteExecCall ["disableCollisionWith", 0, _uav];
 };
 
-_container addMagazineAmmoCargo [_item, -1, 0];
+_container addMagazineCargoGlobal [_item, -1];
