@@ -10,7 +10,7 @@ fn rename_signed_pbo(folder, old_name, new_name, authority) {
 
     let old_signature = folder.join(old_name + ".pbo." + authority + ".bisign");
     let new_signature = folder.join(new_name + ".pbo." + authority + ".bisign");
-    if !old_signature.move(new_signature) {
+    if old_signature.exists() && !old_signature.move(new_signature) {
         fatal("Failed to rename signature for " + old_name + ".pbo");
     }
 }

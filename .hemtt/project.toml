@@ -15,6 +15,26 @@ include = [
     "mod.cpp",
 ]
 
+exclude = [
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/*.bak",
+    "**/*.bak.*",
+    "**/*.back.*",
+    "**/*.tmp",
+    "**/*.orig",
+    "**/*.rej",
+    "**/* - Copy.*",
+    "**/*.psd",
+    "**/*.psb",
+    "**/*.xcf",
+    "**/*.blend",
+    "**/*.blend1",
+    "**/.gitkeep",
+    "addons/**/README*",
+    "optionals/**/README*",
+]
+
 [properties]
 author = "DarkBall, Sam, and contributors"
 url = "https://github.com/Sam-DarkBall-Mods/ArmaFPV"
