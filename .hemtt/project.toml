@@ -50,6 +50,7 @@ workshop = [
     "450814997", # CBA_A3
 ]
 binarize = true
+file_patching = false
 
 [hemtt.release]
 folder = "ArmaFPV"
