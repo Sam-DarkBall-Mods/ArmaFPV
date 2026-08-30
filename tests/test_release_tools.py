@@ -92,6 +92,22 @@ class ReleaseToolTests(unittest.TestCase):
             vdf = output.read_text(encoding="utf-8")
             self.assertIn('"changenote" "First line\\nSecond line"', vdf)
 
+    def test_release_workflow_publishes_files_and_supports_steam_retry(self) -> None:
+        release = (ROOT / ".github" / "workflows" / "release.yml").read_text(
+            encoding="utf-8"
+        )
+        steam = (
+            ROOT / ".github" / "workflows" / "publish-steam.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "release-payload/releases/*.zip release-payload/SHA256SUMS", release
+        )
+        self.assertNotIn("release-payload/* --repo", release)
+        self.assertIn("uses: ./.github/workflows/publish-steam.yml", release)
+        self.assertIn("workflow_dispatch:", steam)
+        self.assertIn("sha256sum --check SHA256SUMS", steam)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -123,6 +123,7 @@ jobs:
           name: release-${{ github.ref_name }}
           path: |
             releases/*.zip
+            !releases/*-latest.zip
             SHA256SUMS
           if-no-files-found: error
 
@@ -143,63 +144,13 @@ jobs:
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" release-payload/* --repo "${{ github.repository }}" --verify-tag --generate-notes
+        run: gh release create "${{ github.ref_name }}" release-payload/releases/*.zip release-payload/SHA256SUMS --repo "${{ github.repository }}" --verify-tag --generate-notes
 
   steam:
     name: Steam Workshop
     needs: github
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    environment: steam-production
-    permissions:
-      contents: read
-    env:
-      STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
-      STEAM_CONFIG_VDF: ${{ secrets.STEAM_CONFIG_VDF }}
-    steps:
-      - name: Checkout metadata
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Download release payload
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
-        with:
-          name: release-${{ github.ref_name }}
-          path: release-payload
-
-      - name: Require Steam credentials
-        shell: bash
-        run: |
-          test -n "$STEAM_USERNAME"
-          test -n "$STEAM_CONFIG_VDF"
-
-      - name: Install SteamCMD
-        shell: bash
-        run: |
-          mkdir -p "$RUNNER_TEMP/steamcmd"
-          curl -fsSL https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz | tar -xz -C "$RUNNER_TEMP/steamcmd"
-          "$RUNNER_TEMP/steamcmd/steamcmd.sh" +quit
-
-      - name: Restore Steam login token
-        shell: bash
-        run: |
-          mkdir -p "$RUNNER_TEMP/steamcmd/config"
-          printf '%s' "$STEAM_CONFIG_VDF" > "$RUNNER_TEMP/steamcmd/config/config.vdf"
-
-      - name: Prepare Workshop content
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          archive=$(find release-payload -name '*.zip' ! -name '*latest*' -print -quit)
-          test -n "$archive"
-          mkdir workshop-content
-          unzip -q "$archive" -d workshop-content
-          content=$(find workshop-content -mindepth 1 -maxdepth 1 -type d -print -quit)
-          test -n "$content"
-          gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" --json body --jq .body > "$RUNNER_TEMP/changenote.txt"
-          python3 -B tools/write_workshop_vdf.py --content "$content" --output "$RUNNER_TEMP/workshop.vdf" --change-note-file "$RUNNER_TEMP/changenote.txt"
-
-      - name: Upload to Workshop
-        shell: bash
-        run: |
-          "$RUNNER_TEMP/steamcmd/steamcmd.sh" +login "$STEAM_USERNAME" +workshop_build_item "$RUNNER_TEMP/workshop.vdf" +quit
+    uses: ./.github/workflows/publish-steam.yml
+    with:
+      tag: ${{ github.ref_name }}
+    secrets: inherit
