@@ -492,6 +492,8 @@ class CfgVehicles
 		scopeCurator=2; \
 		displayName=DISPLAY; \
 		author="DarkBall"; \
+		mass=20; \
+		maximumLoad=0; \
 		class assembleInfo \
 		{ \
 			assembleTo=TOCLASS; \
@@ -866,21 +868,21 @@ class CfgVehicles
 			init="(_this # 0) allowDamage true;";
 		};
 	};
-	class B_UAV_01_backpack_F;
-	class O_UAV_01_backpack_F;
-	class I_UAV_01_backpack_F;
-	ARMAFPV_BAG(O_Crocus_AT_Bag, O_UAV_01_backpack_F, "Crocus AT Bag OPFOR", "O_Crocus_AT")
-	ARMAFPV_BAG(O_Crocus_AP_Bag, O_UAV_01_backpack_F, "Crocus AP Bag OPFOR", "O_Crocus_AP")
-	ARMAFPV_BAG(O_Crocus_AT_TI_Bag, O_UAV_01_backpack_F, "Crocus AT TI Bag OPFOR", "O_Crocus_AT_TI")
-	ARMAFPV_BAG(O_Crocus_AP_TI_Bag, O_UAV_01_backpack_F, "Crocus AP TI Bag OPFOR", "O_Crocus_AP_TI")
+	class B_AssaultPack_khk;
+	class B_AssaultPack_mcamo;
+	class B_AssaultPack_ocamo;
+	ARMAFPV_BAG(O_Crocus_AT_Bag, B_AssaultPack_ocamo, "Crocus AT Bag OPFOR", "O_Crocus_AT")
+	ARMAFPV_BAG(O_Crocus_AP_Bag, B_AssaultPack_ocamo, "Crocus AP Bag OPFOR", "O_Crocus_AP")
+	ARMAFPV_BAG(O_Crocus_AT_TI_Bag, B_AssaultPack_ocamo, "Crocus AT TI Bag OPFOR", "O_Crocus_AT_TI")
+	ARMAFPV_BAG(O_Crocus_AP_TI_Bag, B_AssaultPack_ocamo, "Crocus AP TI Bag OPFOR", "O_Crocus_AP_TI")
 
-	ARMAFPV_BAG(B_Crocus_AT_Bag, B_UAV_01_backpack_F, "Crocus AT Bag BLUFOR", "B_Crocus_AT")
-	ARMAFPV_BAG(B_Crocus_AP_Bag, B_UAV_01_backpack_F, "Crocus AP Bag BLUFOR", "B_Crocus_AP")
-	ARMAFPV_BAG(B_Crocus_AT_TI_Bag, B_UAV_01_backpack_F, "Crocus AT TI Bag BLUFOR", "B_Crocus_AT_TI")
-	ARMAFPV_BAG(B_Crocus_AP_TI_Bag, B_UAV_01_backpack_F, "Crocus AP TI Bag BLUFOR", "B_Crocus_AP_TI")
+	ARMAFPV_BAG(B_Crocus_AT_Bag, B_AssaultPack_mcamo, "Crocus AT Bag BLUFOR", "B_Crocus_AT")
+	ARMAFPV_BAG(B_Crocus_AP_Bag, B_AssaultPack_mcamo, "Crocus AP Bag BLUFOR", "B_Crocus_AP")
+	ARMAFPV_BAG(B_Crocus_AT_TI_Bag, B_AssaultPack_mcamo, "Crocus AT TI Bag BLUFOR", "B_Crocus_AT_TI")
+	ARMAFPV_BAG(B_Crocus_AP_TI_Bag, B_AssaultPack_mcamo, "Crocus AP TI Bag BLUFOR", "B_Crocus_AP_TI")
 
-	ARMAFPV_BAG(I_Crocus_AT_Bag, I_UAV_01_backpack_F, "Crocus AT Bag IND", "I_Crocus_AT")
-	ARMAFPV_BAG(I_Crocus_AP_Bag, I_UAV_01_backpack_F, "Crocus AP Bag IND", "I_Crocus_AP")
-	ARMAFPV_BAG(I_Crocus_AT_TI_Bag, I_UAV_01_backpack_F, "Crocus AT TI Bag IND", "I_Crocus_AT_TI")
-	ARMAFPV_BAG(I_Crocus_AP_TI_Bag, I_UAV_01_backpack_F, "Crocus AP TI Bag IND", "I_Crocus_AP_TI")
+	ARMAFPV_BAG(I_Crocus_AT_Bag, B_AssaultPack_khk, "Crocus AT Bag IND", "I_Crocus_AT")
+	ARMAFPV_BAG(I_Crocus_AP_Bag, B_AssaultPack_khk, "Crocus AP Bag IND", "I_Crocus_AP")
+	ARMAFPV_BAG(I_Crocus_AT_TI_Bag, B_AssaultPack_khk, "Crocus AT TI Bag IND", "I_Crocus_AT_TI")
+	ARMAFPV_BAG(I_Crocus_AP_TI_Bag, B_AssaultPack_khk, "Crocus AP TI Bag IND", "I_Crocus_AP_TI")
 };
