@@ -45,6 +45,12 @@ git_hash = 0
 pdrive = "disallow"
 optional_mod_folders = true
 
+[hemtt.launch.default]
+workshop = [
+    "450814997", # CBA_A3
+]
+binarize = true
+
 [hemtt.release]
 folder = "ArmaFPV"
 
