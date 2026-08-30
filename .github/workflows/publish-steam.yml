@@ -47,11 +47,10 @@ jobs:
   publish:
     name: Steam Workshop
     needs: validate
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows, X64, steam]
     environment: steam-production
     env:
       STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
-      STEAM_CONFIG_VDF: ${{ secrets.STEAM_CONFIG_VDF }}
     steps:
       - name: Checkout release tag
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -88,30 +87,8 @@ jobs:
         shell: pwsh
         run: |
           if ([string]::IsNullOrWhiteSpace($env:STEAM_USERNAME)) { throw "STEAM_USERNAME is required" }
-          if ([string]::IsNullOrWhiteSpace($env:STEAM_CONFIG_VDF)) { throw "STEAM_CONFIG_VDF is required" }
-
-      - name: Install SteamCMD
-        shell: pwsh
-        run: |
-          $steamRoot = Join-Path $env:RUNNER_TEMP "steamcmd"
-          $steamArchive = Join-Path $env:RUNNER_TEMP "steamcmd.zip"
-          New-Item -ItemType Directory -Path $steamRoot | Out-Null
-          Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile $steamArchive
-          Expand-Archive -LiteralPath $steamArchive -DestinationPath $steamRoot
-          $steamCmd = Join-Path $steamRoot "steamcmd.exe"
-          & $steamCmd "+quit"
-          if ($LASTEXITCODE -ne 0) {
-              Start-Sleep -Seconds 5
-              & $steamCmd "+quit"
-          }
-          if ($LASTEXITCODE -ne 0) { throw "SteamCMD setup failed" }
-
-      - name: Restore Steam login token
-        shell: pwsh
-        run: |
-          $configPath = Join-Path $env:RUNNER_TEMP "steamcmd\config\config.vdf"
-          New-Item -ItemType Directory -Path (Split-Path $configPath) -Force | Out-Null
-          [System.IO.File]::WriteAllText($configPath, $env:STEAM_CONFIG_VDF, [System.Text.UTF8Encoding]::new($false))
+          if (-not (Test-Path -LiteralPath "C:\steamcmd\steamcmd.exe")) { throw "C:\steamcmd\steamcmd.exe not found" }
+          if (-not (Test-Path -LiteralPath "C:\steamcmd\config\config.vdf")) { throw "SteamCMD cached session not found" }
 
       - name: Prepare Workshop content
         shell: pwsh
@@ -139,7 +116,6 @@ jobs:
       - name: Upload to Workshop
         shell: pwsh
         run: |
-          $steamCmd = Join-Path $env:RUNNER_TEMP "steamcmd\steamcmd.exe"
           $vdfPath = Join-Path $env:RUNNER_TEMP "workshop.vdf"
-          & $steamCmd "+login" $env:STEAM_USERNAME "+workshop_build_item" $vdfPath "+quit"
+          & "C:\steamcmd\steamcmd.exe" "+login" $env:STEAM_USERNAME "+workshop_build_item" $vdfPath "+quit"
           if ($LASTEXITCODE -ne 0) { throw "Steam Workshop upload failed" }
