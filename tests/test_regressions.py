@@ -3,8 +3,8 @@ import re
 import unittest
 
 
-ROOT = Path(__file__).resolve().parents[2]
-ADDON = ROOT / "ArmaFPV"
+ROOT = Path(__file__).resolve().parents[1]
+ADDON = ROOT / "addons" / "ArmaFPV"
 
 
 def read(relative_path: str) -> str:
@@ -80,13 +80,9 @@ class ArmaFpvRegressionTests(unittest.TestCase):
         self.assertRegex(config_source, r"\bkilled\s*=")
 
     def test_drone_initialization_preserves_waypoint_ai(self) -> None:
-        for path in (
-            ADDON / "functions/fn_fpv_droneInit.sqf",
-            ROOT / "vnd_main/functions/fn_fpv_droneInit.sqf",
-        ):
-            with self.subTest(path=path.relative_to(ROOT)):
-                source = path.read_text(encoding="utf-8")
-                self.assertNotIn('disableAI "ALL"', source)
+        path = ADDON / "functions/fn_fpv_droneInit.sqf"
+        source = path.read_text(encoding="utf-8")
+        self.assertNotIn('disableAI "ALL"', source)
 
     def test_detonation_uses_multiplayer_uav_control_syntax(self) -> None:
         source = read("functions/fn_fpv_onDestroy.sqf")

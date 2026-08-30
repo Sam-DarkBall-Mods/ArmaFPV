@@ -1,0 +1,15 @@
+[config.file_type]
+options.allow_no_extension = true
+
+[sqf.undefined]
+enabled = true
+options.check_orphan_code = true
+
+[sqf.not_private]
+enabled = true
+
+[sqf.unused]
+options.check_params = false
+
+[stringtables.usage]
+options.ignore_unused = true

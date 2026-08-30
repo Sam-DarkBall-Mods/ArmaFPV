@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.paa binary
+*.pac binary
+*.p3d binary
+*.rtm binary
+*.wav binary
+*.ogg binary
+*.wss binary
+
+addons/**/*.cpp linguist-language=SQF
+addons/**/*.hpp linguist-language=SQF
+optionals/**/*.cpp linguist-language=SQF
+optionals/**/*.hpp linguist-language=SQF

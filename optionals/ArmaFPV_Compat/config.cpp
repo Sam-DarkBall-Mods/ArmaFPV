@@ -10,7 +10,7 @@ class CfgPatches
 			"A3_Data_F_AoW_Loadorder",
 			"ArmaFPV_Data"
 		};
-		requiredVersion=0.1;
+		requiredVersion=2.22;
 		units[]={};
 		weapons[]={};
 	};

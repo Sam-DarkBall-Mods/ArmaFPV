@@ -1,0 +1,36 @@
+name = "ArmaFPV"
+prefix = "ArmaFPV"
+mainprefix = "z"
+author = "DarkBall, Sam, and contributors"
+
+[files]
+include = [
+    "AUTHORS.md",
+    "LICENSE",
+    "LICENSES/**",
+    "LICENSES.md",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "meta.cpp",
+    "mod.cpp",
+]
+
+[properties]
+author = "DarkBall, Sam, and contributors"
+url = "https://github.com/Sam-DarkBall-Mods/ArmaFPV"
+
+[version]
+major = 1
+minor = 0
+patch = 0
+git_hash = 0
+
+[hemtt.build]
+pdrive = "disallow"
+optional_mod_folders = true
+
+[hemtt.release]
+folder = "ArmaFPV"
+
+[signing]
+authority = "db_armafpv"

@@ -1,0 +1,25 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: Added
+    labels: ["kind/feature"]
+  - title: Fixed
+    labels: ["kind/bug"]
+  - title: Improved
+    labels: ["kind/enhancement", "kind/optimization"]
+  - title: Changed
+    labels: ["kind/change", "kind/cleanup"]
+exclude-labels: ["ignore-changelog", "dependencies"]
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+version-resolver:
+  major:
+    labels: ["version/major"]
+  minor:
+    labels: ["version/minor", "kind/feature"]
+  patch:
+    labels: ["version/patch", "kind/bug"]
+  default: patch
+template: |
+  ## Changes
+
+  $CHANGES

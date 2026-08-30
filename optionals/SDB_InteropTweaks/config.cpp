@@ -13,7 +13,7 @@ class CfgPatches
 			"cba_main",
 			"cba_settings"
 		};
-		requiredVersion = 0.1;
+		requiredVersion = 2.22;
 	};
 };
 
