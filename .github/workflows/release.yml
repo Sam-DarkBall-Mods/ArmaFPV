@@ -187,6 +187,8 @@ jobs:
 
       - name: Prepare Workshop content
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           archive=$(find release-payload -name '*.zip' ! -name '*latest*' -print -quit)
           test -n "$archive"
@@ -194,7 +196,8 @@ jobs:
           unzip -q "$archive" -d workshop-content
           content=$(find workshop-content -mindepth 1 -maxdepth 1 -type d -print -quit)
           test -n "$content"
-          python3 -B tools/write_workshop_vdf.py --content "$content" --output "$RUNNER_TEMP/workshop.vdf" --change-note "${{ github.ref_name }}"
+          gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" --json body --jq .body > "$RUNNER_TEMP/changenote.txt"
+          python3 -B tools/write_workshop_vdf.py --content "$content" --output "$RUNNER_TEMP/workshop.vdf" --change-note-file "$RUNNER_TEMP/changenote.txt"
 
       - name: Upload to Workshop
         shell: bash
