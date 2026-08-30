@@ -1,0 +1,12 @@
+[sqf.undefined]
+enabled = true
+options.check_orphan_code = true
+
+[sqf.not_private]
+enabled = true
+
+[sqf.unused]
+options.check_params = false
+
+[stringtables.usage]
+options.ignore_unused = true

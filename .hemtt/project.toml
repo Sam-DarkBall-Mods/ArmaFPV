@@ -1,0 +1,31 @@
+name = "DB Example Mod"
+prefix = "db_example"
+mainprefix = "z"
+author = "DarkBall, Sam, and contributors"
+
+[files]
+include = [
+    "AUTHORS.md",
+    "LICENSE",
+    "LICENSES/**",
+    "LICENSES.md",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "meta.cpp",
+    "mod.cpp",
+]
+
+[version]
+major = 1
+minor = 0
+patch = 0
+git_hash = 0
+
+[hemtt.build]
+pdrive = "disallow"
+
+[hemtt.release]
+folder = "DB_Example_Mod"
+
+[signing]
+authority = "db_example"
