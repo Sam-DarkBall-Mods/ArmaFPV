@@ -107,6 +107,8 @@ class ReleaseToolTests(unittest.TestCase):
         self.assertIn("uses: ./.github/workflows/publish-steam.yml", release)
         self.assertIn("workflow_dispatch:", steam)
         self.assertIn("sha256sum --check SHA256SUMS", steam)
+        self.assertIn('$HOME/Steam/config/config.vdf', steam)
+        self.assertNotIn('$RUNNER_TEMP/steamcmd/config/config.vdf', steam)
 
 
 if __name__ == "__main__":

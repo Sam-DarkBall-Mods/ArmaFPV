@@ -84,8 +84,8 @@ jobs:
       - name: Restore Steam login token
         shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/steamcmd/config"
-          printf '%s' "$STEAM_CONFIG_VDF" > "$RUNNER_TEMP/steamcmd/config/config.vdf"
+          mkdir -p "$HOME/Steam/config"
+          printf '%s' "$STEAM_CONFIG_VDF" > "$HOME/Steam/config/config.vdf"
 
       - name: Prepare Workshop content
         shell: bash
