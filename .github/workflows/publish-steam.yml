@@ -98,7 +98,12 @@ jobs:
           New-Item -ItemType Directory -Path $steamRoot | Out-Null
           Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile $steamArchive
           Expand-Archive -LiteralPath $steamArchive -DestinationPath $steamRoot
-          & (Join-Path $steamRoot "steamcmd.exe") "+quit"
+          $steamCmd = Join-Path $steamRoot "steamcmd.exe"
+          & $steamCmd "+quit"
+          if ($LASTEXITCODE -ne 0) {
+              Start-Sleep -Seconds 5
+              & $steamCmd "+quit"
+          }
           if ($LASTEXITCODE -ne 0) { throw "SteamCMD setup failed" }
 
       - name: Restore Steam login token
