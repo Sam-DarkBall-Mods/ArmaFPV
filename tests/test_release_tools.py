@@ -106,9 +106,11 @@ class ReleaseToolTests(unittest.TestCase):
         self.assertNotIn("release-payload/* --repo", release)
         self.assertIn("uses: ./.github/workflows/publish-steam.yml", release)
         self.assertIn("workflow_dispatch:", steam)
-        self.assertIn("sha256sum --check SHA256SUMS", steam)
-        self.assertIn('$HOME/Steam/config/config.vdf', steam)
-        self.assertNotIn('$RUNNER_TEMP/steamcmd/config/config.vdf', steam)
+        self.assertIn("runs-on: windows-latest", steam)
+        self.assertIn("Get-FileHash", steam)
+        self.assertIn("steamcmd.zip", steam)
+        self.assertIn('steamcmd\\config\\config.vdf', steam)
+        self.assertNotIn("steamcmd_linux", steam)
 
 
 if __name__ == "__main__":
