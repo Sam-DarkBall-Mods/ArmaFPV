@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -31,6 +32,13 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertIn("major = 1", project)
         self.assertIn("minor = 0", project)
         self.assertIn("patch = 0", project)
+
+    def test_default_launch_loads_cba_and_binarizes(self) -> None:
+        with (ROOT / ".hemtt" / "project.toml").open("rb") as project_file:
+            project = tomllib.load(project_file)
+        launch = project["hemtt"]["launch"]["default"]
+        self.assertIn("450814997", launch["workshop"])
+        self.assertTrue(launch["binarize"])
 
 
 if __name__ == "__main__":
