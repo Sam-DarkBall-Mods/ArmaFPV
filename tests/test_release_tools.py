@@ -110,6 +110,7 @@ class ReleaseToolTests(unittest.TestCase):
         self.assertIn("Get-FileHash", steam)
         self.assertIn("steamcmd.zip", steam)
         self.assertIn('steamcmd\\config\\config.vdf', steam)
+        self.assertIn("Start-Sleep -Seconds 5", steam)
         self.assertNotIn("steamcmd_linux", steam)
 
 
