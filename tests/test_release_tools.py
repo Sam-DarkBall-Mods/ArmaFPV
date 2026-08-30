@@ -106,11 +106,12 @@ class ReleaseToolTests(unittest.TestCase):
         self.assertNotIn("release-payload/* --repo", release)
         self.assertIn("uses: ./.github/workflows/publish-steam.yml", release)
         self.assertIn("workflow_dispatch:", steam)
-        self.assertIn("runs-on: windows-latest", steam)
+        self.assertIn("runs-on: [self-hosted, Windows, X64, steam]", steam)
         self.assertIn("Get-FileHash", steam)
-        self.assertIn("steamcmd.zip", steam)
-        self.assertIn('steamcmd\\config\\config.vdf', steam)
-        self.assertIn("Start-Sleep -Seconds 5", steam)
+        self.assertIn('C:\\steamcmd\\steamcmd.exe', steam)
+        self.assertIn('C:\\steamcmd\\config\\config.vdf', steam)
+        self.assertNotIn("STEAM_CONFIG_VDF", steam)
+        self.assertNotIn("steamcmd.zip", steam)
         self.assertNotIn("steamcmd_linux", steam)
 
 
