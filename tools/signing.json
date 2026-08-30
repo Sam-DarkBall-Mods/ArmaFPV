@@ -1,0 +1,6 @@
+{
+  "default": "ArmaFPV",
+  "pbos": {
+    "ArmaFPV_Compat.pbo": "ArmaFPV_Compat"
+  }
+}
