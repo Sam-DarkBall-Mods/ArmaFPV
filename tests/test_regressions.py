@@ -49,12 +49,13 @@ class ArmaFpvRegressionTests(unittest.TestCase):
         self.assertIn('_uav setVariable ["DB_fpv_timeInJammerZone", 0]', source)
         self.assertIn('_uav setVariable ["DB_fpv_jammerLowTime", 0]', source)
 
-    def test_ppfx_oscillators_use_sqf_degrees(self) -> None:
+    def test_ppfx_analog_link_never_darkens(self) -> None:
         source = read("functions/fn_fpv_ppfx_update.sqf")
+        self.assertNotIn("BLACKOUT", source)
         self.assertNotIn("6.283", source)
-        self.assertIn("_flickerHz * 360", source)
-        self.assertIn("_microHz * 360", source)
-        self.assertIn("sin (deg (", source)
+        self.assertIn("ppEffectAdjust [1, 1.04, 0, [0, 0, 0, 0]", source)
+        self.assertIn('"ArmaFPV_FX_Snow"', source)
+        self.assertIn('uiNamespace setVariable ["ArmaFPV_FX_osd", _osd]', source)
 
     def test_unsupported_side_exits_before_creation(self) -> None:
         source = read("functions/fn_fpv_createUavOnItemCheck.sqf")

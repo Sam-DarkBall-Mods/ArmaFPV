@@ -1,6 +1,7 @@
 /*
-	Build normalized list of supported UAV vehicle classes.
-	Returns only CfgVehicles classes that are Air and can be used by autonomy runtime checks.
+    SDB_it_fnc_getSupportedUavClasses
+    Returns the cached list of Air vehicle classes the autonomy can fly.
+    Author: DarkBall
 */
 
 private _cached = missionNamespace getVariable ["SDB_it_supportedUavClasses", []];

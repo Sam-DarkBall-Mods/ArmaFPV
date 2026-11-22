@@ -17,6 +17,7 @@ class CfgFunctions
 			class fpv_ppfx_setInput {};
 			class fpv_handleSettings {};
 			class fpv_handleTime {};
+			class fpv_handleOSD {};
 			class fpv_onDestroy {};
 			class fpv_onSignalLost {};
 			class fpv_destroyUI {};

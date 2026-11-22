@@ -1,6 +1,7 @@
 /*
-	Player-side autonomy state bootstrap.
-	Uses CBA player event type "unit" to refresh action after respawn/teamswitch.
+    SDB_it_fnc_initPlayerAutonomy
+    Keeps the autonomy toggle action on the current player unit after respawn or unit change.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"

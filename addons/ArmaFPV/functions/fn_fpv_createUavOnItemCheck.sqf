@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_createUavOnItemCheck
+    Put handler: turns a Crocus item dropped on the ground into a ready drone of the player's side.
+    Author: DarkBall
+*/
 params ["_unit", "_container", "_item"];
 
 #include "\ArmaFPV\script_macros.hpp"
@@ -29,15 +34,13 @@ if (_sidePrefix isEqualTo "") exitWith {};
 private _uavClass = format ["%1%2", _sidePrefix, _uavType];
 if !(isClass (configFile >> "CfgVehicles" >> _uavClass)) exitWith {};
 
-private _cargo = magazinesAmmoCargo _container;
-if (_cargo findIf { (_x # 0) isEqualTo _item } < 0) exitWith {};
+if !(_item in magazineCargo _container) exitWith {};
 
-private _pos = getPosATL _container;
-private _uav = createVehicle [_uavClass, _pos, [], 0, "CAN_COLLIDE"];
+private _uav = createVehicle [_uavClass, getPosATL _container, [], 0, "CAN_COLLIDE"];
 if (isNull _uav) exitWith {};
+_uav setVariable ["DB_fpv_spawnFrame", diag_frameNo];
 createVehicleCrew _uav;
-
-if (local _uav && local _container) then {
+if (local _container) then {
 	_uav disableCollisionWith _container;
 } else {
 	[_uav, _container] remoteExecCall ["disableCollisionWith", 0, _uav];

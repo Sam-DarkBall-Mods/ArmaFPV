@@ -38,4 +38,5 @@ class CfgFontFamilies
             QARMAFPV_FONT(VCROSDMono46)
         };
      };
+    #include "OSDFont.hpp"
 };

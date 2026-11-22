@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_restoreDroneLossScore
+    Runs on the server: cancels the aircraft loss score the pilot gets when the Crocus detonates.
+    Author: DarkBall
+*/
 params ["_operator"];
 
 if (!isServer) exitWith {};

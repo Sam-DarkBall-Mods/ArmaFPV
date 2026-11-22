@@ -1,5 +1,7 @@
 /*
-	Apply ArmaFPV interop patch once ArmaFPV creation handler is available.
+    SDB_it_fnc_patchArmaFPVInterop
+    Optionally wraps the Crocus Put handler once ArmaFPV is ready.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"

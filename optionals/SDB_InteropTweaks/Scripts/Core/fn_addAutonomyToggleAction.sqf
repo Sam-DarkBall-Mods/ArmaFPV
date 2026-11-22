@@ -1,5 +1,7 @@
 /*
-	Add or refresh local player action that toggles autonomy for next launch.
+    SDB_it_fnc_addAutonomyToggleAction
+    Adds or refreshes the player action that toggles autonomy for the next launch.
+    Author: DarkBall
 */
 
 params ["_unit"];
@@ -33,7 +35,7 @@ private _id = _unit addAction [
 	false,
 	true,
 	"",
-	"true"
+	"missionNamespace getVariable ['sdbAutoAllowPlayers', true]"
 ];
 
 _unit setVariable ["SDB_autonomyToggleAction", _id];

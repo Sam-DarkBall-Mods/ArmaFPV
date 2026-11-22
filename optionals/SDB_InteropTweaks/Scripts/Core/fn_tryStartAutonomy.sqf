@@ -1,6 +1,7 @@
 /*
-	Common autonomy starter.
-	Purpose: dedupe launch attempts and centralize local/remote autonomy start.
+    SDB_it_fnc_tryStartAutonomy
+    Starts autonomy for a drone once, where the drone is local.
+    Author: DarkBall
 */
 
 params [
@@ -33,24 +34,31 @@ if !(_uav isKindOf "Air") exitWith {
 	false
 };
 
+if (isPlayer _unit && { !(missionNamespace getVariable ["sdbAutoAllowPlayers", true]) }) exitWith {
+	if !(_log isEqualTo {}) then {
+		["Autonomy start skipped: disabled for players by the server", [_source, typeOf _uav]] call _log;
+	};
+	false
+};
+
+private _supported = [];
+private _unsupported = false;
 if (_enforceSupported) then {
 	private _supportedFn = missionNamespace getVariable ["SDB_it_fnc_getSupportedUavClasses", {}];
-	private _supported = [];
 	if (_supportedFn isEqualTo {}) then {
 		_supported = missionNamespace getVariable ["SDB_it_supportedUavClasses", []];
 	} else {
 		_supported = call _supportedFn;
 	};
 
-	private _uavClass = typeOf _uav;
-	private _uavClassUpper = toUpper _uavClass;
-	private _supportedIndex = _supported findIf { (toUpper _x) isEqualTo _uavClassUpper };
-	if (_supportedIndex < 0) exitWith {
-		if !(_log isEqualTo {}) then {
-			["Autonomy start skipped: unsupported class", [_source, _uavClass, _supported]] call _log;
-		};
-		false
+	private _uavClassUpper = toUpper typeOf _uav;
+	_unsupported = (_supported findIf { (toUpper _x) isEqualTo _uavClassUpper }) < 0;
+};
+if (_unsupported) exitWith {
+	if !(_log isEqualTo {}) then {
+		["Autonomy start skipped: unsupported class", [_source, typeOf _uav, _supported]] call _log;
 	};
+	false
 };
 
 if (_uav getVariable ["SDB_autonomyStarted", false]) exitWith {

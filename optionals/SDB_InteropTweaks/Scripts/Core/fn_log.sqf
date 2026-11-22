@@ -1,5 +1,7 @@
 /*
-	Interop diagnostics logger.
+    SDB_it_fnc_log
+    Writes an SDB Interop Tweaks line to the RPT.
+    Author: DarkBall
 */
 
 params ["_message", ["_payload", []]];

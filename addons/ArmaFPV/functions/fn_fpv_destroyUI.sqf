@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_destroyUI
+    Closes the FPV OSD and stops the video effects, again a second later unless a new OSD opens.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 private _cleanupToken = diag_frameNo;

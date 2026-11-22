@@ -1,6 +1,7 @@
 /*
-	SDB Interop Tweaks bootstrap.
-	Purpose: load SDB interop abstractions and run patch entrypoints.
+    SDB_InteropTweaks Start
+    Compiles the SDB Interop Tweaks functions and applies the DDT and ArmaFPV patches.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"

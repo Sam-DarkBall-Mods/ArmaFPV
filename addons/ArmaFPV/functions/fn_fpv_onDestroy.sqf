@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_onDestroy
+    Detonates a hit or killed Crocus: fires its warhead credited to the pilot, deletes the drone and cancels the aircraft loss score.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 params ["_uav"];
@@ -22,8 +27,6 @@ if (_controllers isEqualTo []) then {
 };
 private _instigator = _controllers param [0, objNull];
 private _operator = _instigator;
-private _missileType = "";
-private _uavType = toLower (typeOf _uav);
 
 if (isNull _operator && { hasInterface }) then {
 	_operator = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
@@ -32,16 +35,7 @@ if (isNull _instigator) then {
 	_instigator = _operator;
 };
 
-if (_uavType find "at" > -1) then {
-	_missileType = "FPV_RPG42_AT";
-};
-
-if (_uavType find "ap" > -1) then {
-	_missileType = "R_TBG32V_F";
-};
-
-if (_missileType isEqualTo "") exitWith {};
-
+private _missileType = ["FPV_RPG42_AT", "R_TBG32V_F"] select ("_ap" in toLower typeOf _uav);
 private _missile = createVehicle [_missileType, _uav modelToWorld [0, 0, 0]];
 _missile setVectorDirAndUp [vectorDir _uav, vectorUp _uav];
 
@@ -51,8 +45,8 @@ private _shotParents = [_uav, _instigator];
 
 [
 	{
-		_this params ["_missile", "_shotParents"];
-		(getShotParents _missile) isEqualTo _shotParents;
+		_this params ["_missile", "_shotParents", "", "", "_deadline"];
+		(getShotParents _missile) isEqualTo _shotParents || { diag_tickTime > _deadline };
 	},
 	{
 		_this params ["_missile", "", "_uav", "_operator"];
@@ -73,5 +67,5 @@ private _shotParents = [_uav, _instigator];
 			] call CBA_fnc_waitAndExecute;
 		};
 	},
-	[_missile, _shotParents, _uav, _operator]
+	[_missile, _shotParents, _uav, _operator, diag_tickTime + 1]
 ] call CBA_fnc_waitUntilAndExecute;

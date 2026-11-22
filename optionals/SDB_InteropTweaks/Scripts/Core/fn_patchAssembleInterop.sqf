@@ -1,6 +1,7 @@
 /*
-	Register WeaponAssembled interop for player-built UAVs.
-	Purpose: start SDB autonomy for KVN/Crocus drones assembled from inventory.
+    SDB_it_fnc_patchAssembleInterop
+    Registers the WeaponAssembled handler for player-built drones.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"

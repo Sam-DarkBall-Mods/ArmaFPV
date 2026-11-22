@@ -1,6 +1,7 @@
 /*
-	Handle WeaponAssembled event.
-	Purpose: enable autonomy for supported FPV drones assembled by player.
+    SDB_it_fnc_handleAssembledUAV
+    WeaponAssembled handler: starts autonomy for a supported FPV drone the player assembled.
+    Author: DarkBall
 */
 
 params ["_unit", "_uav"];

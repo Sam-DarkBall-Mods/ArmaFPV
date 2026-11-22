@@ -1,6 +1,7 @@
 /*
-	Return class map used to extend DDT FPV/FPVAT compatibility.
-	Return format: [fpvClasses, fpvatClasses]
+    SDB_it_fnc_getInteropClassMap
+    Returns the FPV and FPV AT classes added to DDT, as [fpvClasses, fpvAtClasses].
+    Author: DarkBall
 */
 
 private _fpvClasses = [

@@ -1,6 +1,7 @@
 /*
-	Autonomous FPV loop.
-	Purpose: emulate noisy CV+tracking and direct intercept guidance with waypoint-route support.
+    SDB_fnc_fpvAutonomyStart
+    Autonomous FPV flight: searches targets in a camera cone, tracks them and dives in; runs where the drone is local.
+    Author: DarkBall
 */
 
 params ["_drone", "_man"];
@@ -88,15 +89,18 @@ private _fn_selectTarget = {
 	private _fwd = vectorDir _vehicle;
 
 	private _candidates = _vehicle nearEntities [["Man", "LandVehicle", "Air"], _maxRange];
+	private _ownSide = side _vehicle;
 	_candidates = _candidates select {
 		alive _x
 		&& {_x isNotEqualTo _vehicle}
-		&& {!([side _x, side _vehicle] call BIS_fnc_sideIsFriendly)}
+		&& {((side _x) getFriend _ownSide) < 0.6}
 	};
 
 	if ((count _candidates) > 24) then {
-		_candidates = [_candidates, [], { _vehicle distance2D _x }, "ASCEND"] call BIS_fnc_sortBy;
-		_candidates resize 24;
+		private _byDistance = [];
+		{ _byDistance pushBack [_vehicle distance2D _x, _forEachIndex]; } forEach _candidates;
+		_byDistance sort true;
+		_candidates = (_byDistance select [0, 24]) apply { _candidates # (_x # 1) };
 	};
 
 	private _quick = [];
@@ -202,6 +206,7 @@ private _fn_startLoop = {
 			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {
 				[_drone, _man, _pfhId] call _fn_stopLoop;
 			};
+			if (!local _drone) exitWith {};
 			if ((fuel _drone) <= 0.01) exitWith {
 				[_drone, _man, _pfhId] call _fn_stopLoop;
 			};
@@ -326,14 +331,15 @@ if (_takeOff) then {
 		{
 			params ["_drone", "_man"];
 			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith { true };
-			((getPosATL _drone) select 2) > 1
+			((getPosATL _drone) # 2) > 1
 		},
 		{
 			params ["_drone", "_man", "_fpvAtClasses", "_fn_flyTo", "_fn_getRouteWaypoint", "_fn_selectTarget", "_fn_stopLoop", "_fn_startLoop"];
 			if !([_drone, _man] call DDT_fnc_DroneGroupAlive) exitWith {};
 			[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;
 		},
-		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop, _fn_startLoop]
+		[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop, _fn_startLoop],
+		30
 	] call CBA_fnc_waitUntilAndExecute;
 } else {
 	[_drone, _man, _fpvAtClasses, _fn_flyTo, _fn_getRouteWaypoint, _fn_selectTarget, _fn_stopLoop] call _fn_startLoop;

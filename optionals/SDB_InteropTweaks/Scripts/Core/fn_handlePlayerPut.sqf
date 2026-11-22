@@ -1,6 +1,7 @@
 /*
-	Handle Put event from controlled player.
-	Purpose: catch inventory drop workflows and attach autonomy to spawned UAV.
+    SDB_it_fnc_handlePlayerPut
+    Put handler: waits for the drone spawned from a dropped item and starts autonomy for it.
+    Author: DarkBall
 */
 
 params ["_unit", "_container", "_item"];
@@ -49,7 +50,7 @@ private _originPosATL = if (isNull _container) then {
 } else {
 	getPosATL _container
 };
-private _before = nearestObjects [_originPosATL, _candidateClasses, 12];
+private _before = (nearestObjects [_originPosATL, _candidateClasses, 12]) select { (_x getVariable ["DB_fpv_spawnFrame", -1]) != diag_frameNo };
 
 private _log = missionNamespace getVariable ["SDB_it_fnc_log", {}];
 if !(_log isEqualTo {}) then {

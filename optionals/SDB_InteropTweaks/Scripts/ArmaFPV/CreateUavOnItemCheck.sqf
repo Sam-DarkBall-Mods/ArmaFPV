@@ -1,6 +1,7 @@
 /*
-	ArmaFPV create handler wrapper.
-	Purpose: keep original spawn flow and attach SDB autonomy when launched from inventory workflow.
+    DB_fnc_fpv_createUavOnItemCheck
+    Optional wrapper of the Crocus Put handler that also starts SDB autonomy for the spawned drone.
+    Author: DarkBall
 */
 
 params ["_unit", "_container", "_item"];

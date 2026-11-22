@@ -1,6 +1,7 @@
 /*
-	DDT ManGetUAV wrapper.
-	Purpose: keep original DDT logic and resolve Item_Crocus_* to drone class by side.
+    DDT_fnc_ManGetUAV
+    Wraps DDT drone class lookup and resolves Crocus items to the side's drone class.
+    Author: DarkBall
 */
 
 params ["_man", "_type"];

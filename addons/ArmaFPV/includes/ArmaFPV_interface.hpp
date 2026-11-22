@@ -1,23 +1,43 @@
 class RscText;
-class ctrlControlsGroupNoScrollBars;
-class ctrlControlsGroup;
 class ctrlStaticBackground;
 class ctrlStaticPicture;
-class ctrlStructuredText;
 
 #define UI_EXPR_INNER(value) #value
 #define UI_EXPR(value) UI_EXPR_INNER(value)
 
-#define GRID_W( num ) ( num * ( pixelGridNoUIScale * pixelW * 2 ))
-#define GRID_H( num ) ( num * ( pixelGridNoUIScale * pixelH * 2 ))
+#define OSD_W ((safeZoneH * 4 / 3 * pixelW / pixelH) min safeZoneW)
+#define OSD_X (safeZoneX + (safeZoneW - OSD_W) / 2)
+#define CELL_W (OSD_W / 30)
+#define CELL_H (safeZoneH / 16)
 
-#define LINE_WIDTH (safeZoneW * 0.15)
-#define LINE_HEIGHT (safeZoneH)
+#define OSD_CELL(COL,ROW,COLS) \
+    x = UI_EXPR(OSD_X + COL * CELL_W); \
+    y = UI_EXPR(safeZoneY + ROW * CELL_H); \
+    w = UI_EXPR(COLS * CELL_W); \
+    h = UI_EXPR(CELL_H)
 
-#define WX_POS (safeZoneXAbs + LINE_WIDTH)
-#define WY_POS (safeZoneY)
-#define W_WIDTH (safeZoneWAbs - 2*LINE_WIDTH)
-#define W_HEIGHT (safeZoneH)
+class ArmaFPV_OSDText: RscText
+{
+    idc = -1;
+    style = 0;
+    font = "ArmaFPV_OSD";
+    sizeEx = UI_EXPR(CELL_H);
+    shadow = 0;
+    colorText[] = {1, 1, 1, 1};
+    colorBackground[] = {0, 0, 0, 0};
+    text = "";
+};
+
+class ArmaFPV_FXLayer: ctrlStaticPicture
+{
+    idc = -1;
+    text = "";
+    colorText[] = {1, 1, 1, 0};
+    x = UI_EXPR(OSD_X);
+    y = UI_EXPR(safeZoneY);
+    w = UI_EXPR(OSD_W);
+    h = UI_EXPR(safeZoneH);
+};
 
 class RscTitles
 {
@@ -27,595 +47,124 @@ class RscTitles
         duration = 1e+038;
         movingEnable = 0;
         enableSimulation = 1;
-        onLoad = "uiNameSpace setVariable [""ArmaFPV_Display"", _this # 0];";
-        onUnload = "uiNameSpace setVariable ['ArmaFPV_Display', displayNull];";
+        onLoad = "uiNamespace setVariable ['ArmaFPV_Display', _this # 0];";
+        onUnload = "uiNamespace setVariable ['ArmaFPV_Display', displayNull];";
 
         class controlsBackground
         {
-            class LeftHudMask : ctrlStaticBackground
+            class LeftMask: ctrlStaticBackground
             {
                 idc = -1;
                 colorBackground[] = {0, 0, 0, 1};
-
                 x = UI_EXPR(safeZoneXAbs);
                 y = UI_EXPR(safeZoneY);
-                w = UI_EXPR(LINE_WIDTH);
+                w = UI_EXPR(OSD_X - safeZoneXAbs);
                 h = UI_EXPR(safeZoneH);
             };
-
-            class RightHudMask : ctrlStaticBackground
+            class RightMask: LeftMask
             {
-                idc = -1;
-                colorBackground[] = {0, 0, 0, 1};
-
-                x = UI_EXPR(safeZoneXAbs + safeZoneWAbs - LINE_WIDTH);
-                y = UI_EXPR(safeZoneY);
-                w = UI_EXPR(LINE_WIDTH);
-                h = UI_EXPR(safeZoneH);
+                x = UI_EXPR(OSD_X + OSD_W);
+                w = UI_EXPR(safeZoneXAbs + safeZoneWAbs - OSD_X - OSD_W);
             };
         };
 
         class controls
         {
-            class TopLeftText : ctrlStructuredText
+            class SignalSentinel: ctrlStaticPicture
             {
                 idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.2));
                 text = "";
-
-                x = UI_EXPR(WX_POS + GRID_W(1));
-                y = UI_EXPR(WY_POS + GRID_H(6.2));
-                w = UI_EXPR(GRID_W(10));
-                h = UI_EXPR(GRID_H(1.4));
+                x = 0;
+                y = 0;
+                w = 0;
+                h = 0;
+                onLoad = "(_this # 0) ctrlShow false; uiNamespace setVariable ['ArmaFPV_SignalPicture', _this # 0];";
             };
-
-            class TopLeftIcon : ctrlStaticPicture
+            class Vignette: ArmaFPV_FXLayer
+            {
+                text = "\ArmaFPV\pictures\fx\vignette_ca.paa";
+                colorText[] = {1, 1, 1, 1};
+            };
+            class LinkQuality: ArmaFPV_OSDText
+            {
+                OSD_CELL(1,1,7);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_LQ', _this # 0];";
+            };
+            class Rssi: ArmaFPV_OSDText
+            {
+                OSD_CELL(24,1,6);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Rssi', _this # 0];";
+            };
+            class Crosshair: ArmaFPV_OSDText
+            {
+                x = UI_EXPR(OSD_X + OSD_W / 2 - 1.5 * CELL_W);
+                y = UI_EXPR(safeZoneY + safeZoneH / 2 - CELL_H / 2);
+                w = UI_EXPR(3 * CELL_W);
+                h = UI_EXPR(CELL_H);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Cross', _this # 0];";
+            };
+            class Warnings: ArmaFPV_OSDText
+            {
+                style = 2;
+                OSD_CELL(0,10,30);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Warn', _this # 0];";
+            };
+            class Altitude: ArmaFPV_OSDText
+            {
+                OSD_CELL(1,13,8);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Alt', _this # 0];";
+            };
+            class Voltage: ArmaFPV_OSDText
+            {
+                OSD_CELL(1,14,8);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Volt', _this # 0];";
+            };
+            class MahDrawn: ArmaFPV_OSDText
+            {
+                OSD_CELL(1,15,8);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Mah', _this # 0];";
+            };
+            class CraftName: ArmaFPV_OSDText
+            {
+                style = 2;
+                OSD_CELL(9,15,12);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_DefaultText', _this # 0];";
+            };
+            class Current: ArmaFPV_OSDText
+            {
+                OSD_CELL(22,14,8);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Amp', _this # 0];";
+            };
+            class FlyTime: ArmaFPV_OSDText
+            {
+                OSD_CELL(23,15,7);
+                onLoad = "uiNamespace setVariable ['ArmaFPV_OSD_Time', _this # 0];";
+            };
+            class SyncBar: ctrlStaticBackground
             {
                 idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_signal.paa";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalPicture"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(1));
-                y = UI_EXPR(WY_POS + GRID_H(7.9));
-                w = UI_EXPR(GRID_W(2));
-                h = UI_EXPR(GRID_H(2));
+                colorBackground[] = {0, 0, 0, 1};
+                x = UI_EXPR(OSD_X);
+                y = UI_EXPR(safeZoneY);
+                w = UI_EXPR(OSD_W);
+                h = UI_EXPR(safeZoneH * 0.07);
+                onLoad = "(_this # 0) ctrlShow false; uiNamespace setVariable ['ArmaFPV_FX_Bar', _this # 0];";
             };
-
-            class TopLeftValue : ctrlStructuredText
+            class Spark1: ArmaFPV_FXLayer
             {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.2));
-                text = "75";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_SignalText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(3.4));
-                y = UI_EXPR(WY_POS + GRID_H(8.3));
-                w = UI_EXPR(GRID_W(6));
-                h = UI_EXPR(GRID_H(1.4));
+                onLoad = "uiNamespace setVariable ['ArmaFPV_FX_Spark1', _this # 0];";
             };
-
-            class TopRightIcon : ctrlStaticPicture
+            class Spark2: Spark1
             {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_controller.paa";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(2.6));
-                y = UI_EXPR(WY_POS + GRID_H(0.9));
-                w = UI_EXPR(GRID_W(1.6));
-                h = UI_EXPR(GRID_H(1.6));
+                onLoad = "uiNamespace setVariable ['ArmaFPV_FX_Spark2', _this # 0];";
             };
-            class CompassBar : ctrlStaticPicture
+            class Spark3: Spark1
             {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_compass.paa";
-
-                x = UI_EXPR(WX_POS + W_WIDTH / 2 - GRID_W(30) / 2);
-                y = UI_EXPR(WY_POS + GRID_H(2.6));
-                w = UI_EXPR(GRID_W(30));
-                h = UI_EXPR(GRID_H(2));
+                onLoad = "uiNamespace setVariable ['ArmaFPV_FX_Spark3', _this # 0];";
             };
-
-            class CompassLettersGroup : ctrlControlsGroupNoScrollBars
+            class Snow: ArmaFPV_FXLayer
             {
-                idc = -1;
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassGroup"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH / 2 - GRID_W(30) / 2);
-                y = UI_EXPR(WY_POS + GRID_H(1.6));
-                w = UI_EXPR(GRID_W(30));
-                h = UI_EXPR(GRID_H(2));
-
-                class controls
-                {
-                    class CompassLetterN : ctrlStructuredText
-                    {
-                        idc = -1;
-
-                        class Attributes
-                        {
-                            font = "VCROSDMono";
-                            align = "center";
-                            shadow = 1;
-                        };
-
-                        shadow = 2;
-                        shadowColor[] = {0, 0, 0, 1};
-                        size = UI_EXPR(GRID_H(1.4));
-                        text = "N";
-                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassN"", _this # 0];";
-
-                        x = UI_EXPR(GRID_W(14));
-                        y = UI_EXPR(GRID_H(0));
-                        w = UI_EXPR(GRID_W(2));
-                        h = UI_EXPR(GRID_H(1.6));
-                    };
-
-                    class CompassLetterE : ctrlStructuredText
-                    {
-                        idc = -1;
-
-                        class Attributes
-                        {
-                            font = "VCROSDMono";
-                            align = "center";
-                            shadow = 1;
-                        };
-
-                        shadow = 2;
-                        shadowColor[] = {0, 0, 0, 1};
-                        size = UI_EXPR(GRID_H(1.4));
-                        text = "E";
-                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassE"", _this # 0];";
-
-                        x = UI_EXPR(GRID_W(14));
-                        y = UI_EXPR(GRID_H(0));
-                        w = UI_EXPR(GRID_W(2));
-                        h = UI_EXPR(GRID_H(1.6));
-                    };
-
-                    class CompassLetterS : ctrlStructuredText
-                    {
-                        idc = -1;
-
-                        class Attributes
-                        {
-                            font = "VCROSDMono";
-                            align = "center";
-                            shadow = 1;
-                        };
-
-                        shadow = 2;
-                        shadowColor[] = {0, 0, 0, 1};
-                        size = UI_EXPR(GRID_H(1.4));
-                        text = "S";
-                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassS"", _this # 0];";
-
-                        x = UI_EXPR(GRID_W(14));
-                        y = UI_EXPR(GRID_H(0));
-                        w = UI_EXPR(GRID_W(2));
-                        h = UI_EXPR(GRID_H(1.6));
-                    };
-
-                    class CompassLetterW : ctrlStructuredText
-                    {
-                        idc = -1;
-
-                        class Attributes
-                        {
-                            font = "VCROSDMono";
-                            align = "center";
-                            shadow = 1;
-                        };
-
-                        shadow = 2;
-                        shadowColor[] = {0, 0, 0, 1};
-                        size = UI_EXPR(GRID_H(1.4));
-                        text = "W";
-                        onLoad = "uiNameSpace setVariable [""ArmaFPV_CompassW"", _this # 0];";
-
-                        x = UI_EXPR(GRID_W(14));
-                        y = UI_EXPR(GRID_H(0));
-                        w = UI_EXPR(GRID_W(2));
-                        h = UI_EXPR(GRID_H(1.6));
-                    };
-                };
-            };
-
-            class HeadingText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "center";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.6));
-                text = "032";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_HeadingText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH / 2 - GRID_W(6) / 2);
-                y = UI_EXPR(WY_POS + GRID_H(4.6));
-                w = UI_EXPR(GRID_W(6));
-                h = UI_EXPR(GRID_H(2));
-            };
-
-            class HeadingPointerDown : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_pointer_down.paa";
-
-                x = UI_EXPR(WX_POS + W_WIDTH / 2 - GRID_W(0.9) / 2);
-                y = UI_EXPR(WY_POS + GRID_H(3.7));
-                w = UI_EXPR(GRID_W(0.9));
-                h = UI_EXPR(GRID_H(0.9));
-            };
-
-            class Center_target : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_center.paa";
-
-                x = UI_EXPR(0.5 - GRID_W(2) / 2);
-                y = UI_EXPR(0.5 - GRID_H(2) / 2 + GRID_H(1.25));
-                w = UI_EXPR(GRID_W(2));
-                h = UI_EXPR(GRID_H(2));
-            };
-
-            class VBarLeft : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_vbar_left.paa";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarLeft"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(9));
-                y = UI_EXPR(WY_POS + GRID_H(12));
-                w = UI_EXPR(GRID_W(1));
-                h = UI_EXPR(GRID_H(16));
-            };
-
-            class VBarRight : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_vbar_right.paa";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_VBarRight"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(10));
-                y = UI_EXPR(WY_POS + GRID_H(12));
-                w = UI_EXPR(GRID_W(1));
-                h = UI_EXPR(GRID_H(16));
-            };
-
-            class VPointerLeft : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_pointer_left.paa";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerLeft"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(10.2));
-                y = UI_EXPR(WY_POS + GRID_H(19));
-                w = UI_EXPR(GRID_W(1.4));
-                h = UI_EXPR(GRID_H(1.4));
-            };
-
-            class VPointerRight : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_pointer_right.paa";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_VPointerRight"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(11.6));
-                y = UI_EXPR(WY_POS + GRID_H(19));
-                w = UI_EXPR(GRID_W(1.4));
-                h = UI_EXPR(GRID_H(1.4));
-            };
-
-            class AltLeftText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.3));
-                text = "061";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_AltText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(1));
-                y = UI_EXPR(WY_POS + GRID_H(18.5));
-                w = UI_EXPR(GRID_W(6));
-                h = UI_EXPR(GRID_H(1.6));
-            };
-
-            class AltLeftUnit : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.1));
-                text = "m";
-
-                x = UI_EXPR(WX_POS + GRID_W(1));
-                y = UI_EXPR(WY_POS + GRID_H(20.2));
-                w = UI_EXPR(GRID_W(4));
-                h = UI_EXPR(GRID_H(1.2));
-            };
-
-            class DistRightText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "right";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.3));
-                text = "10483";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_RightText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(10));
-                y = UI_EXPR(WY_POS + GRID_H(18.5));
-                w = UI_EXPR(GRID_W(9));
-                h = UI_EXPR(GRID_H(1.6));
-            };
-
-            class DistRightUnit : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "right";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.1));
-                text = "m/s";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(8));
-                y = UI_EXPR(WY_POS + GRID_H(20.2));
-                w = UI_EXPR(GRID_W(7));
-                h = UI_EXPR(GRID_H(1.2));
-            };
-
-            class BottomDistanceText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "center";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.3));
-                text = "11861ft";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_DefaultText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH / 2 - GRID_W(10) / 2);
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(6));
-                w = UI_EXPR(GRID_W(10));
-                h = UI_EXPR(GRID_H(1.6));
-            };
-
-            class LeftStatusIcon : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_p_icon.paa";
-
-                x = UI_EXPR(WX_POS + GRID_W(1));
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(9));
-                w = UI_EXPR(GRID_W(2));
-                h = UI_EXPR(GRID_H(2));
-            };
-
-            class LeftVoltText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.2));
-                text = "15.0V";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_LeftVoltText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(3.4));
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(9));
-                w = UI_EXPR(GRID_W(8));
-                h = UI_EXPR(GRID_H(1.6));
-            };
-
-            class LeftCurrentText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.2));
-                text = "11.4A";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_LeftCurrentText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(3.4));
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(7.2));
-                w = UI_EXPR(GRID_W(8));
-                h = UI_EXPR(GRID_H(1.6));
-            };
-
-            class LeftMahText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.2));
-                text = "2406mAh";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_LeftMahText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + GRID_W(3.4));
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(5.4));
-                w = UI_EXPR(GRID_W(10));
-                h = UI_EXPR(GRID_H(1.6));
-            };
-
-            class RightStatusIcon : ctrlStaticPicture
-            {
-                idc = -1;
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                text = "\ArmaFPV\pictures\osd_batt_icon.paa";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_BatteryPicture"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(6.5));
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(9));
-                w = UI_EXPR(GRID_W(2));
-                h = UI_EXPR(GRID_H(2));
-            };
-
-            class RightVoltText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.2));
-                text = "12.3V";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_RightVoltText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(4.3));
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(9));
-                w = UI_EXPR(GRID_W(6));
-                h = UI_EXPR(GRID_H(1.6));
-            };
-
-            class RightTimeText : ctrlStructuredText
-            {
-                idc = -1;
-
-                class Attributes
-                {
-                    font = "VCROSDMono";
-                    align = "left";
-                    shadow = 1;
-                };
-
-                shadow = 2;
-                shadowColor[] = {0, 0, 0, 1};
-                size = UI_EXPR(GRID_H(1.2));
-                text = "11:45";
-                onLoad = "uiNameSpace setVariable [""ArmaFPV_TimeText"", _this # 0];";
-
-                x = UI_EXPR(WX_POS + W_WIDTH - GRID_W(4.3));
-                y = UI_EXPR(WY_POS + W_HEIGHT - GRID_H(7.2));
-                w = UI_EXPR(GRID_W(6));
-                h = UI_EXPR(GRID_H(1.6));
+                onLoad = "uiNamespace setVariable ['ArmaFPV_FX_Snow', _this # 0];";
             };
         };
     };

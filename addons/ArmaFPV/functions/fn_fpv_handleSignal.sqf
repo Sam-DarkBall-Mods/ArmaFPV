@@ -1,50 +1,15 @@
+/*
+    DB_fnc_fpv_handleSignal
+    Link loop: samples the signal, feeds the video effects and the OSD and drops the link after a long jam.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 private _loopInterval = GETMVAR(DB_fpv_signalUpdateInterval, FPV_SIGNAL_UPDATE_INTERVAL);
-private _ppfxInterval = GETMVAR(DB_fpv_ppfxUpdateInterval, FPV_PPFX_UPDATE_INTERVAL);
-private _jammerHeartbeatInterval = GETMVAR(DB_fpv_jammerHeartbeatInterval, 3);
 private _signalLossThreshold = GETMVAR(DB_fpv_signalLossThreshold, FPV_SIGNAL_LOSS_THRESHOLD);
 private _signalLossDuration = GETMVAR(DB_fpv_signalLossDuration, FPV_SIGNAL_LOSS_DURATION);
-private _state = [
-	diag_tickTime,
-	1,
-	diag_tickTime,
-	-1,
-	false
-];
 
 call DB_fnc_fpv_ppfx_start;
-
-private _initialPlayer = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
-private _initialUav = objNull;
-if (!isNull _initialPlayer) then {
-	_initialUav = getConnectedUAV _initialPlayer;
-};
-
-if (!isNull _initialPlayer && { !isNull _initialUav }) then {
-	private _initialSignal = [_initialPlayer, _initialUav] call DB_fnc_fpv_getSignal;
-	_state set [1, _initialSignal];
-
-	private _initialAltitude = (getPosATL _initialUav) # 2;
-	private _initialDistance = _initialPlayer distance _initialUav;
-	private _initialMaxDistance = _initialUav getVariable ["DB_fpv_signalMaxDistance", GETMVAR(FPV_MaxFlightDistance, 4000)];
-	private _initialInJammer = _initialUav getVariable ["DB_fpv_inJammer", false];
-	private _initialJammerFactor = _initialUav getVariable ["DB_fpv_jammerFactor", 0];
-	private _initialObstacles = _initialUav getVariable ["DB_fpv_signalObstacles", 0];
-	private _initialTerrainMask = _initialUav getVariable ["DB_fpv_signalTerrainMask", 0];
-	private _initialContext = [
-		"altAGL", _initialAltitude,
-		"distance", _initialDistance,
-		"maxDistance", _initialMaxDistance,
-		"inJammer", _initialInJammer,
-		"jammerFactor", _initialJammerFactor,
-		"obstacleCount", _initialObstacles,
-		"terrainMask", _initialTerrainMask
-	];
-
-	[_initialSignal, _initialContext] call DB_fnc_fpv_ppfx_setInput;
-	call DB_fnc_fpv_ppfx_update;
-};
 
 private _prevPfh = GETMVAR(DB_fpv_signalPFH, -1);
 if (_prevPfh >= 0) then {
@@ -52,8 +17,8 @@ if (_prevPfh >= 0) then {
 };
 
 private _pfhId = [{
-	_this params ["_args", "_handle"];
-	_args params ["_loopInterval", "_ppfxInterval", "_jammerHeartbeatInterval", "_signalLossThreshold", "_signalLossDuration", "_state"];
+	params ["_args", "_handle"];
+	_args params ["_signalLossThreshold", "_signalLossDuration", "_lastTick"];
 
 	private _player = GETMVAR(bis_fnc_moduleRemoteControl_unit, player);
 	private _uav = getConnectedUAV _player;
@@ -64,194 +29,29 @@ private _pfhId = [{
 	};
 
 	private _now = diag_tickTime;
-	private _lastUpdate = _state # 0;
-	private _signal = _state # 1;
-	private _lastPpfxUpdate = _state # 2;
-	private _lastJammerBroadcast = _state # 3;
-	private _lastJammerActive = _state # 4;
-	private _doUpdate = (_now - _lastUpdate) >= _loopInterval;
-	private _doPpfxUpdate = (_now - _lastPpfxUpdate) >= _ppfxInterval;
+	_args set [2, _now];
 
-	private _altitude = (getPosATL _uav) # 2;
-	private _controlPicture = GETUVAR(ArmaFPV_SignalPicture, controlNull);
-	private _controlText = GETUVAR(ArmaFPV_SignalText, controlNull);
-	private _headingText = GETUVAR(ArmaFPV_HeadingText, controlNull);
-	private _compassGroup = GETUVAR(ArmaFPV_CompassGroup, controlNull);
-	private _compassN = GETUVAR(ArmaFPV_CompassN, controlNull);
-	private _compassE = GETUVAR(ArmaFPV_CompassE, controlNull);
-	private _compassS = GETUVAR(ArmaFPV_CompassS, controlNull);
-	private _compassW = GETUVAR(ArmaFPV_CompassW, controlNull);
-	private _vBarLeft = GETUVAR(ArmaFPV_VBarLeft, controlNull);
-	private _vBarRight = GETUVAR(ArmaFPV_VBarRight, controlNull);
-	private _vPointerLeft = GETUVAR(ArmaFPV_VPointerLeft, controlNull);
-	private _vPointerRight = GETUVAR(ArmaFPV_VPointerRight, controlNull);
-	private _altText = GETUVAR(ArmaFPV_AltText, controlNull);
-	private _rightText = GETUVAR(ArmaFPV_RightText, controlNull);
-	private _distText = GETUVAR(ArmaFPV_DefaultText, controlNull);
-	private _heading = (round (getDir _uav)) mod 360;
-	private _distance = _player distance _uav;
-	private _speedMs = vectorMagnitude (velocity _uav);
-	private _speedDisplay = round (_speedMs / FPV_SPEED_SCALE);
-
-	private _sampleSignal = _doUpdate || _doPpfxUpdate;
-	if (_sampleSignal) then {
-		_signal = [_player, _uav] call DB_fnc_fpv_getSignal;
-		_state set [1, _signal];
-		if (_doUpdate) then { _state set [0, _now]; };
-		if (_doPpfxUpdate) then { _state set [2, _now]; };
-	};
-
+	private _signal = [_player, _uav] call DB_fnc_fpv_getSignal;
 	private _inJammer = _uav getVariable ["DB_fpv_inJammer", false];
-	private _jammerStateChanged = _inJammer != _lastJammerActive;
-	private _jammerHeartbeatDue = _inJammer && { (_now - _lastJammerBroadcast) >= _jammerHeartbeatInterval };
-	if (_jammerStateChanged || _jammerHeartbeatDue) then {
-		if (_jammerStateChanged) then {
-			_uav setVariable ["DB_fpv_jammerClientActive", _inJammer, true];
-		};
-		_uav setVariable ["DB_fpv_jammerClientUpdate", _now, true];
-		if (_inJammer) then {
-			_uav setVariable ["DB_fpv_lastJammerContact", _now, true];
-		};
-		_state set [3, _now];
-		_state set [4, _inJammer];
-	};
+	[_signal, [
+		"altAGL", (getPosATL _uav) # 2,
+		"distance", _player distance _uav,
+		"maxDistance", _uav getVariable ["DB_fpv_signalMaxDistance", GETMVAR(FPV_MaxFlightDistance, 4000)],
+		"inJammer", _inJammer,
+		"jammerFactor", _uav getVariable ["DB_fpv_jammerFactor", 0],
+		"obstacleCount", _uav getVariable ["DB_fpv_signalObstacles", 0],
+		"terrainMask", _uav getVariable ["DB_fpv_signalTerrainMask", 0]
+	]] call DB_fnc_fpv_ppfx_setInput;
 
-	if (_sampleSignal) then {
-		if (_doUpdate) then {
-			private _picture = "";
-			switch (true) do {
-				case (_signal > 0.75): { _picture = "\ArmaFPV\pictures\100.paa"; };
-				case (_signal > 0.5): { _picture = "\ArmaFPV\pictures\75.paa"; };
-				case (_signal > 0.25): { _picture = "\ArmaFPV\pictures\50.paa"; };
-				case (_signal > 0): { _picture = "\ArmaFPV\pictures\25.paa"; };
-				case (_signal <= 0): { _picture = "\ArmaFPV\pictures\0.paa"; };
-				default { _picture = "\ArmaFPV\pictures\100.paa"; };
-			};
-
-			if (!isNull _controlPicture) then {
-				_controlPicture ctrlSetText _picture;
-			};
-
-			if (!isNull _controlText) then {
-				_controlText ctrlSetText str(round(_signal * 100));
-			};
-		};
-
-		private _maxDistance = _uav getVariable ["DB_fpv_signalMaxDistance", GETMVAR(FPV_MaxFlightDistance, 4000)];
-		private _jammerFactor = _uav getVariable ["DB_fpv_jammerFactor", 0];
-		private _obstacles = _uav getVariable ["DB_fpv_signalObstacles", 0];
-		private _terrainMask = _uav getVariable ["DB_fpv_signalTerrainMask", 0];
-
-		private _context = [
-			"altAGL", _altitude,
-			"distance", _distance,
-			"maxDistance", _maxDistance,
-			"inJammer", _inJammer,
-			"jammerFactor", _jammerFactor,
-			"obstacleCount", _obstacles,
-			"terrainMask", _terrainMask
-		];
-
-		[_signal, _context] call DB_fnc_fpv_ppfx_setInput;
-	};
-
-	private _jammerLowTime = _uav getVariable ["DB_fpv_jammerLowTime", 0];
-	private _isLost = _uav getVariable ["DB_fpv_isUAVsignalLost", false];
-
-	if (_inJammer && { _signal <= _signalLossThreshold } && { !_isLost }) then {
-		_jammerLowTime = _jammerLowTime + diag_deltaTime;
+	private _jammerLowTime = 0;
+	if (_inJammer && { _signal <= _signalLossThreshold } && { !(_uav getVariable ["DB_fpv_isUAVsignalLost", false]) }) then {
+		_jammerLowTime = (_uav getVariable ["DB_fpv_jammerLowTime", 0]) + _now - _lastTick;
 		if (_jammerLowTime >= _signalLossDuration) then {
 			[_player, _uav] call DB_fnc_fpv_onSignalLost;
 			_jammerLowTime = 0;
 		};
-	} else {
-		_jammerLowTime = 0;
 	};
-
 	_uav setVariable ["DB_fpv_jammerLowTime", _jammerLowTime];
-
-	if (!isNull _headingText) then {
-		private _hTxt = if (_heading < 10) then {
-			format ["00%1", _heading]
-		} else {
-			if (_heading < 100) then { format ["0%1", _heading] } else { str _heading };
-		};
-		_headingText ctrlSetText _hTxt;
-	};
-
-	if (!isNull _compassGroup) then {
-		private _groupPos = ctrlPosition _compassGroup;
-		private _groupW = _groupPos # 2;
-		private _centerX = _groupW / 2;
-		private _halfW = _groupW / 2;
-		private _letters = [
-			[_compassN, 0],
-			[_compassE, 90],
-			[_compassS, 180],
-			[_compassW, 270]
-		];
-
-		{
-			private _ctrl = _x # 0;
-			private _angle = _x # 1;
-
-			if (!isNull _ctrl) then {
-				private _pos = ctrlPosition _ctrl;
-				private _w = _pos # 2;
-				private _h = _pos # 3;
-				private _y = _pos # 1;
-				private _offset = ((_angle - _heading + 540) mod 360) - 180;
-				private _xPos = _centerX + (_offset / 180) * _halfW - (_w / 2);
-
-				_ctrl ctrlSetPosition [_xPos, _y, _w, _h];
-				_ctrl ctrlCommit 0;
-			};
-		} forEach _letters;
-	};
-
-	if (!isNull _altText) then {
-		private _alt = (round _altitude) max 0;
-		_altText ctrlSetText format ["%1", _alt];
-	};
-
-	if (!isNull _rightText) then {
-		_rightText ctrlSetText format ["%1", _speedDisplay];
-	};
-
-	if (!isNull _distText) then {
-		private _defaultText = GETMVAR(FPV_DefaultText, "CROCUS");
-		_distText ctrlSetText _defaultText;
-	};
-
-	if (!isNull _vBarLeft && !isNull _vPointerLeft) then {
-		private _barPos = ctrlPosition _vBarLeft;
-		private _barY = _barPos # 1;
-		private _barH = _barPos # 3;
-		private _ptrPos = ctrlPosition _vPointerLeft;
-		private _ptrW = _ptrPos # 2;
-		private _ptrH = _ptrPos # 3;
-		private _altClamp = (_altitude max 0) min FPV_ALT_MAX;
-		private _altNorm = _altClamp / FPV_ALT_MAX;
-		private _yPos = _barY + (_barH * (1 - _altNorm)) - (_ptrH / 2);
-
-		_vPointerLeft ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
-		_vPointerLeft ctrlCommit 0;
-	};
-
-	if (!isNull _vBarRight && !isNull _vPointerRight) then {
-		private _barPos = ctrlPosition _vBarRight;
-		private _barY = _barPos # 1;
-		private _barH = _barPos # 3;
-		private _ptrPos = ctrlPosition _vPointerRight;
-		private _ptrW = _ptrPos # 2;
-		private _ptrH = _ptrPos # 3;
-		private _speedClamp = (_speedDisplay max 0) min FPV_SPEED_MAX;
-		private _speedNorm = _speedClamp / FPV_SPEED_MAX;
-		private _yPos = _barY + (_barH * (1 - _speedNorm)) - (_ptrH / 2);
-
-		_vPointerRight ctrlSetPosition [_ptrPos # 0, _yPos, _ptrW, _ptrH];
-		_vPointerRight ctrlCommit 0;
-	};
-}, 0, [_loopInterval, _ppfxInterval, _jammerHeartbeatInterval, _signalLossThreshold, _signalLossDuration, _state]] call CBA_fnc_addPerFrameHandler;
+}, _loopInterval, [_signalLossThreshold, _signalLossDuration, diag_tickTime]] call CBA_fnc_addPerFrameHandler;
 
 SETMVAR(DB_fpv_signalPFH, _pfhId);

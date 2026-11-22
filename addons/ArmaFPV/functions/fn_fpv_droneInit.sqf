@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_droneInit
+    Marks a local Crocus for the jammer mod and applies the AI captive setting; runs on spawn and on locality change.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 params ["_uav"];

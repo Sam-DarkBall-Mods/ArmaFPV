@@ -66,3 +66,14 @@ class CfgPatches
 #include "includes\CfgVehicles.hpp"
 #include "includes\Extended_PreInit_EventHandlers.hpp"
 #include "includes\Extended_PostInit_EventHandlers.hpp"
+
+class Extended_Init_EventHandlers
+{
+	class FPV_Retranslator
+	{
+		class ArmaFPV
+		{
+			init="(_this # 0) allowDamage true;";
+		};
+	};
+};

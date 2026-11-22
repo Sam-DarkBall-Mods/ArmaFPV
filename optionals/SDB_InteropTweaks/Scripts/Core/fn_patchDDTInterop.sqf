@@ -1,5 +1,7 @@
 /*
-	Apply DDT interop patch once DDT function pointers are available.
+    SDB_it_fnc_patchDDTInterop
+    Hooks DDT drone launching once its functions exist: adds the Crocus classes and the autonomy path.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"

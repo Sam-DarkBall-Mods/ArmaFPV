@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_onSignalLost
+    Drops the link when the jammer wins: stops the motors, disconnects the pilot and kills the drone's AI crew.
+    Author: DarkBall
+*/
 params ["_player", "_uav"];
 
 if (isNull _uav) exitWith {};

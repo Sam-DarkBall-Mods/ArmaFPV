@@ -1,5 +1,7 @@
 /*
-	Register Put event interop for inventory-drop UAV workflows.
+    SDB_it_fnc_patchPutInterop
+    Registers the Put handler for drones deployed from a dropped item.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"

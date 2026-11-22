@@ -1,6 +1,7 @@
 /*
-	DDT DeployUAV wrapper.
-	Purpose: route FPV/FPVAT launches to autonomous deploy path when enabled.
+    DDT_fnc_DeployUAV
+    Wraps DDT drone deployment and sends FPV launches down the autonomy path when it is on.
+    Author: DarkBall
 */
 
 params ["_man", "_type"];
@@ -14,6 +15,7 @@ if !(_t in ["FPV", "FPVAT"]) exitWith {
 };
 
 private _useAutonomy = _man getVariable ["SDB_autonomyNextLaunch", missionNamespace getVariable ["sdbAutoEnableByDefault", false]];
+if (isPlayer _man && { !(missionNamespace getVariable ["sdbAutoAllowPlayers", true]) }) then { _useAutonomy = false; };
 if !(_useAutonomy) exitWith {
 	_this call _original;
 };

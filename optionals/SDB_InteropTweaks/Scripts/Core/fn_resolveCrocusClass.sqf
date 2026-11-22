@@ -1,5 +1,7 @@
 /*
-	Convert Item_Crocus_* inventory items to side-specific vehicle class.
+    SDB_it_fnc_resolveCrocusClass
+    Turns an Item_Crocus_* item into the Crocus vehicle class of the given side.
+    Author: DarkBall
 */
 
 params ["_itemClass", "_side"];

@@ -1,6 +1,7 @@
 /*
-	Autonomous DeployUAV path.
-	Purpose: spawn the drone like DDT, but run SDB autonomous FPV loop for FPV/FPVAT.
+    SDB_fnc_ddt_deployUAVAutonomy
+    Deploys a drone the way DDT does and starts the SDB autonomy instead of the DDT FPV AI.
+    Author: DarkBall
 */
 
 params ["_man", "_type"];
@@ -19,6 +20,7 @@ if (_droneClass == "1Rnd_RC40_shell_RF") exitWith {
 	[_man, _man] spawn lxRF_fnc_RC40_recon;
 };
 if (_droneClass == "1Rnd_RC40_HE_shell_RF") exitWith {};
+if !(isClass (configFile >> "CfgVehicles" >> _droneClass)) exitWith {};
 
 (group _man) setVariable ["Vcm_Disable", true, true];
 
@@ -91,7 +93,7 @@ private _fn_finishDeploy = {
 
 	if !((side _drone) == (side _man)) then {
 		private _side = side _man;
-		(crew _drone) joinSilent (createGroup _side);
+		(crew _drone) joinSilent (createGroup [_side, true]);
 		(group _drone) setVariable ["daoExclude", true, true];
 		(group _drone) setVariable ["dceExclude", true, true];
 	};

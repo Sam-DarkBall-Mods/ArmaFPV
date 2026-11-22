@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_getSignal
+    Returns the 0..1 link quality between pilot and drone from distance, terrain, obstacles, signal boosters and jammers.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 params ["_player", "_uav"];

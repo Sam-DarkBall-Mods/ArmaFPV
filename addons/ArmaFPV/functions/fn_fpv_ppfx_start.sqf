@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_ppfx_start
+    Creates the analog video post effects and starts their per-frame update.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
@@ -5,10 +10,13 @@ if (!hasInterface) exitWith {};
 SETMVAR(DB_fpv_ppfx_input, 1);
 private _ppfxContext = [];
 SETMVAR(DB_fpv_ppfx_context, _ppfxContext);
-SETMVAR(DB_fpv_ppfx_prevQ, 1);
+SETMVAR(DB_fpv_ppfx_drop, 0);
+SETMVAR(DB_fpv_ppfx_clean, false);
 SETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
 private _ppfxGlitch = [];
 SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
+SETMVAR(DB_fpv_ppfx_nextFrame, 0);
+SETMVAR(DB_fpv_ppfx_lastFrame, diag_tickTime);
 
 if (GETMVAR(DB_fpv_ppfx_active, false)) exitWith {};
 
@@ -88,7 +96,6 @@ SETMVAR(DB_fpv_ppfx_fxChrom, _fxChrom);
 SETMVAR(DB_fpv_ppfx_fxRadial, _fxRadial);
 SETMVAR(DB_fpv_ppfx_fxWet, _fxWet);
 SETMVAR(DB_fpv_ppfx_active, true);
-SETMVAR(DB_fpv_ppfx_prevQ, GETMVAR(DB_fpv_ppfx_input, 1));
 SETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
 _ppfxGlitch = [];
 SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);

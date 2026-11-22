@@ -1,309 +1,147 @@
+/*
+    DB_fnc_fpv_ppfx_update
+    Analog video look at the PAL frame rate: a soft picture whose colour fades, line snow and sparkles over the OSD, line tears and rolling frames as the link degrades.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
 if (!(GETMVAR(DB_fpv_ppfx_active, false))) exitWith {};
 
 private _now = diag_tickTime;
-private _dt = diag_deltaTime max 0.001;
+if (_now < GETMVAR(DB_fpv_ppfx_nextFrame, 0)) exitWith {};
+private _dt = (_now - GETMVAR(DB_fpv_ppfx_lastFrame, _now)) min 0.25;
+SETMVAR(DB_fpv_ppfx_lastFrame, _now);
+SETMVAR(DB_fpv_ppfx_nextFrame, _now + FPV_FX_FRAME);
 
-private _handles = missionNamespace getVariable ["DB_fpv_ppfx_handles", []];
-if (_handles isEqualTo []) exitWith {};
+(GETMVAR(DB_fpv_ppfx_handles, [])) params [["_fxColor", -1], ["_fxGrain", -1], ["_fxBlur", -1], ["_fxChrom", -1], "", ["_fxWet", -1]];
 
-private _fxColor = GETMVAR(DB_fpv_ppfx_fxColor, -1);
-private _fxGrain = GETMVAR(DB_fpv_ppfx_fxGrain, -1);
-private _fxBlur = GETMVAR(DB_fpv_ppfx_fxBlur, -1);
-private _fxChrom = GETMVAR(DB_fpv_ppfx_fxChrom, -1);
-private _fxRadial = GETMVAR(DB_fpv_ppfx_fxRadial, -1);
-private _fxWet = GETMVAR(DB_fpv_ppfx_fxWet, -1);
+private _q = (GETMVAR(DB_fpv_ppfx_input, 1) max 0) min 1;
+private _qDrop = GETMVAR(DB_fpv_ppfx_drop, 0);
+SETMVAR(DB_fpv_ppfx_drop, (_qDrop - _dt * 1.5) max 0);
 
-private _q = GETMVAR(DB_fpv_ppfx_input, 1);
-_q = (_q max 0) min 1;
-private _prevQ = GETMVAR(DB_fpv_ppfx_prevQ, _q);
-private _qDrop = (_prevQ - _q) max 0;
-SETMVAR(DB_fpv_ppfx_prevQ, _q);
-
-private _context = missionNamespace getVariable ["DB_fpv_ppfx_context", []];
-private _getCtx = {
-	params ["_ctx", "_key", "_default"];
-	private _idx = _ctx find _key;
-	if (_idx >= 0 && { (_idx + 1) < count _ctx }) then {
-		_ctx # (_idx + 1)
-	} else {
-		_default
-	};
+private _ctx = GETMVAR(DB_fpv_ppfx_context, []);
+private _get = {
+	params ["_key", "_default"];
+	private _i = _ctx find _key;
+	[_default, _ctx param [_i + 1, _default]] select (_i >= 0)
 };
+private _multipath = ((["obstacleCount", 0] call _get) min 10) / 20
+	+ ((["terrainMask", 0] call _get) min 1) * 0.5
+	+ ((1 - (["altAGL", 100] call _get) / 8) max 0) * 0.3;
 
-private _altAGL = [_context, "altAGL", 0] call _getCtx;
-private _distance = [_context, "distance", 0] call _getCtx;
-private _maxDistance = [_context, "maxDistance", 1500] call _getCtx;
-private _inJammer = [_context, "inJammer", false] call _getCtx;
-private _jammerFactor = [_context, "jammerFactor", 0] call _getCtx;
-private _obstacles = [_context, "obstacleCount", 0] call _getCtx;
-private _terrainMask = [_context, "terrainMask", 0] call _getCtx;
-private _lowAltFactor = (1 - ((_altAGL max 0) / 20) min 1) max 0;
-
-private _smoothstepInv = {
-	params ["_x", "_high", "_low"];
-	private _t = (_high - _x) / (_high - _low);
-	_t = (_t max 0) min 1;
+private _ramp = {
+	params ["_hi", "_lo"];
+	private _t = (((_hi - _q) / (_hi - _lo)) max 0) min 1;
 	_t * _t * (3 - 2 * _t)
 };
 
-private _severity = 1 - _q;
-private _lowAltImpact = _lowAltFactor * _severity;
-private _noiseWeight = [_q, 0.95, 0.35] call _smoothstepInv;
-private _blurWeight = _severity ^ 1.7;
-private _aberrWeight = _severity ^ 2.2;
-private _dropImpulse = (_qDrop * 2.0) min 0.35;
-
-if (_dropImpulse > 0) then {
-	_noiseWeight = (_noiseWeight + (_dropImpulse * 0.8)) min 1;
-	_blurWeight = (_blurWeight + (_dropImpulse * 0.5)) min 1;
-	_aberrWeight = (_aberrWeight + (_dropImpulse * 0.35)) min 1;
-};
-
-private _envBoost = 1;
-if (_altAGL < 20 && { _q < 0.5 }) then { _envBoost = _envBoost * 1.25; };
-if (_inJammer) then { _envBoost = _envBoost * 1.35; };
-if (_jammerFactor > 0) then { _envBoost = _envBoost * (1 + (_jammerFactor min 1) * 0.8); };
-if (_obstacles > 0) then { _envBoost = _envBoost * (1 + (0.03 * (_obstacles min 10))); };
-if (_terrainMask > 0) then { _envBoost = _envBoost * (1 + (_terrainMask min 1) * 0.4); };
-if (_maxDistance > 0) then { _envBoost = _envBoost * (1 + ((_distance / _maxDistance) min 1) * 0.25); };
-
-_noiseWeight = _noiseWeight * 1.1;
-_blurWeight = _blurWeight * 0.6;
-_aberrWeight = _aberrWeight * 0.9;
-
-private _envScale = (_severity max 0) min 1;
-_noiseWeight = (_noiseWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
-_blurWeight = (_blurWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
-_aberrWeight = (_aberrWeight * (1 + ((_envBoost - 1) * _envScale))) min 1;
-
-private _glitch = GETMVAR(DB_fpv_ppfx_glitch, []);
-private _glitchType = "";
-private _glitchEnd = 0;
-
-if (_glitch isEqualType [] && { count _glitch >= 2 }) then {
-	_glitchType = _glitch # 0;
-	_glitchEnd = _glitch # 1;
-};
-
-if (_glitchType != "" && { _now >= _glitchEnd }) then {
-	_glitchType = "";
-	_glitchEnd = 0;
-	private _ppfxGlitchReset = [];
-	SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitchReset);
-};
-
-private _lastDropGlitch = GETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
-if (
-	_glitchType isEqualTo ""
-	&& { _q < 0.85 }
-	&& { _qDrop >= 0.03 }
-	&& { (_now - _lastDropGlitch) >= 0.25 }
-) then {
-	_glitchType = if (_q < 0.35) then { "BLACK_PULSE" } else { "LINE_TEAR" };
-	_glitchEnd = _now + (0.05 + ((_qDrop min 0.4) * 0.35));
-	private _ppfxDropGlitch = [_glitchType, _glitchEnd];
-	SETMVAR(DB_fpv_ppfx_glitch, _ppfxDropGlitch);
-	SETMVAR(DB_fpv_ppfx_lastDropGlitch, _now);
-};
-
-if (_glitchType isEqualTo "") then {
-	private _chanceBase = 0.01 + (_severity ^ 2) * 0.35;
-	_chanceBase = _chanceBase + ((_qDrop min 0.25) * 0.6);
-	if (_altAGL < 20) then { _chanceBase = _chanceBase + (0.03 * _severity); };
-	if (_lowAltImpact > 0) then { _chanceBase = _chanceBase + (_lowAltImpact * 0.08); };
-	if (_inJammer) then { _chanceBase = _chanceBase + 0.06; };
-	if (_obstacles > 0) then { _chanceBase = _chanceBase + 0.02; };
-	if (_severity > 0.6) then { _chanceBase = _chanceBase + 0.04; };
-	private _chance = _chanceBase * _dt;
-
-	if ((random 1) < _chance) then {
-		private _types = ["LINE_TEAR", "COLOR_SHIFT", "BLACK_PULSE"];
-		if (_severity > 0.6) then {
-			_types pushBack "BLACKOUT";
-		};
-		_glitchType = selectRandom _types;
-		private _duration = 0.08 + (random 0.25) * (0.5 + _severity);
-		if (_glitchType isEqualTo "BLACKOUT") then {
-			private _short = 0.02 + (random 0.05);
-			if (_lowAltFactor > 0.4) then { _short = 0.02 + (random 0.04); };
-			_duration = _short;
-		};
-		_glitchEnd = _now + _duration;
-		private _ppfxGlitch = [_glitchType, _glitchEnd];
-		SETMVAR(DB_fpv_ppfx_glitch, _ppfxGlitch);
+(GETMVAR(DB_fpv_ppfx_glitch, [])) params [["_type", ""], ["_start", 0], ["_end", 0]];
+if (_now >= _end) then { _type = ""; };
+if (_type == "") then {
+	private _burst = 1.5 * ([0.85, 0.3] call _ramp) + 2.5 * _multipath * (1 - _q);
+	private _tearRate = 2.5 * ([0.7, 0.25] call _ramp) + 1.5 * _multipath * (1 - _q);
+	private _rollRate = 1.2 * ([0.4, 0.12] call _ramp);
+	private _total = _burst + _tearRate + _rollRate;
+	private _pick = random _total;
+	if (_qDrop >= 0.08 && { _q < 0.85 }) then {
+		_pick = 0;
+		_total = 1e6;
+		SETMVAR(DB_fpv_ppfx_drop, 0);
+	};
+	if (random 1 < _total * _dt) then {
+		_type = "ROLL";
+		if (_pick < _burst + _tearRate) then { _type = "TEAR"; };
+		if (_pick < _burst) then { _type = "BURST"; };
+		_start = _now;
+		_end = _now + (switch (_type) do {
+			case "BURST": { 0.1 + random 0.3 };
+			case "TEAR": { 0.06 + random 0.2 };
+			default { 0.3 + random 0.5 };
+		});
+		missionNamespace setVariable ["DB_fpv_ppfx_glitch", [_type, _start, _end]];
 	};
 };
 
-private _glitchNoise = 0;
-private _glitchRadial = 0;
-private _glitchWet = 0;
-private _colorShift = 0;
-private _stripePulse = 0;
-private _pulse = 0;
-private _blackout = 0;
+private _clean = _q >= 0.97 && { _type == "" };
+if (_clean && { GETMVAR(DB_fpv_ppfx_clean, false) }) exitWith {};
+SETMVAR(DB_fpv_ppfx_clean, _clean);
 
-switch (_glitchType) do {
-	case "LINE_TEAR": {
-		_glitchWet = 0.08 + _severity * 0.25;
-		_glitchNoise = 0.4;
-		_glitchRadial = 0.03;
-	};
-	case "COLOR_SHIFT": {
-		_colorShift = 0.08 + _severity * 0.12;
-	};
-	case "BLACK_PULSE": {
-		_pulse = -0.35;
-		_glitchNoise = 0.2;
-	};
-	case "BLACKOUT": {
-		_blackout = 0.5;
-		_glitchNoise = 0.6;
-	};
-	default {};
-};
-
-if (_severity > 0.35) then {
-	private _stripeHz = 7 + (_severity * 13);
-	private _stripePhase = (_now * _stripeHz + (sin (deg (_now * 3.1)) * 0.35)) % 1;
-	private _stripeDuty = (0.22 - (_severity * 0.1)) max 0.08;
-	if (_stripePhase < _stripeDuty) then {
-		_stripePulse = (0.18 + (_severity * 0.42)) min 0.65;
-	};
-};
-
-if (_stripePulse > 0) then {
-	_glitchWet = (_glitchWet + (_stripePulse * 0.38)) min 0.45;
-	_glitchNoise = (_glitchNoise + (_stripePulse * 0.55)) min 1;
-	_glitchRadial = (_glitchRadial + (_stripePulse * 0.018)) min 0.06;
-	_colorShift = _colorShift + (_stripePulse * 0.045);
-};
-
-private _commitTime = if (_glitchType isEqualTo "") then {
-	if (_severity > 0.7) then { 0 } else { if (_severity > 0.35) then { 0.01 } else { 0.03 } }
-} else {
-	0
-};
-
-private _analogBase = 0.06;
-private _drift = (sin (deg (_now * 2.1)) * 0.03 + sin (deg (_now * 0.7)) * 0.015) * _severity;
-private _baseBrightness = 1 + _drift + _pulse;
-if (_severity > 0.8) then {
-	_baseBrightness = _baseBrightness max 0.28;
-};
-private _flickerBlackout = 0;
-if (_severity > 0.35) then {
-	private _flickerHz = 18 + (_severity * 14);
-	private _wave = ((sin (_now * _flickerHz * 360) + 1) * 0.5);
-	_flickerBlackout = _wave * (0.25 + (_severity * 0.2));
-	if (_lowAltFactor > 0.4) then { _flickerBlackout = _flickerBlackout + (0.06 * _severity); };
-};
-
-private _microFlicker = 0;
-if (_lowAltFactor > 0.25) then {
-	private _microHz = 24 + (_lowAltFactor * 12);
-	private _microWave = ((sin (_now * _microHz * 360) + 1) * 0.5);
-	private _microAmp = 0.04 + ((1 - _q) * 0.06);
-	_microFlicker = _microWave * _microAmp;
-};
-
-private _hardFlicker = 0;
-if (_severity > 0.45) then {
-	private _hardHz = 26 + (_severity * 34);
-	private _hardPhase = (_now * _hardHz) % 1;
-	private _hardDuty = (0.16 - (_severity * 0.08)) max 0.05;
-	if (_hardPhase < _hardDuty) then {
-		_hardFlicker = 0.08 + (_severity * 0.26);
-	};
-};
-
-private _finalBlackout = (_blackout max _flickerBlackout max _microFlicker max _hardFlicker) min 0.55;
-private _brightness = _baseBrightness * (1 - _finalBlackout);
-if (_severity > 0.7) then {
-	_brightness = _brightness max 0.16;
-};
-private _contrast = (1 + (_severity * 0.4) + (_analogBase * 0.12)) * (1 - _finalBlackout) + (1 * _finalBlackout);
-private _offset = 0;
-
-private _colorA = [0, 0, 0, _finalBlackout];
-private _colorB = [1 + _colorShift + (_analogBase * 0.02), 1, 1 - _colorShift - (_analogBase * 0.01), 1];
-
-private _grain = (_noiseWeight + _glitchNoise + _analogBase * 0.35) min 1;
-private _blur = (_blurWeight + _analogBase * 0.08) min 1;
-private _chrom = (_aberrWeight * 0.025 + _analogBase * 0.004) min 0.06;
-
-if (_stripePulse > 0) then {
-	_grain = (_grain + (_stripePulse * 0.22)) min 1;
-	_chrom = (_chrom + (_stripePulse * 0.012)) min 0.06;
+private _snow = ((((0.55 - _q) / 0.5) max 0) min 1) ^ 1.5;
+private _tear = 0;
+private _roll = -1;
+switch (_type) do {
+	case "BURST": { _snow = (_snow + 0.45) min 1; };
+	case "TEAR": { _tear = 0.12 + 0.25 * (1 - _q); };
+	case "ROLL": { _roll = (_now - _start) / ((_end - _start) max 0.01); };
 };
 
 if (_fxColor >= 0) then {
-	_fxColor ppEffectAdjust [
-		_brightness,
-		_contrast,
-		_offset,
-		_colorA,
-		_colorB,
-		[0.299, 0.587, 0.114, 0]
-	];
-	_fxColor ppEffectCommit _commitTime;
+	_fxColor ppEffectAdjust [1, 1.04, 0, [0, 0, 0, 0], [1, 1, 1, 1.1 * (1 - ([0.6, 0.25] call _ramp))], [0.299, 0.587, 0.114, 0]];
+	_fxColor ppEffectCommit 0;
 };
-
 if (_fxGrain >= 0) then {
-	_fxGrain ppEffectAdjust [_grain, 1, 1 + (_grain * 5), 0.5, 0.5, 0];
-	_fxGrain ppEffectCommit _commitTime;
+	_fxGrain ppEffectAdjust [0.05 + 0.2 * (1 - _q), 1, 1.25, 0.5, 0.5, 1];
+	_fxGrain ppEffectCommit 0;
 };
-
 if (_fxBlur >= 0) then {
-	_fxBlur ppEffectAdjust [_blur];
-	_fxBlur ppEffectCommit _commitTime;
+	_fxBlur ppEffectAdjust [0.12 + 0.25 * ([0.7, 0.2] call _ramp)];
+	_fxBlur ppEffectCommit 0;
 };
-
 if (_fxChrom >= 0) then {
-	_fxChrom ppEffectAdjust [_chrom, _chrom, true];
-	_fxChrom ppEffectCommit _commitTime;
+	_fxChrom ppEffectAdjust [0.004 + 0.008 * (1 - _q), 0.0006, true];
+	_fxChrom ppEffectCommit 0;
 };
-
-if (_fxRadial >= 0) then {
-	_fxRadial ppEffectAdjust [_glitchRadial, _glitchRadial, 0.5, 0.5];
-	_fxRadial ppEffectCommit _commitTime;
-};
-
 if (_fxWet >= 0) then {
-	private _wetParams = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	if (_glitchWet > 0) then {
-		private _ampScale = 0.2 + (_glitchWet * 1.4);
-		private _randScale = 0.2 + (_glitchWet * 0.8);
-		private _posScale = 0.2 + (_glitchWet * 0.8);
-		_wetParams = [
-			_glitchWet,
-			_glitchWet * 0.6,
-			_glitchWet * 0.4,
-			4.10,
-			3.70,
-			2.50,
-			1.85,
-			0.0054 * _ampScale,
-			0.0041 * _ampScale,
-			0.0090 * _ampScale,
-			0.0070 * _ampScale,
-			0.5 * _randScale,
-			0.3 * _randScale,
-			10.0 * _posScale,
-			6.0 * _posScale
-		];
-	};
-	_fxWet ppEffectAdjust _wetParams;
-	_fxWet ppEffectCommit _commitTime;
+	private _s = 0.2 + _tear;
+	_fxWet ppEffectAdjust ([
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[_tear, _tear * 0.6, _tear * 0.4, 4.10, 3.70, 2.50, 1.85, 0.0054 * (0.2 + _tear * 1.4), 0.0041 * (0.2 + _tear * 1.4), 0.0090 * (0.2 + _tear * 1.4), 0.0070 * (0.2 + _tear * 1.4), 0.5 * _s, 0.3 * _s, 10 * _s, 6 * _s]
+	] select (_tear > 0));
+	_fxWet ppEffectCommit 0;
 };
 
-if (_q >= 0.99) then {
-	if (_fxColor >= 0) then { _fxColor ppEffectAdjust [1, 1, 0, [0, 0, 0, 0], [1, 1, 1, 1], [0.299, 0.587, 0.114, 0]]; _fxColor ppEffectCommit 0; };
-	if (_fxGrain >= 0) then { _fxGrain ppEffectAdjust [0, 1, 1, 0, 0, 0]; _fxGrain ppEffectCommit 0; };
-	if (_fxBlur >= 0) then { _fxBlur ppEffectAdjust [0]; _fxBlur ppEffectCommit 0; };
-	if (_fxChrom >= 0) then { _fxChrom ppEffectAdjust [0, 0, true]; _fxChrom ppEffectCommit 0; };
-	if (_fxRadial >= 0) then { _fxRadial ppEffectAdjust [0, 0, 0, 0]; _fxRadial ppEffectCommit 0; };
-	if (_fxWet >= 0) then { _fxWet ppEffectAdjust [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; _fxWet ppEffectCommit 0; };
+{
+	_x params ["_name", "_alpha", "_kind"];
+	private _ctrl = uiNamespace getVariable [_name, controlNull];
+	if (_alpha > 0.01) then {
+		_ctrl ctrlSetText format ["\ArmaFPV\pictures\fx\%1_%2_%3.paa", _kind, floor random FPV_FX_FRAMES, ["ca", "co"] select (_kind == "snow")];
+	};
+	_ctrl ctrlSetTextColor [1, 1, 1, _alpha];
+} forEach [
+	["ArmaFPV_FX_Spark1", [0.92, 0.65] call _ramp, "spark"],
+	["ArmaFPV_FX_Spark2", [0.75, 0.45] call _ramp, "spark"],
+	["ArmaFPV_FX_Spark3", [0.55, 0.25] call _ramp, "spark"],
+	["ArmaFPV_FX_Snow", _snow, "snow"]
+];
+
+private _osd = uiNamespace getVariable ["ArmaFPV_FX_osd", []];
+if (_osd isEqualTo [] || { isNull (_osd # 0 # 0) }) then {
+	_osd = (["ArmaFPV_OSD_LQ", "ArmaFPV_OSD_Rssi", "ArmaFPV_OSD_Cross", "ArmaFPV_OSD_Warn", "ArmaFPV_OSD_Alt", "ArmaFPV_OSD_Volt", "ArmaFPV_OSD_Mah", "ArmaFPV_DefaultText", "ArmaFPV_OSD_Amp", "ArmaFPV_OSD_Time"]
+		apply { private _c = uiNamespace getVariable [_x, controlNull]; [_c, ctrlPosition _c] }) select { !isNull (_x # 0) };
+	uiNamespace setVariable ["ArmaFPV_FX_osd", _osd];
+};
+
+(ctrlPosition (uiNamespace getVariable ["ArmaFPV_FX_Snow", controlNull])) params ["_ax", "_ay", "_aw", "_ah"];
+private _bar = uiNamespace getVariable ["ArmaFPV_FX_Bar", controlNull];
+private _dy = 0;
+if (_roll >= 0) then {
+	_dy = _roll * _ah;
+	_bar ctrlSetPosition [_ax, _ay + _dy - _ah * 0.035, _aw, _ah * 0.07];
+	_bar ctrlCommit 0;
+};
+_bar ctrlShow (_roll >= 0);
+
+private _shifted = _roll >= 0 || { _tear > 0 };
+if (_shifted || { uiNamespace getVariable ["ArmaFPV_FX_osdShifted", false] }) then {
+	{
+		_x params ["_ctrl", "_pos"];
+		_pos params ["_x0", "_y0", "_w", "_h"];
+		private _y = _y0 + _dy;
+		if (_y > _ay + _ah) then { _y = _y - _ah; };
+		private _dx = [0, (random 2 - 1) * _tear * _aw * 0.12] select (random 1 < 0.5);
+		_ctrl ctrlSetPosition [_x0 + _dx, _y, _w, _h];
+		_ctrl ctrlCommit 0;
+	} forEach _osd;
+	uiNamespace setVariable ["ArmaFPV_FX_osdShifted", _shifted];
 };

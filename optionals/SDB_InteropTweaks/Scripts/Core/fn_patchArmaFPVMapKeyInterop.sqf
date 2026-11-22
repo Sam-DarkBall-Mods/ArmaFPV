@@ -1,6 +1,7 @@
 /*
-	Allow map key for ArmaFPV control when SDB autonomy is active.
-	Purpose: bypass ArmaFPV KeyDown showMap block for autonomy-enabled UAVs.
+    SDB_it_fnc_patchArmaFPVMapKeyInterop
+    Lets the map key open the map while watching an autonomous Crocus.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"
@@ -37,10 +38,8 @@ if !(_log isEqualTo {}) then {
 			if (isNull _uav) exitWith { false };
 			if !(_uav getVariable ["SDB_autonomyEnabled", false]) exitWith { false };
 
-			// ArmaFPV key handler checks this flag and blocks map when true.
-			// Display EH order is last-added first, so this runs before ArmaFPV handler.
-			missionNamespace setVariable ["ArmaFPV_isControl", false];
-			false
+			if (!visibleMap && { "ItemMap" in assignedItems _player }) then { openMap [true, false]; };
+			true
 		}];
 
 		SDB_SET_MVAR(SDB_it_armafpvMapKeyPatchEhId, _ehId);

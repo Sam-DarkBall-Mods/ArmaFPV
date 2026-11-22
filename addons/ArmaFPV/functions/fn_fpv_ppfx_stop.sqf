@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_ppfx_stop
+    Resets and destroys the analog video post effects and stops their update.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
@@ -50,6 +55,18 @@ if (_fxWet >= 0) then {
 	ppEffectDestroy _fxWet;
 };
 
+{
+	_x params ["_ctrl", "_pos"];
+	_ctrl ctrlSetPosition _pos;
+	_ctrl ctrlCommit 0;
+} forEach (uiNamespace getVariable ["ArmaFPV_FX_osd", []]);
+uiNamespace setVariable ["ArmaFPV_FX_osd", []];
+uiNamespace setVariable ["ArmaFPV_FX_osdShifted", false];
+{
+	(uiNamespace getVariable [_x, controlNull]) ctrlSetTextColor [1, 1, 1, 0];
+} forEach ["ArmaFPV_FX_Spark1", "ArmaFPV_FX_Spark2", "ArmaFPV_FX_Spark3", "ArmaFPV_FX_Snow"];
+(uiNamespace getVariable ["ArmaFPV_FX_Bar", controlNull]) ctrlShow false;
+
 private _usedPriorities = GETMVAR(DB_fpv_ppfx_usedPriorities, []);
 private _instancePriorities = GETMVAR(DB_fpv_ppfx_priorities, []);
 
@@ -74,7 +91,8 @@ SETMVAR(DB_fpv_ppfx_fxWet, -1);
 SETMVAR(DB_fpv_ppfx_pfhId, -1);
 SETMVAR(DB_fpv_ppfx_active, false);
 SETMVAR(DB_fpv_ppfx_input, 1);
-SETMVAR(DB_fpv_ppfx_prevQ, 1);
+SETMVAR(DB_fpv_ppfx_drop, 0);
+SETMVAR(DB_fpv_ppfx_clean, false);
 SETMVAR(DB_fpv_ppfx_lastDropGlitch, -1);
 private _ppfxContext = [];
 SETMVAR(DB_fpv_ppfx_context, _ppfxContext);

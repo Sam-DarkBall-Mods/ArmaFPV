@@ -1,3 +1,8 @@
+/*
+    DB_fnc_fpv_handleConnect
+    Client loop that detects when the player flies a Crocus, opens or closes the OSD and blocks the map while flying.
+    Author: DarkBall
+*/
 #include "\ArmaFPV\script_macros.hpp"
 
 if (!hasInterface) exitWith {};
@@ -60,21 +65,14 @@ private _pfhId = [{
 			_uav setVariable ["DB_fpv_lastSignalUpdate", nil];
 			_uav setVariable ["DB_fpv_timeInJammerZone", 0];
 			_uav setVariable ["DB_fpv_jammerLowTime", 0];
+			_uav setVariable ["DB_jammer_customUavBehavior", true, true];
 		};
-
-		_uav setVariable ["DB_jammer_customUavBehavior", true, true];
 
 		if (!_wasControl) then {
 			private _currentHud = shownHUD;
-			if ((count _currentHud) == 11) then {
-				SETMVAR(ArmaFPV_savedHUD, _currentHud);
-			} else {
-				SETMVAR(ArmaFPV_savedHUD, []);
-			};
+			if (count _currentHud != 11) then { _currentHud = []; };
+			SETMVAR(ArmaFPV_savedHUD, _currentHud);
 			SETMVAR(ArmaFPV_hudApplied, false);
-		};
-
-		if (!_wasControl) then {
 			SETMVAR(ArmaFPV_isControl, true);
 		};
 

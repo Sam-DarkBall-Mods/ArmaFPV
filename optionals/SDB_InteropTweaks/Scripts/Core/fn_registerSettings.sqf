@@ -1,5 +1,7 @@
 /*
-	SDB Interop Tweaks settings registration.
+    SDB_it_fnc_registerSettings
+    Registers the SDB Interop Tweaks CBA settings.
+    Author: DarkBall
 */
 
 #include "\SDB_InteropTweaks\script_macros.hpp"
@@ -22,6 +24,15 @@ SDB_SET_MVAR(SDB_it_settingsRegistered, true);
 			};
 		};
 	}
+] call CBA_fnc_addSetting;
+
+[
+	"sdbAutoAllowPlayers",
+	"CHECKBOX",
+	["Allow Autonomy For Players", "Players may launch FPV drones in autonomous mode."],
+	"SDB Interop Tweaks",
+	true,
+	true
 ] call CBA_fnc_addSetting;
 
 [

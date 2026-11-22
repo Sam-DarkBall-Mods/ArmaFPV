@@ -257,27 +257,27 @@ class CfgVehicles
 		};
 		soundEngineOnInt[]=
 		{
-			QARMAFPV_SOUND(quad_start_full_int.wav),
-			0.56234133,
+			"",
+			1,
 			1
 		};
 		soundEngineOnExt[]=
 		{
-			QARMAFPV_SOUND(quad_start_full_01.wav),
-			0.56234133,
+			QARMAFPV_SOUND(fpv_start.ogg),
+			0.8,
 			1,
-			200
+			150
 		};
 		soundEngineOffInt[]=
 		{
-			QARMAFPV_SOUND(quad_stop_full_int.wav),
-			0.56234133,
+			"",
+			1,
 			1
 		};
 		soundEngineOffExt[]=
 		{
-			QARMAFPV_SOUND(quad_stop_full_01.wav),
-			0.56234133,
+			QARMAFPV_SOUND(fpv_stop_ext.ogg),
+			0.47,
 			1,
 			200
 		};
@@ -377,72 +377,59 @@ class CfgVehicles
 			{
 				sound[]=
 				{
-					QARMAFPV_SOUND(quad_engine_full_01.wav),
-					0.44668359,
-					1,
-					200
-				};
-				frequency="rotorSpeed";
-				volume="camPos*((rotorSpeed-0.72)*4)";
-			};
-			class RotorLowOut
-			{
-				sound[]=
-				{
-					"A3\Sounds_F\air\Uav_01\blade",
-					0.31622776,
-					1,
-					200
-				};
-				frequency="rotorSpeed";
-				volume="camPos*(0 max (rotorSpeed-0.1))";
-				cone[]={1.6,3.1400001,1.6,0.94999999};
-			};
-			class RotorHighOut
-			{
-				sound[]=
-				{
-					"A3\Sounds_F\air\Uav_01\blade_high",
-					0.31622776,
+					QARMAFPV_SOUND(fpv_engine_ext.ogg),
+					1.12,
 					1,
 					250
 				};
-				frequency="rotorSpeed";
-				volume="camPos*10*(0 max (rotorThrust-0.9))";
-				cone[]={1.6,3.1400001,1.6,0.94999999};
+				frequency="rotorSpeed*(0.7+0.6*rotorThrust)";
+				volume="camPos*rotorSpeed*rotorSpeed";
 			};
-			class EngineIn
+			class PunchOut
 			{
 				sound[]=
 				{
-					QARMAFPV_SOUND(quad_engine_full_int.wav),
-					0.56234133,
-					1
+					QARMAFPV_SOUND(fpv_punch_ext.ogg),
+					0.72,
+					1,
+					300
 				};
-				frequency="rotorSpeed";
-				volume="(1-camPos)*((rotorSpeed-0.75)*4)";
+				frequency="rotorSpeed*(0.7+0.6*rotorThrust)";
+				volume="camPos*rotorSpeed*2.5*(0 max (rotorThrust-0.6))";
 			};
-			class RotorLowIn
+			class FarOut
 			{
 				sound[]=
 				{
-					"",
-					0.56234133,
-					1
+					QARMAFPV_SOUND(fpv_far_ext.ogg),
+					0.5,
+					1,
+					500
 				};
-				frequency="rotorSpeed";
-				volume="(1-camPos)*(0 max (rotorSpeed-0.1))";
+				frequency="rotorSpeed*(0.7+0.6*rotorThrust)";
+				volume="camPos*rotorSpeed*(0.6+0.4*rotorThrust)";
 			};
-			class RotorHighIn
+			class RxHiss
 			{
 				sound[]=
 				{
-					"",
-					0.56234133,
+					QARMAFPV_SOUND(fpv_rx_hiss.ogg),
+					0.35,
 					1
 				};
-				frequency="rotorSpeed";
-				volume="(1-camPos)*3*(rotorThrust-0.9)";
+				frequency=1;
+				volume="(1-camPos)*(0.25+0.75*CustomSoundController1)";
+			};
+			class RxCrackle
+			{
+				sound[]=
+				{
+					QARMAFPV_SOUND(fpv_rx_crackle.ogg),
+					0.4,
+					1
+				};
+				frequency=1;
+				volume="(1-camPos)*1.4*(0 max (CustomSoundController1-0.3))";
 			};
 		};
 		class Exhausts
@@ -641,7 +628,7 @@ class CfgVehicles
 			verticalOffsetWorld=-0.001;
 			init="''";
 		};
-		class EventHandlers
+		class EventHandlers: EventHandlers
 		{
 			class ArmaFPV
 			{
@@ -863,10 +850,6 @@ class CfgVehicles
 		armorStructural=2;
 		destrType="DestructBuilding";
 		explosionShielding=0.5;
-		class EventHandlers
-		{
-			init="(_this # 0) allowDamage true;";
-		};
 	};
 	class B_AssaultPack_khk;
 	class B_AssaultPack_mcamo;
